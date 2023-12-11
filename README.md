@@ -9,7 +9,7 @@ Things should be written in [markdown](https://commonmark.org/help/) with a few 
 
 Images should be inserted using
 
-`{{ figure(src="dla/<name of image file>.<file extension>", alt="alt text", caption="caption text") }}`
+`{{ figure(src="img.png", alt="alt text", caption="caption text") }}`
 with the file located in the `content/dla/` directory.
 
 

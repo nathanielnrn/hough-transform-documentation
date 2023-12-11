@@ -1,0 +1,11 @@
+{%- set colocated_path = section.path | default(value="") -%}
+{%- set relative_path = colocated_path ~ src -%}
+
+<figure>
+	<img src="{{config.base_url}}{{ relative_path }}" {% if alt %} alt="{{ alt }}"{% endif %}>
+    {% if via %}
+    <figcaption><a href="{{via}}">via</a></figcaption>
+    {% else %}
+    <figcaption>{{ caption }}</figcaption>
+    {% endif %}
+</figure>

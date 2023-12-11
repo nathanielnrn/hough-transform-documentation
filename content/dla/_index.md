@@ -20,7 +20,7 @@ DLA simulator that does x,y,z. Write here!
 
 
 
-{{ figure(src="dla/google.png", alt="alt text", caption="test caption text") }}
+{{ figure(src="google.png", alt="alt text", caption="test caption text") }}
 
 Here is some fancy math $x^2 + y^2 = z^2$
 
