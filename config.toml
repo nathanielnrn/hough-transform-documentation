@@ -41,10 +41,10 @@ anchors = "on"
 
 [extra]
 
-name = "xxxx"                         # Your name
-id = "xxxx"                           # Your id / username / handle
-bio = "xxxx"                          # Your bio
-avatar = ""            # Your avatar
+name = "dla"                         # Your name
+id = "out_id"                           # Your id / username / handle
+bio = "this is a bio"                          # Your bio
+avatar = "img/avatar.jpeg"            # Your avatar
 links = [                             # Your links
 #    { name = "GitHub", icon = "github", url = "https://github.com/<your-username>" },
 #    { name = "Twitter", icon = "twitter", url = "https://twitter.com/<your-username>" },
@@ -59,7 +59,7 @@ sections = [
     # { name = "about", path = "/about", is_external = false },
     # { name = "github", path = "https://github.com/<your-username>", is_external = true },
 ]
-blog_section_path = "/dla"
+blog_section_path = ""
 
 nav_separator = "::"
 nav_wrapper_left = "{"

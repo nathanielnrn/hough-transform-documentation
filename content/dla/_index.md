@@ -3,6 +3,7 @@ title = "About me"
 description = "A about page of ..."
 template = "prose.html"
 
+url = "dla-coumentation/dla"
 [extra]
 lang = 'en'
 math = false
