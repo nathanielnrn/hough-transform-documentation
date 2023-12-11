@@ -4,6 +4,7 @@
 {% block lang -%}
 {%- set blog_section_path = config.extra.blog_section_path | trim_start_matches(pat="/") -%}
 {%- set section_md_path = blog_section_path ~ "/_index.md" -%}
+{%- set section = get_section(path=section_md_path, metadata_only=true) -%}
 {%- if page.extra.lang %}{{page.extra.lang}}{% elif section.extra.lang %}{{section.extra.lang}}{% else %}{{page.lang}}{% endif -%}
 {%- endblock lang %}
 {% block title %}{{ page.title }}{% endblock title %}
@@ -143,7 +144,7 @@
 {% endblock content %}
 
 {% block script %}
-<script src="/js/lightense.min.js"></script>
+<script src="{{config.base_url}}/js/lightense.min.js"></script>
 {% if page.extra.mermaid %}
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
