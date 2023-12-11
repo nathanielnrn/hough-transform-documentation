@@ -1,6 +1,6 @@
 +++
 template = 'home.html'
-title = 'title 1'
+title = 'DLA Simulator'
 
 [extra]
 lang = 'en'
