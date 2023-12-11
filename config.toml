@@ -5,9 +5,9 @@
 #
 #=========================================================================================
 
-base_url = "https://example.com"      # Domain name of your website
-title = "xxxx"
-description = "xxxx xxxx xxxx"
+base_url = "https://nathanielnrn.github.io/dla-documentation/"      # Domain name of your website
+title = "Diffusion Limited Aggregation"
+description = "Just trying to keep it together"
 default_language = "en"
 theme = "serene"
 output_dir = "public"
