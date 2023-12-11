@@ -5,7 +5,7 @@
 #
 #=========================================================================================
 
-base_url = "https://nathanielnrn.github.io/dla-documentation/"      # Domain name of your website
+base_url = "https://nathanielnrn.github.io/dla-documentation"      # Domain name of your website
 title = "Diffusion Limited Aggregation"
 description = "Just trying to keep it together"
 default_language = "en"
