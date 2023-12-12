@@ -80,6 +80,9 @@ Can one of you work on the voltage divider here? We also need to get rid of moto
 The software we built for our simulator can be broken into a number of components.
 We will describe each component as it stands alone, and then describe how these components integrate together.
 
+
+
+
 #### Random number generator
 
 Simulating brownian motion requires drawing from a [normal distribution]. Most modern languages
@@ -89,7 +92,29 @@ C, however, lacks such functionality.
 
 What C does offer is a [`rand()` function](https://en.cppreference.com/w/c/numeric/random/rand) that returns a value sampled from a uniform distribution between 0 and some constant `RAND_MAX`. We use this uniform distribution to approximate
 a normal distribution by drawing from `rand()` multiple times and updating a particle based on that value.
-Over many time steps, the motion of a given particle will approximate a normal distribution as a result of the .
+Over many time steps, the motion of a given particle will approximate a normal distribution as a result of the [Central Limit Theorem](https://en.wikipedia.org/wiki/Central_limit_theorem). As our particles are updated 30 times a second, and the sampling distribution tends to normal over time,
+we can get a good approximation of brownian motian with this uniform distribution.
+
+<!-- TODO: Move this to conclusion/bugs section maybe? -->
+Before settling on the approach described above, we attempted a few ways
+to sample from a normal distribution for every particle, once a frame.
+One approach involved summing over multiple calls to `rand()` in order to approximate
+a normal distribution within a single frame. Because this involved 10s of function calls per particle,
+it severely limited the speed of our due to the increased computation complexity.
+Another approach involved [sampling a random bit](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html) using the RP 2040's ring oscillator clock (ROSC).
+With these random bits it is possible to generate a wide variety of distributions, including
+a normal one. Furthermore, it is possible to perform many of the tasks required
+to generate a normal distribution by utilizing the RP 2040's DMA channels, at little to no
+cost to the CPU.
+
+While the second approach in particular is attractive due to the minimal cpu overhead,
+user testing found that the simple approach that we went with,
+generating a normal distribution ``over time'' simulated well and was both nice
+to interact with via motion controls, and behaved inline with other DLA simulations.
+
+#### Particle State and Collision Detection
+
+
 
 
 
