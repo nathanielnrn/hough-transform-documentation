@@ -109,13 +109,38 @@ cost to the CPU.
 
 While the second approach in particular is attractive due to the minimal cpu overhead,
 user testing found that the simple approach that we went with,
-generating a normal distribution ``over time'' simulated well and was both nice
+generating a normal distribution "over time" simulated well and was both nice
 to interact with via motion controls, and behaved inline with other DLA simulations.
 
 #### Particle State and Collision Detection
 
+Our particles consisted of `x` and `y` coordinates stored as `short`s, `color` stored as a `char`,
+and a `cyclic_counter` that tracked how long a particle was aggregated for. In order
+to minimize memory usage, our `color` member variable also acted as a way to determine if a particle
+was aggregated or not. Particles that were not aggregated had a color of either `1` (dimmest possible green)
+or `0` (black), while particles that were aggregated had colors ranging from `2-15`, (increasingly bright shades of green). 
+All particles were stored in an array.
+
+Collision detection was implemented by with the help of fixed point precision types, with 16 decimal places, a [alpha max beta min](https://en.wikipedia.org/wiki/Alpha_max_plus_beta_min_algorithm)
+square root approximation algorithm, and our pixel backing array.
+
+Our collision detector calculates the distance between a particle's current location
+and it's new desired location using the alpha max beta min algorithm.
+It then uses this distance to determine an increment, which can be thought of as a vector of unit length
+in the direction of the particles updated location. With the help of this "increment vector", each pixel in between
+the particle's current location and new location is checked to see if it is touching existing aggregate or not.
+If a pixel is determined to
+be touching our aggregate, the particle is moved to that pixel (falling short of the initial update location)
+and it is mutated to be part of the collective aggregate (by changing its color to bright green).
 
 
+
+#### Touching Aggregate Detection
+Recall that our aggregate consists of various shades of green (represented as `color` values from `2-15`). A pixel is deemed to be touching aggregate if the sum of the colors of the 8 pixels surrounding it surpasses some threshold. This threshold can be tuned to change the emergent behavior of aggregation, but was often left at `15` as this often produced interesting results.
+As an example, with a threshold of `15` a pixel would be deemed to be touching aggregate if it neighbored at least a single
+"bright green" pixel, or at least 2 pixels with color values of `8` (theoretically, half as bright as a "bright green"), and so on.
+
+#### 
 
 
 
