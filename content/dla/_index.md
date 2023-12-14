@@ -405,11 +405,7 @@ The following is a non-exhaustive list of topics focused on.
 
 ### Code
 
-```C
-
-```
-
-
+Code can be found [here](../code).
 
 
 {{ figure(src="google.png", alt="alt text", caption="This is here to show how to use images in source code") }}
