@@ -92,8 +92,23 @@ C, however, lacks such functionality.
 
 What C does offer is a [`rand()` function](https://en.cppreference.com/w/c/numeric/random/rand) that returns a value sampled from a uniform distribution between 0 and some constant `RAND_MAX`. We use this uniform distribution to approximate
 a normal distribution by drawing from `rand()` multiple times and updating a particle based on that value.
-Over many time steps, the motion of a given particle will approximate a normal distribution as a result of the [Central Limit Theorem](https://en.wikipedia.org/wiki/Central_limit_theorem). As our particles are updated 30 times a second, and the sampling distribution tends to normal over time,
-we can get a good approximation of brownian motian with this uniform distribution.
+Over many time steps, the motion of a given particle will approximate a normal distribution as a result of the [Central Limit Theorem](https://en.wikipedia.org/wiki/Central_limit_theorem).
+As our particles are updated 30 times a second, and the sampling distribution tends to normal over time,
+we can get a good approximation of brownian motian with this uniform distribution. Figure 1 shows the empircal probability distribution of displacement
+of a particle over 15 timesteps (equivalent to half a second), using this "sum of uniform samples" method.
+Figure 2 shows the empirical probability distribution of displacement of a particle over 15 timesteps sampling from a normal distribution at
+each time step.
+The distributions between each method are very similar, with our uniform distribution method being slightly biased towards the right.
+We believe this is an artifact of the visualization of our as our uniform distribution has integer values, and our simulation did not
+show any obvious tendency to positive values at runtime.
+The takeaway from this graph is that, over time, our particles behave as if they were moving randomly with movement at each timestep being samples from a normal distribution.
+
+{{ figure(src="nearly-uniform-distribution.png", alt="A histogram. ", caption="Figure 1: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with uniformly sampled movement. Taken from 8,000 samples. The orange line is an actual normal distribution with appropriate mean and variance.") }}
+
+{{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 2: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled moved. Taken from 8,000 samples. The orange line is the same orange line from Figure 1.") }}
+
+
+
 
 <!-- TODO: Move this to conclusion/bugs section maybe? -->
 Before settling on the approach described above, we attempted a few ways
@@ -159,7 +174,7 @@ the inverse tan function. See the next section for more information.
 Figure 1 shows how accelerometer data can be used to calculate an angle of an IMU.
 In our case, we were interested in measuring rotaiton around the x and y axes.
 
-{{ figure(src="angles.png", alt="A lever and ", caption="Figure 1: An image showing how acceleration data can be used to calculate an angle. Taken from the <a href='https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html'>course website</a>.") }}
+{{ figure(src="angles.png", alt="A lever and acceleration vectors, along with an angle theta.", caption="Figure 1: An image showing how acceleration data can be used to calculate an angle. Taken from the <a href='https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html'>course website</a>.") }}
 
 
 #### Low pass
@@ -199,6 +214,14 @@ You may be asking why we set `(max_speed - 1) / 2` and not `max_speed / 2` when 
 For this reason we enforced the ranges of our uniform distribution to never be higher than `-1` and never be lower than `1`
 (depending on the direciton of tilt). This slightly changes the mean of our distribution.
 
+#### Particle decay
+
+We were interested in simualting [cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/).
+To this end, our particle structs store a `cyclic_counter` member variable that counted the number of frames
+a particle had been aggregated for. The more time a particle had been aggregated for, the dimmer the aggregated particle would
+appear, before disappearing and returning to be a "free" particle, undergoing Brownian motion independent of the aggregate.
+TODO: add gif
+
 #### Simulation/Animation
 30 times a second our simulation/animation [protothread](https://en.wikipedia.org/wiki/Protothread) was awoken. This thread
 was responsible for polling our IMU, performing collision detection, updating particle locations and colors, and finally
@@ -221,23 +244,60 @@ can be read/written via UART, and in this way only runs when needed. This allows
 
 After initializing all of our UART and IMU GPIOs, along with our PIO state machines, our serial and simulation/animation
 threads are initialized.
-Our serial thread is non-blocking, so we will focus on the simulation thread.
+Our serial thread is non-blocking, and simply uses protothreads to output to terminal
+and read in to an input buffer as needed. Some logic regarding flags is contained in this thread as well.
+This thread is initialized on our second core. 
 
-Our simulation thread intially polls our IMU and updates the parameters that describe our uniform distribution based on
-our IMUs acceleration variance and tilt. Then, a 2 samples are drawn from our distribution and fed to our collision detector.
-Our collision detector updates the location and color of our particle, based on the aggregate currently present.
-The particle's old location is drawn over ("erasing" it) and the particle's new location is drawn.
+Our simulation thread is initialized on our first core. In a given frame this thread polls our IMU and updates the parameters that describe our uniform distribution based on
+our IMUs acceleration variance and tilt. Then, two samples are drawn from our distribution and fed to our collision detector.
+Our collision detector updates the location and color of our particle, based on the aggregate currently present (i.e. a particle
+moves an amount determined by our random sampling, or collides with aggregate in the way).
+The particle's old location is drawn over ("erasing" it) and the particle's new location is drawn to.
 
-The thread then yields for an amount of time 
-
+The thread then yields such that it will awaken 1/30th of a second after the current frame began. In this way we enforce a simulation and animation speed of 30 fps.
 
 
 
 
 ## Testing
 
-TODO: Write about testing
+### Hardware
+TODO: Talk about voltage divider and IMU, we can say we were lucky to be familiar with IMU set up due to lab 3.
 
+
+### Software
+
+The visual nature of our graphs 
+
+#### Angle Graphs
+We used software (modified from [here](https://vanhunteradams.com/Pico/Helicopter/Display.html)) to graph the measured angle of 
+our rotation around both the `x` and `y` axis. This allowed us to both examine the behavior of our angle measurements with
+respect to noise and responsiveness, and qualitatively view the effects of changes we made to our measurement algorithm.
+In particular, graphing proved invaluable to help us notice that changing our polling rates had down stream effects on
+measured angles, and required modification to our low pass algorithm to account for these changes.
+
+Furthermore, or graph helped us verify that our parameter changes were behaving as expected. In particular, our graph
+allowed us to tell at what angle the mean of our uniform distribution shifted (which was a stepwise function). We verified
+that our mean shifted at the intended angles through user testing.
+
+
+
+#### Simulation
+Having an obvious visual component to our simulation made testing for it's correctness easy.
+After making changes to our algorithms,
+we verified visually if our simulation behaved as expected. We compared our simulation both to other,
+examples of [DLA](https://isaacshaker.github.io/DLA-Simulation/) and to previous iterations of our own work.
+Examining incremental changes to our simulation algorithms helped us uncover a number of issues, described in detail below.
+Among the issues we discovered was a shift in the mean of the movement of our particles from
+conversion from fixed point to integer values, incorrect aggregation occurring at the
+borders of our simulation, and some issues with a naive collision detection algorithm.
+
+
+
+## Results
+
+TODO: talk about density of particles needing tuning, maximum number of particles allowed (memory wise) (around 16k),
+slow downs encountered when computaiton was too expensive
 
 
 ## Bugs of Note
@@ -270,11 +330,38 @@ unclear why poling the IMU changed our collision detection logic.
 
 
 ### Aggravating Angle Assessment
+During testing, we noticed that 
 
 TODO: Talk about how too steep of an angle looses information 
 
 ### Restrictive Rounding
 TODO: Talk about how truncating fixes gave us biased particle movement.
+
+
+
+
+
+
+
+## Appendix
+
+### Project Site
+The group approves this report for inclusion on the course website.
+
+### Project Video
+The group approves the video for inclusion on the course youtube channel.
+
+### Hardware
+
+### Tasks
+The work was largely evenly split among team members, with slight focuses on certain.
+The following is a non-exhaustive list of topics focused on.
+
+**Nathaniel:** Setup and dev environment, collision detection, voltage divider, website, and report.
+**Angela:** Collision detection, voltage divider, aggregation algorithm,  report.
+**William:** Random number generation, moition-random-distribution effects, serial.
+
+### Code
 
 
 
