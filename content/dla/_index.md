@@ -29,6 +29,12 @@ DLA models aggregation of particles whose primary motion is [Brownian](https://e
 that is described by a [normal distribution]
 whose variance is proportional to time elapsed.
 
+In particular, linear Brownian motion is defined (see [page 21](https://www.stat.berkeley.edu/~aldous/205B/bmbook.pdf)) as motion such that for a timestep $h$
+the movement of a particle descibed by $B(t+h) - B(t)$ are normally distributed with mean 0 and standard deviation $h.$
+More explicitly this increment must be obtained with probability
+$$P(X=x)\frac{1}{h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-0}{h})^2}.$$ 
+We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation.
+
 IMUs measure the acceleration and rotational velocity they experience
 With the help of some [trigonometry and filtering](https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html#Accelerometer-vs.-Gyroscope), it is possible
 to determine the orientation of an IMU.
@@ -105,7 +111,7 @@ The takeaway from this graph is that, over time, our particles behave as if they
 
 {{ figure(src="nearly-uniform-distribution.png", alt="A histogram. ", caption="Figure 1: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with uniformly sampled movement. Taken from 8,000 samples. The orange line is an actual normal distribution with appropriate mean and variance.") }}
 
-{{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 2: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled moved. Taken from 8,000 samples. The orange line is the same orange line from Figure 1.") }}
+{{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 2: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled moved. Taken from 8,000 samples. The orange line is the same orange from Figure 1.") }}
 
 
 
@@ -330,12 +336,25 @@ unclear why poling the IMU changed our collision detection logic.
 
 
 ### Aggravating Angle Assessment
-During testing, we noticed that 
+During testing, we noticed that if we rotated our IMU to close to 90 degrees along the x-axis, the rotational measurements of our
+y-axis would become inaccurate. The same occurred if we swapped the axes of rotation. We learned that using acceleration along axes is limited in that
+at extreme angles we lose a degree of information. Consider rotating around an axis pointed in front of you (y axis pointing forward, x-axis to the left,
+z-axis pointing towards the sky). Our IMU calculates
+rotation around the y-axis by comparing z and x-axis accelerations. Consider that if we rotate along the x axis so that our y-axis is now pointing up
+(z axis pointing towards us, x axis pointing to the left), rotation around the y-axis no longer changes the acceleration experienced in both the x-axis and z-axis, rather, both remain close to 0. This makes measurement of rotation around y very difficult and sensitive to noise.
 
-TODO: Talk about how too steep of an angle looses information 
+Luckily for our project, users did not often reach rotations of 90 degrees, as doing so was quite uncomfortable with our glove. So this did
+not prove an issue in practice.
+
+**Takeaway:** It was discussed how in measuring rotation around 2 axes, we were essentially trying to model the IMU in 3 degrees of freedom.
+However, we were doing this with only 2 pieces of data in each axes: z acceleration and x/y acceleration. To this end our measurement
+were underdetermined, and caused the issues described above. We should aim to have fully determined systems, and if that is infeasibly be aware of the
+limitations of our models
+
 
 ### Restrictive Rounding
-TODO: Talk about how truncating fixes gave us biased particle movement.
+Our uniform random number generator collision detection process relied on doing fixed point math for the sake of computational speed,
+and then converting values to integers. Our initial collision detection
 
 
 
@@ -353,15 +372,21 @@ The group approves the video for inclusion on the course youtube channel.
 
 ### Hardware
 
+TODO: Add schematics of hardware
+
 ### Tasks
 The work was largely evenly split among team members, with slight focuses on certain.
 The following is a non-exhaustive list of topics focused on.
 
 **Nathaniel:** Setup and dev environment, collision detection, voltage divider, website, and report.
-**Angela:** Collision detection, voltage divider, aggregation algorithm,  report.
+**Angela:** Collision detection, voltage divider, aggregation algorithm.
 **William:** Random number generation, moition-random-distribution effects, serial.
 
 ### Code
+
+```C
+
+```
 
 
 
