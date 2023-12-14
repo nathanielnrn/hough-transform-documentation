@@ -6,6 +6,6 @@
     {% if via %}
     <figcaption><a href="{{via}}">via</a></figcaption>
     {% else %}
-    <figcaption>{{ caption }}</figcaption>
+    <figcaption>{{ caption | safe }}</figcaption>
     {% endif %}
 </figure>
