@@ -31,8 +31,8 @@ whose variance is proportional to time elapsed.
 
 In particular, linear Brownian motion is defined (see [page 21](https://www.stat.berkeley.edu/~aldous/205B/bmbook.pdf)) as motion such that for a timestep $h$
 the movement of a particle descibed by $B(t+h) - B(t)$ are normally distributed with mean 0 and standard deviation $h.$
-More explicitly this increment must be obtained with probability
-$$P(X=x)\frac{1}{h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-0}{h})^2}.$$ 
+More explicitly this increment $X$ must be obtained with probability
+$$P(X=x)\frac{1} = {h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-0}{h})^2}.$$ 
 We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation.
 
 IMUs measure the acceleration and rotational velocity they experience
@@ -216,7 +216,8 @@ The mean of this distribution depended on the angle of our IMU. Rotation along t
 The mean of our distributions moved stepwise linearly based on the ratio of the angle of our IMU with 90.
 Meaning rotation around an axis of 90 degrees had a (absolute) mean of `(max_speed - 1) / 2`, while a rotation of 0 degrees (i.e the IMU was flat) had a mean of 0.
 
-You may be asking why we set `(max_speed - 1) / 2` and not `max_speed / 2` when our IMU was fully rotated? This is because if we had set the mean to be exactly `max_speed / 2` our particles would have lost the brownian component of their motion.
+You may be asking why we set `(max_speed - 1) / 2` and not `max_speed / 2` when our IMU was fully rotated? This is because if we had set the mean to be exactly `max_speed / 2` our particles would have only ever moved in a single direction.
+This makes the movement seem un-random nature and is not satisfying to interact with.
 For this reason we enforced the ranges of our uniform distribution to never be higher than `-1` and never be lower than `1`
 (depending on the direciton of tilt). This slightly changes the mean of our distribution.
 
@@ -311,7 +312,7 @@ slow downs encountered when computaiton was too expensive
 We detail below some of the bugs we encountered while building our simulator, how we overcame them,
 and any takeaways we have.
 
-### IMU Polling Crashes
+### Polling Problems
 Initially, polling our IMU at a rate of 1,000 Hz via a repeating alarm timer
 led to our simulation crashing shortly after startup.
 It was unclear what the root cause of these issues were, as they persisted even when moving
@@ -328,7 +329,7 @@ Moving our IMU polling trigger to our simulation protothread meant that our IMU 
 for our motion controls to feel responsive.
 
 
-### IMU Polling Aggregation Behavior
+### Bonkers Borders
 In addition to crashes, enabling IMU polling changed the behavior of pixel aggregation, leading pixels
 to aggregate seemingly at random at the borders of our simulation. This was eventually
 resolved by adding better bounds logic to our touching-aggregate function. However it remains
@@ -353,8 +354,28 @@ limitations of our models
 
 
 ### Restrictive Rounding
-Our uniform random number generator collision detection process relied on doing fixed point math for the sake of computational speed,
-and then converting values to integers. Our initial collision detection
+When shifting the mean of our uniform distribution based on the tilt of our IMU we performed fixed point
+airthmeitc for the sake of computational speed,
+and then converted values to integers. Our initial system took into account the sign of our tilt,
+and shifted the mean of our distribution accordingly, based on the between our current angle and 90 degrees.
+
+Because of the way our fixed to integer conversion works, numbers were rounded differently dependent on their sign.
+Namely, fixed point representations are converted to integers by right shifting `>>`. This means that integer values
+are truncated, not rounded. This meant that we were taking the floor of our fixed point number.
+This has an effect on the magnitude of a number agfter truncation based on its sign. Consider that `4.3` is truncated to `4`
+while `-4.3` is truncated to `-5`.
+This, along with the details of our initial implementation, meant that our mean was incorrectly being biased towards
+negative numbers. This was apparent in our simulation as particles tending towards the top left, even when our IMU was held flat.
+
+To fix this, we negated some fixed point numbers before truncating them and negating them again. In this way, our truncation
+was "symmetric" on both positive and negative fixed point numbers.
+
+**Takeaway:** Implementation matters! Especially when developing in C on things like microcontrollers,
+we need to be very aware of the implications of various implementations, as they can have compounding downstream effects.
+We were fortunate enough to figure out what was going on fairly quickly, but this may had not been obvious
+if we had been less aware of different number representations and how we convert between them.
+
+
 
 
 
