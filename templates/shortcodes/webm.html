@@ -1,0 +1,15 @@
+{%- set colocated_path = section.path | default(value="") -%}
+{%- set relative_path = colocated_path ~ src -%}
+
+<style>
+  .center{ text-align: center; }
+</style>
+<div class="center">
+<figure>
+	<video autoplay loop muted src="{{ config.base_url }}{{ relative_path }}" {% if height %} height={{ height }} {% endif %} {% if width %} width={{ width }} {% endif %}>
+  {% if caption %}
+  <figcaption> {{caption | safe }} </figcaption>
+  {% endif %}
+</video>
+</figure>
+</div>

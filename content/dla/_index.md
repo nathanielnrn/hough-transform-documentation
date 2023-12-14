@@ -408,7 +408,7 @@ The following is a non-exhaustive list of topics focused on.
 Code can be found [here](../code).
 
 
-{{ figure(src="google.png", alt="alt text", caption="This is here to show how to use images in source code") }}
+{{ webm(src="basic.webm", caption="This is here to show how to use images in source code", width=500, height=500) }}
 
 [normal distribution]: https://en.wikipedia.org/wiki/Normal_distribution
 [lab 3]: https://vanhunteradams.com/Pico/Helicopter/Helicopter.html
