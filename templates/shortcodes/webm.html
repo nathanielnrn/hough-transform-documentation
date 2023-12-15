@@ -6,7 +6,7 @@
 </style>
 <div class="center">
 <figure>
-	<video autoplay loop muted src="{{ config.base_url }}{{ relative_path }}" {% if height %} {% endif %} {% if width %} width={{ width }} {% endif %}>
+	<video controls loop muted src="{{ config.base_url }}{{ relative_path }}" {% if height %} {% endif %} {% if width %} width={{ width }} {% endif %}>
 </video>
   {% if caption %}
   <figcaption> {{caption | safe }} </figcaption>
