@@ -64,29 +64,23 @@ TODO: logical structure; hardware/software tradeoffs; Discuss existing patents, 
 
 ### Hardware
 
-Some of the following is largely taken from a previous report we have written for this
-class (specifically, [lab 3]). It is included here for completeness. 
-
 The heart of our hardware system is a Raspberry Pi Pico, which features the RP2040 microcontroller.
-We implemented the circuitry for this lab using a breadboard, shown in Fig. TODO: add figure of breadbvoard
+We implemented the circuitry for this lab using a breadboard, shown in Fig 1.
 Similar to previous labs, our microcontroller communicates through UART to interface with a PuTTY terminal
 serial interface and utilizes the Pico's PIO state machines (see [chapter 3](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)) to implement [VGA drivers](https://vanhunteradams.com/Pico/VGA/VGA.html) that allow us to visualize our simulation.
+
+{{ figure(src="breadboard.png", caption="System level diagram", width=500, height=500) }}
+
 As shown in Fig.TODO: change fig number, add image, the UART connection consists of two data data wires (RX for receiving data and TX for transmitting data) and
-a ground wire to the USB-A port. The VGA connection consists of TODO: fix this and explain voltage divider
+a ground wire to the USB-A port. The MPU6050 is an IMU that communicates via I2C. The MPU6050 also receives 3.3V power from the RP2040.
 <!-- three RGB lines with $330 \Omega$ voltage dividers and two digital synchronization signals (VSYNC and HSYNC). -->
 
-The MPU6050 is an IMU that communicates via I2C. The I2C communication protocol consists of only two lines between a controller and peripheral device. 
-The SCL is the clock line, and the SDA is the data line. The MPU6050 also receives 3.3V power from the RP2040. Communication between a controller and peripheral device generally consists of 
-6 steps. First, the RP2040 initiates a signal to start communicating by pulling the SDA line low while the SCL line stays high. Next, the RP2040 transmits the address of the peripheral it wants to 
-communicate with, which in our case is the address of the MPU6050. The address consists of 7 bits of data. Then, the RP2040 transmits a read write bit on the 8th bit. On the 9th clock bit, the MPU6050 will pull the SDA 
-line low to acknowledge it has understood the request. Afterwards, a series of data frames, each consisting of 8 data bits and 1 acknowledge bit, are transmitted, initiated from either the RP2040 or the MPU6050. 
-Finally, after all data frames are complete, the RP2040 will generate a stop condition. 
+{{ figure(src="lab4-final-dla-schematic.png", caption="System level diagram", width=500, height=500) }}
 
-
+To allow for 4 bit color with a green gradient, the VGA connection utilizes a summing circuit, as seen in Fig 2. We use four resistors with the approximate form 1R, 2R, 4R, and 8R where R = 100, with limitations from the available resistors in the course lab. So, looking at the figure, if we set all four GPIOs to high, we get the brightest green, whereas if we only set the rightmost GPIO to high, we get the dimmest green.
 
 TODO: Angela? Will?
 Can one of you work on the voltage divider here? We also need to get rid of motor stuff https://drive.google.com/file/d/144f4phreXZ6joDq6fZQi09b3GmID1vCD/view?usp=drive_link
-
 
 
 ### Software
