@@ -1,7 +1,7 @@
 
 +++
-title = "About me"
-description = "A about page of ..."
+title = "DLA - Code"
+description = "Code listing for our DLA project."
 template = "prose.html"
 
 url = "dla-coumentation/dla"
