@@ -47,11 +47,13 @@ to determine the orientation of an IMU.
 
 With this in mind, we set off to build a motion-controlled DLA simulator.
 
-We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
-aggregation characteristics. In parallel, the same RP 2040 utilized an MPU6050 IMU to modify the behavior
+On a high level, our design involves 3 blocks: 1) the RP2040 microcontroller 2) the IMU 3) the VGA display. The IMU measures the user-affected data, the VGA displays the simulation, and the MCU performs both the simulation and interfaces witht he IMU and VGA. We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
+aggregation characteristics. The same RP 2040 utilized an MPU6050 IMU to modify the behavior
 of the particles being simulated. In particular, the IMU could modify the mean and variance of
 the normal distribution used to model particles' behavior. Concretely, this meant that we could bias particles
-to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving.
+to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving. In parallel, the MCU updates the VGA display with the particle positions and colors. 
+
+We encountered a few hardware software tradeoffs in this project. A major tradeoff we encountered involves the polling rate of the IMU. From the software side, polling the IMU for updated measurements would result in a more real-time behavior. However, polling the IMU takes a nontrivial amount of time that takes up valuable DLA computation time. Computation time became especially important when we increased the computational intensity to perform more accurate aggregate checks. We found that increasing the complexity of the algorithm and maintaining a high IMU polling rate would cause certain particles to be modified incorrectly. Thus, to execute a more accurate software design, we decreased the polling rate of the IMU. Another significant tradeoff we dealt with involved the color bitwidth for the VGA screen. We initially used 4 bit color. In our DLA algorithm, we used the color to define which stage of decay a particle was in. In order to achieve more fine-tuned decay and aggregation behavior, we considered using 8 bit color. However, we were concerned with the memory limitations, and decided to stay with 4 bit color with the loss of some software accuracy in the end. 
 
 <!-- TODO: add a gif of DLA -->
 
