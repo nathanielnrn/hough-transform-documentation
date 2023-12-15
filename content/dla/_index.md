@@ -457,14 +457,16 @@ The work was largely evenly split among team members, with slight focuses on cer
 The following is a non-exhaustive list of topics focused on.
 
 **Nathaniel:** Setup and dev environment, collision detection, voltage divider, website, and report.
+
 **Angela:** Collision detection, voltage divider, aggregation algorithm, website, and report.
+
 **William:** Random number generation, motion-random-distribution effects, serial, website, and report.
 
 ### References
-[DLA Simulation]http://formandcode.com/code-examples/simulate-dla
-[DLA Repository](https://isaacshaker.github.io/DLA-Simulation/)
-[Random Bit](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html)
-[Cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/)
+http://formandcode.com/code-examples/simulate-dla
+https://isaacshaker.github.io/DLA-Simulation/
+https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html
+https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/
 
 ### Code
 
