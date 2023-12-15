@@ -15,15 +15,21 @@ toc = true
 
 # Off-grid Diffusion Limited Aggregation on Memory and a Computation Constrained Microcontroller
 
+## Project Introduction
+
 As part of our [ECE 4760](https://ece4760.github.io/) final project, we created a
-cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation)
+cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation) (DLA) 
 simulator that can be controlled via handmotions.
+
+DLA is the process that simulates particles undergoing Brownian motion that form clusters and aggregate upon collisions. Our inspiration for this project comes from both the beautiful shapes that DLA creates and the natural processes that DLA models. The visual aesthetics of DLA bridge the gap between art and nature, allowing us to notice and appreciate otherwise common natural processes. DLA also has a multitude of scientific applications, such as modeling snowflakes, crystals, or chemical reactions. Further, we wanted users to be able to interact with characteristics of the DLA algorithm to observe in real-time how human movement can enhance these natural processes. 
+
+We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay upon aggregation. The simulation is then displayed, real-time, on a VGA screen. The user is able to interact with the simulation using hand motions by wearing a glove with an IMU attached. Shaking and tilting their hands in various directions will cause the particles to aggregate faster or move with a bias in certain directions. To make the project accessible, we used a high-contrast color scheme for the VGA display.
 
 The following details the design of our simulator, the testing we performed on our system,
 how our system performed, and some takeaways for the future.
 and
 
-## Background
+## High Level Design
 
 DLA models aggregation of particles whose primary motion is [Brownian](https://en.wikipedia.org/wiki/Brownian_motion). Particles undergoing brownian motion can be modeled by moving an amount
 that is described by a [normal distribution]
@@ -41,8 +47,6 @@ to determine the orientation of an IMU.
 
 With this in mind, we set off to build a motion-controlled DLA simulator.
 
-## Introduction
-
 We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
 aggregation characteristics. In parallel, the same RP 2040 utilized an MPU6050 IMU to modify the behavior
 of the particles being simulated. In particular, the IMU could modify the mean and variance of
@@ -50,6 +54,8 @@ the normal distribution used to model particles' behavior. Concretely, this mean
 to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving.
 
 <!-- TODO: add a gif of DLA -->
+
+TODO: logical structure; hardware/software tradeoffs; Discuss existing patents, copyrights, and trademarks which are relevant to your project.
 
 
 ## Design
@@ -303,8 +309,16 @@ borders of our simulation, and some issues with a naive collision detection algo
 
 ## Results
 
+
+
 TODO: talk about density of particles needing tuning, maximum number of particles allowed (memory wise) (around 16k),
 slow downs encountered when computaiton was too expensive
+TODO: 
+Any and all test data, scope traces, waveforms, etc;
+speed of execution (hesitation, filcker, interactiveness, concurrency);
+accuracy (numeric, music frequencies, video signal timing, etc);
+how you enforced safety in the design;
+usability by you and other people;
 
 
 ## Bugs of Note
@@ -378,15 +392,18 @@ if we had been less aware of different number representations and how we convert
 
 
 
+## Conclusion
 
 
 
 
+
+## Appendix A
+The group approves this report for inclusion on the course website.
+
+"The group approves the video for inclusion on the course youtube channel."
 
 ## Appendix
-
-### Project Site
-The group approves this report for inclusion on the course website.
 
 ### Project Video
 The group approves the video for inclusion on the course youtube channel.
