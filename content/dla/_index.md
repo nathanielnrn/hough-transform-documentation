@@ -15,15 +15,21 @@ toc = true
 
 # Off-grid Diffusion Limited Aggregation on Memory and a Computation Constrained Microcontroller
 
+## Project Introduction
+
 As part of our [ECE 4760](https://ece4760.github.io/) final project, we created a
-cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation)
+cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation) (DLA) 
 simulator that can be controlled via handmotions.
+
+DLA is the process that simulates particles undergoing Brownian motion that form clusters and aggregate upon collisions. Our inspiration for this project comes from both the beautiful shapes that DLA creates and the natural processes that DLA models. The visual aesthetics of DLA bridge the gap between art and nature, allowing us to notice and appreciate otherwise common natural processes. DLA also has a multitude of scientific applications, such as modeling snowflakes, crystals, or chemical reactions. Further, we wanted users to be able to interact with characteristics of the DLA algorithm to observe in real-time how human movement can enhance these natural processes. 
+
+We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay upon aggregation. The simulation is then displayed, real-time, on a VGA screen. The user is able to interact with the simulation using hand motions by wearing a glove with an IMU attached. Shaking and tilting their hands in various directions will cause the particles to aggregate faster or move with a bias in certain directions. To make the project accessible, we used a high-contrast color scheme for the VGA display.
 
 The following details the design of our simulator, the testing we performed on our system,
 how our system performed, and some takeaways for the future.
 and
 
-## Background
+## High Level Design
 
 DLA models aggregation of particles whose primary motion is [Brownian](https://en.wikipedia.org/wiki/Brownian_motion). Particles undergoing brownian motion can be modeled by moving an amount
 that is described by a [normal distribution]
@@ -41,15 +47,17 @@ to determine the orientation of an IMU.
 
 With this in mind, we set off to build a motion-controlled DLA simulator.
 
-## Introduction
-
-We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
-aggregation characteristics. In parallel, the same RP 2040 utilized an MPU6050 IMU to modify the behavior
+On a high level, our design involves 3 blocks: 1) the RP2040 microcontroller 2) the IMU 3) the VGA display. The IMU measures the user-affected data, the VGA displays the simulation, and the MCU performs both the simulation and interfaces witht he IMU and VGA. We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
+aggregation characteristics. The same RP 2040 utilized an MPU6050 IMU to modify the behavior
 of the particles being simulated. In particular, the IMU could modify the mean and variance of
 the normal distribution used to model particles' behavior. Concretely, this meant that we could bias particles
-to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving.
+to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving. In parallel, the MCU updates the VGA display with the particle positions and colors. 
+
+We encountered a few hardware software tradeoffs in this project. A major tradeoff we encountered involves the polling rate of the IMU. From the software side, polling the IMU for updated measurements would result in a more real-time behavior. However, polling the IMU takes a nontrivial amount of time that takes up valuable DLA computation time. Computation time became especially important when we increased the computational intensity to perform more accurate aggregate checks. We found that increasing the complexity of the algorithm and maintaining a high IMU polling rate would cause certain particles to be modified incorrectly. Thus, to execute a more accurate software design, we decreased the polling rate of the IMU. Another significant tradeoff we dealt with involved the color bitwidth for the VGA screen. We initially used 4 bit color. In our DLA algorithm, we used the color to define which stage of decay a particle was in. In order to achieve more fine-tuned decay and aggregation behavior, we considered using 8 bit color. However, we were concerned with the memory limitations, and decided to stay with 4 bit color with the loss of some software accuracy in the end. 
 
 <!-- TODO: add a gif of DLA -->
+
+TODO: logical structure; hardware/software tradeoffs; Discuss existing patents, copyrights, and trademarks which are relevant to your project.
 
 
 ## Design
@@ -303,8 +311,16 @@ borders of our simulation, and some issues with a naive collision detection algo
 
 ## Results
 
+
+
 TODO: talk about density of particles needing tuning, maximum number of particles allowed (memory wise) (around 16k),
 slow downs encountered when computaiton was too expensive
+TODO: 
+Any and all test data, scope traces, waveforms, etc;
+speed of execution (hesitation, filcker, interactiveness, concurrency);
+accuracy (numeric, music frequencies, video signal timing, etc);
+how you enforced safety in the design;
+usability by you and other people;
 
 
 ## Bugs of Note
@@ -378,15 +394,18 @@ if we had been less aware of different number representations and how we convert
 
 
 
+## Conclusion
 
 
 
 
+
+## Appendix A
+The group approves this report for inclusion on the course website.
+
+"The group approves the video for inclusion on the course youtube channel."
 
 ## Appendix
-
-### Project Site
-The group approves this report for inclusion on the course website.
 
 ### Project Video
 The group approves the video for inclusion on the course youtube channel.
