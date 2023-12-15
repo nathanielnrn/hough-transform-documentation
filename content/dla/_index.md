@@ -439,14 +439,14 @@ Regarding standards, this project is specialized, meaning that it does not entir
 We do not use any third-party music clips or images, so we do not have to include any licensing agreements. Because we based our implementation off of code from several public online demo sources, we have properly cited our sources below. While we used these sources as motivation, we created our own DLA design that utilizes a customized collision algorithm. Since the DLA is a common algorithm, we do not have any patent opportunities for our project. No NDA was required as all our hardware was provided in lab. Additionally, because we do not use any RF transmitters or have any legal considerations regarding the FDA, motor vehicle codes, and similar regulations, this project will be recreatable without the user ensuring that their setup passes specific certifications.
 
 ## Appendix A
+
+#### Project Website
 The group approves this report for inclusion on the course website.
 
-"The group approves the video for inclusion on the course youtube channel."
+#### Project Video
+The group approves the video for inclusion on the course youtube channel.
 
 ## Appendix
-
-### Project Video
-The group approves the video for inclusion on the course youtube channel.
 
 ### Hardware
 
