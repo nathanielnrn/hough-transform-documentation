@@ -464,8 +464,11 @@ The following is a non-exhaustive list of topics focused on.
 
 ### References
 http://formandcode.com/code-examples/simulate-dla
+
 https://isaacshaker.github.io/DLA-Simulation/
+
 https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html
+
 https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/
 
 ### Code
