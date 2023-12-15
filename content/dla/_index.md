@@ -25,9 +25,10 @@ DLA is the process that simulates particles undergoing Brownian motion that form
 
 We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay upon aggregation. The simulation is then displayed, real-time, on a VGA screen. The user is able to interact with the simulation using hand motions by wearing a glove with an IMU attached. Shaking and tilting their hands in various directions will cause the particles to aggregate faster or move with a bias in certain directions. To make the project accessible, we used a high-contrast color scheme for the VGA display.
 
+{{ webm(src="basic.webm", caption="Basic DLA", width=500) }}
+
 The following details the design of our simulator, the testing we performed on our system,
 how our system performed, and some takeaways for the future.
-and
 
 ## High Level Design
 
@@ -83,8 +84,6 @@ To allow for 4 bit color with a green gradient, the VGA connection utilizes a su
 
 The software we built for our simulator can be broken into a number of components.
 We will describe each component as it stands alone, and then describe how these components integrate together.
-
-
 
 
 #### Random number generator
@@ -148,8 +147,6 @@ the particle's current location and new location is checked to see if it is touc
 If a pixel is determined to
 be touching our aggregate, the particle is moved to that pixel (falling short of the initial update location)
 and it is mutated to be part of the collective aggregate (by changing its color to bright green).
-
-
 
 #### Touching Aggregate Detection
 Recall that our aggregate consists of various shades of green (represented as `color` values from `2-15`). A pixel is deemed to be touching aggregate if the sum of the colors of the 8 pixels surrounding it surpasses some threshold. This threshold can be tuned to change the emergent behavior of aggregation, but was often left at `15` as this often produced interesting results.
@@ -299,7 +296,7 @@ We visually tested the clusters and formations of each unique factor to guarante
 #### Basic DLA
 The basic DLA motion consists of a min speed = -2 and a max speed = 2. In order to ensure that particles resembled Brownian motion, we used the random number generator mentioned above. As shown below, the clustering motion branches out evenly from the center, indicating that the motion is truly Brownian. This motion occurs when the serial interface is either reset or no factors are activated.
 
-{{ webm(src="basic.webm", caption="Hand-activated Tilt", width=500) }}
+{{ webm(src="basic.webm", caption="Basic DLA", width=500) }}
 
 
 #### Tilt Factor
