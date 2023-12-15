@@ -19,7 +19,7 @@ toc = true
 
 As part of our [ECE 4760](https://ece4760.github.io/) final project, we created a
 cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation) (DLA) 
-simulator that can be controlled via handmotions.
+simulator that can be controlled via hand motions.
 
 DLA is the process that simulates particles undergoing Brownian motion that form clusters and aggregate upon collisions. Our inspiration for this project comes from both the beautiful shapes that DLA creates and the natural processes that DLA models. The visual aesthetics of DLA bridge the gap between art and nature, allowing us to notice and appreciate otherwise common natural processes. DLA also has a multitude of scientific applications, such as modeling snowflakes, crystals, or chemical reactions. Further, we wanted users to be able to interact with characteristics of the DLA algorithm to observe in real-time how human movement can enhance these natural processes. 
 
@@ -31,12 +31,13 @@ and
 
 ## High Level Design
 
-DLA models aggregation of particles whose primary motion is [Brownian](https://en.wikipedia.org/wiki/Brownian_motion). Particles undergoing brownian motion can be modeled by moving an amount
+#### Rationale and Background Math
+This project aims to show how human movement can be used to enhance dense particle models. DLA models aggregate particles whose primary motion is [Brownian](https://en.wikipedia.org/wiki/Brownian_motion). Particles undergoing brownian motion can be modeled by moving an amount
 that is described by a [normal distribution]
 whose variance is proportional to time elapsed.
 
 In particular, linear Brownian motion is defined (see [page 21](https://www.stat.berkeley.edu/~aldous/205B/bmbook.pdf)) as motion such that for a timestep $h$
-the movement of a particle descibed by $B(t+h) - B(t)$ are normally distributed with mean 0 and standard deviation $h.$
+the movement of a particle described by $B(t+h) - B(t)$ are normally distributed with mean 0 and standard deviation $h.$
 More explicitly this increment $X$ must be obtained with probability
 $$P(X=x)\frac{1} = {h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-0}{h})^2}.$$ 
 We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation.
@@ -47,18 +48,19 @@ to determine the orientation of an IMU.
 
 With this in mind, we set off to build a motion-controlled DLA simulator.
 
-On a high level, our design involves 3 blocks: 1) the RP2040 microcontroller 2) the IMU 3) the VGA display. The IMU measures the user-affected data, the VGA displays the simulation, and the MCU performs both the simulation and interfaces witht he IMU and VGA. We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
+On a high level, our design involves 3 blocks: 1) the RP2040 microcontroller 2) the IMU 3) the VGA display. The IMU measures the user-affected data, the VGA displays the simulation, and the MCU performs both the simulation and interfaces with the IMU and VGA. We utilized a PICO RP 2040 to simulate brownian motion of particles along with parameterized
 aggregation characteristics. The same RP 2040 utilized an MPU6050 IMU to modify the behavior
 of the particles being simulated. In particular, the IMU could modify the mean and variance of
 the normal distribution used to model particles' behavior. Concretely, this meant that we could bias particles
 to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving. In parallel, the MCU updates the VGA display with the particle positions and colors. 
 
-We encountered a few hardware software tradeoffs in this project. A major tradeoff we encountered involves the polling rate of the IMU. From the software side, polling the IMU for updated measurements would result in a more real-time behavior. However, polling the IMU takes a nontrivial amount of time that takes up valuable DLA computation time. Computation time became especially important when we increased the computational intensity to perform more accurate aggregate checks. We found that increasing the complexity of the algorithm and maintaining a high IMU polling rate would cause certain particles to be modified incorrectly. Thus, to execute a more accurate software design, we decreased the polling rate of the IMU. Another significant tradeoff we dealt with involved the color bitwidth for the VGA screen. We initially used 4 bit color. In our DLA algorithm, we used the color to define which stage of decay a particle was in. In order to achieve more fine-tuned decay and aggregation behavior, we considered using 8 bit color. However, we were concerned with the memory limitations, and decided to stay with 4 bit color with the loss of some software accuracy in the end. 
+#### Hardware/Software Tradeoffs
 
-<!-- TODO: add a gif of DLA -->
+We encountered a few hardware software tradeoffs in this project. A major tradeoff we encountered involves the polling rate of the IMU. From the software side, polling the IMU for updated measurements would result in a more real-time behavior. However, polling the IMU takes a nontrivial amount of time that takes up valuable DLA computation time. Computation time became especially important when we increased the computational intensity to perform more accurate aggregate checks. We found that increasing the complexity of the algorithm and maintaining a high IMU polling rate would cause certain particles to be modified incorrectly. Thus, to execute a more accurate software design, we decreased the polling rate of the IMU. Another significant tradeoff we dealt with involved the color bitwidth for the VGA screen. We initially used 4 bit color. In our DLA algorithm, we used the color to define which stage of decay a particle was in. In order to achieve more fine-tuned decay and aggregation behavior, we considered using 8 bit color. However, we were concerned with the memory limitations, and decided to stay with 4 bit color with the loss of some software accuracy in the end.
 
-TODO: logical structure; hardware/software tradeoffs; Discuss existing patents, copyrights, and trademarks which are relevant to your project.
 
+#### Existing Patents, Copyrights, Standards, and Trademarks
+Regarding patents, copyrights, or trademarks, nothing is applicable to this project. We properly source all online coding resources, and this project has expanded upon an existing DLA implementation. Regarding standards, this project is specialized, meaning that it will not entirely align with a single standard. However, IEEE 1872, “Ontologies for Robotics and Automation,” appears to be the most relevant as we integrate the IMU and hand motions and define the relationship between our DLA program with said hand motions.
 
 ## Design
 
@@ -71,17 +73,11 @@ serial interface and utilizes the Pico's PIO state machines (see [chapter 3](htt
 
 {{ figure(src="breadboard.png", caption="System level diagram", width=500, height=500) }}
 
-As shown in Fig.TODO: change fig number, add image, the UART connection consists of two data data wires (RX for receiving data and TX for transmitting data) and
-a ground wire to the USB-A port. The MPU6050 is an IMU that communicates via I2C. The MPU6050 also receives 3.3V power from the RP2040.
-<!-- three RGB lines with $330 \Omega$ voltage dividers and two digital synchronization signals (VSYNC and HSYNC). -->
+As for the software-hardware system, the figure below visualizes how we integrated the VGA display, RP2040, IMU (MPU 6050), and Serial interface (USB-A and PuTTY terminal) together.
 
 {{ figure(src="lab4-final-dla-schematic.png", caption="System level diagram", width=500, height=500) }}
 
-To allow for 4 bit color with a green gradient, the VGA connection utilizes a summing circuit, as seen in Fig 2. We use four resistors with the approximate form 1R, 2R, 4R, and 8R where R = 100, with limitations from the available resistors in the course lab. So, looking at the figure, if we set all four GPIOs to high, we get the brightest green, whereas if we only set the rightmost GPIO to high, we get the dimmest green.
-
-TODO: Angela? Will?
-Can one of you work on the voltage divider here? We also need to get rid of motor stuff https://drive.google.com/file/d/144f4phreXZ6joDq6fZQi09b3GmID1vCD/view?usp=drive_link
-
+To allow for 4 bit color with a green gradient, the VGA connection utilizes a summing circuit, as seen in the Figure above. We use four resistors with the approximate form 1R, 2R, 4R, and 8R where R = 100, with limitations from the available resistors in the course lab. So, looking at the figure, if we set all four GPIOs to high, we get the brightest green, whereas if we only set the rightmost GPIO to high, we get the dimmest green.
 
 ### Software
 
@@ -102,7 +98,7 @@ What C does offer is a [`rand()` function](https://en.cppreference.com/w/c/numer
 a normal distribution by drawing from `rand()` multiple times and updating a particle based on that value.
 Over many time steps, the motion of a given particle will approximate a normal distribution as a result of the [Central Limit Theorem](https://en.wikipedia.org/wiki/Central_limit_theorem).
 As our particles are updated 30 times a second, and the sampling distribution tends to normal over time,
-we can get a good approximation of brownian motian with this uniform distribution. Figure 1 shows the empircal probability distribution of displacement
+we can get a good approximation of brownian motion with this uniform distribution. Figure 1 shows the empirical probability distribution of displacement
 of a particle over 15 timesteps (equivalent to half a second), using this "sum of uniform samples" method.
 Figure 2 shows the empirical probability distribution of displacement of a particle over 15 timesteps sampling from a normal distribution at
 each time step.
@@ -116,9 +112,6 @@ The takeaway from this graph is that, over time, our particles behave as if they
 {{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 2: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled moved. Taken from 8,000 samples. The orange line is the same orange from Figure 1.") }}
 
 
-
-
-<!-- TODO: Move this to conclusion/bugs section maybe? -->
 Before settling on the approach described above, we attempted a few ways
 to sample from a normal distribution for every particle, once a frame.
 One approach involved summing over multiple calls to `rand()` in order to approximate
@@ -168,10 +161,10 @@ As an example, with a threshold of `15` a pixel would be deemed to be touching a
 The following is adapted from our [lab 3] report. And is included here for completeness:
 
 Our raw MPU6050 IMU measurements were received via I2C, where specific registers
-were read, corresponding with specific measurements of the IMU. While we initally planned to utilize the
+were read, corresponding with specific measurements of the IMU. While we initially planned to utilize the
 IMU's raw gyroscope measurements around the x-axis and y-axis to compute rotational
 deltas, we found that just using accelerometer data proved accurate enough for responsive use.
-Getting rid of the gryscopic factor would reduce the computational complexity of our
+Getting rid of the gyroscopic factor would reduce the computational complexity of our
 simulation without affecting it's quality, so we opted to just use the accelerometer to determine our angle
 
 Our raw accelerometer data was used to compute the angle of our lever based on
@@ -180,7 +173,7 @@ was low passed, as noise in the raw data is amplified through
 the inverse tan function. See the next section for more information.
 
 Figure 1 shows how accelerometer data can be used to calculate an angle of an IMU.
-In our case, we were interested in measuring rotaiton around the x and y axes.
+In our case, we were interested in measuring rotation around the x and y axes.
 
 {{ figure(src="angles.png", alt="A lever and acceleration vectors, along with an angle theta.", caption="Figure 1: An image showing how acceleration data can be used to calculate an angle. Taken from the <a href='https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html'>course website</a>.") }}
 
@@ -203,7 +196,7 @@ This was accomplished by maintaining a rolling average and storing the previous 
 obtained from our IMU and calculating the variance of our Z acceleration:
 $$\text{Var}(Z) = \mathbb{E}[(Z - \mathbb{E}[Z])^2]$$
 
-The variance calculaiton was performed naively (iterating over all values in our array), but proved fast
+The variance calculation was performed naively (iterating over all values in our array), but proved fast
 enough to be computed in the span of a single frame.
 
 #### Particle Movement
@@ -225,16 +218,15 @@ For this reason we enforced the ranges of our uniform distribution to never be h
 
 #### Particle decay
 
-We were interested in simualting [cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/).
+We were interested in simulating [cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/).
 To this end, our particle structs store a `cyclic_counter` member variable that counted the number of frames
 a particle had been aggregated for. The more time a particle had been aggregated for, the dimmer the aggregated particle would
-appear, before disappearing and returning to be a "free" particle, undergoing Brownian motion independent of the aggregate.
-TODO: add gif
+appear, before disappearing and returning to be a "free" particle, undergoing Brownian motion independent of the aggregate. This feature is displayed when explaining cyclic factor results.
 
 #### Simulation/Animation
 30 times a second our simulation/animation [protothread](https://en.wikipedia.org/wiki/Protothread) was awoken. This thread
 was responsible for polling our IMU, performing collision detection, updating particle locations and colors, and finally
-writing to our pixel backing-array. While responsible for many tasks, in practice this prothread
+writing to our pixel backing-array. While responsible for many tasks, in practice this protothread
 largely consists of a a bunch of function calls in a while loop. Some of these functions
 are guarded by flags that let us turn features (such as variable speed, tilt bias) on and off.
 
@@ -245,7 +237,7 @@ a PuTTY terminal to allow us to turn feature flags on and off, and reset our sim
 Serial runs on it's own protothread and utilizes non-blocking serial read and write functions,
 obtained from Bruce Land's protothreads [modifications](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_protothreads/index_Protothreads.html). These non-blocking functions rely on the RP 2040s ability
 to signal when UART can be written to. The thread responsible for reading/writing yields until a character
-can be read/written via UART, and in this way only runs when needed. This allows for computaitonal threads
+can be read/written via UART, and in this way only runs when needed. This allows for computational threads
 (such our simulator/animator) to run almost constantly.
 
 
@@ -266,17 +258,18 @@ The particle's old location is drawn over ("erasing" it) and the particle's new 
 The thread then yields such that it will awaken 1/30th of a second after the current frame began. In this way we enforce a simulation and animation speed of 30 fps.
 
 
-
-
 ## Testing
 
 ### Hardware
-TODO: Talk about voltage divider and IMU, we can say we were lucky to be familiar with IMU set up due to lab 3.
 
+We used the VGA display and the IMU, both of which we are familiar with. Like usual, we had to ensure that the VGA connector was wired correctly and that the receiving monitor was functional. If the receiving monitor did not properly display our program, we knew that either the wiring was incorrect or the monitor had to be swapped out. Luckily, the IMU was already integrated from lab 3, making it easy for us to leverage its acceleration and angle capabilities.
+
+When testing for user input, we wired up the UART connection to input keyboard statements using PuTTY. With this wired up, we could manipulate desired features. We were confident with the UART wiring given that the program always responded to our inputs.
+
+We did have some difficulty implementing the 4 bit green gradient as it required some additional circuits knowledge. Fortunately, the required summing circuit utilized resistors available in lab and the circuitry was not complicated. That being said, we were able to verify this 4 bit green gradient by using the VGA display and determining whether particles were properly decaying from the brightest green to the dimmest green. 
 
 ### Software
-
-The visual nature of our graphs 
+Like previous labs, we utilized serial's print capabilities to allow us to examine the values of variables in real time. Beyond that, a large amount of testing was done by looking at our IMU acceleration and complementary angle graphs to determine whether the particle motion was correct. For the features that did not utilize the IMU, their effectiveness could be verified by looking at the program and comparing it to the expected result.
 
 #### Angle Graphs
 We used software (modified from [here](https://vanhunteradams.com/Pico/Helicopter/Display.html)) to graph the measured angle of 
@@ -289,8 +282,6 @@ Furthermore, or graph helped us verify that our parameter changes were behaving 
 allowed us to tell at what angle the mean of our uniform distribution shifted (which was a stepwise function). We verified
 that our mean shifted at the intended angles through user testing.
 
-
-
 #### Simulation
 Having an obvious visual component to our simulation made testing for it's correctness easy.
 After making changes to our algorithms,
@@ -300,8 +291,6 @@ Examining incremental changes to our simulation algorithms helped us uncover a n
 Among the issues we discovered was a shift in the mean of the movement of our particles from
 conversion from fixed point to integer values, incorrect aggregation occurring at the
 borders of our simulation, and some issues with a naive collision detection algorithm.
-
-
 
 ## Results
 
@@ -351,7 +340,7 @@ Before we decided to run the program with 7000-8000 particles, we had troubles w
 While we were capable of smoothly running 7000-8000 particles, program is capable of running 16000 particles based on memory limitations. However, as the particle count increases, there were noticeable reductions in frame rate. This reduction is especially noticeable depending on which factors are activated. Because tilt, speed, and cyclic are computationally intensive, these factors are the computational bottleneck. Additionally, as mentioned above, running the maximum number of particles would also significantly increase the particle density, straying the program away from Brownian clusters.
 
 #### Overall
-Because our program is an expansion upon lab 2 (Animating murmurations of starlings) and not hardware intensive, we did not have to perform much hardware debugging. Instead, we had to perform software debugging, graphing the IMU outputs like in lab 3 (PID control of a 1D helicopter) and visually checking the functionality of our particle aggregation and features. We focused on implementing features rather than optimizing the particle count and frame rate, so we do not have any results relating to speed or numerical accuracy. 
+Because our program is an expansion upon lab 2 and not hardware intensive, we did not have to perform much hardware debugging. Instead, we had to perform software debugging, graphing the IMU outputs like in lab 3 and visually checking the functionality of our particle aggregation and features. We focused on implementing features rather than optimizing the particle count and frame rate, so we do not have any results relating to speed or numerical accuracy. 
 
 #### Safety
 There are on significant safety concerns as our project mainly focuses on viewing simulations through the VGA. We ensured that the IMU safely captures hand motions using a customized glove. The human being used will not matter as the IMU is attached to the glove. The hand movements are completely safe as they are dependent on changing the angle and acceleration of the IMU. For the user, this results in tilting their hand and waving it back and forth, both of which are safe movements.
@@ -368,7 +357,7 @@ and any takeaways we have.
 Initially, polling our IMU at a rate of 1,000 Hz via a repeating alarm timer
 led to our simulation crashing shortly after startup.
 It was unclear what the root cause of these issues were, as they persisted even when moving
-our repeating alarm timer to a different core. Which goes against our intial suspicion that
+our repeating alarm timer to a different core. Which goes against our initial suspicion that
 our interrupts were interfering with in-flight writes/reads to our backing pixel array,
 which may have eventually lead to the reading of garbage data which softlocked our program.
 
@@ -385,7 +374,7 @@ for our motion controls to feel responsive.
 In addition to crashes, enabling IMU polling changed the behavior of pixel aggregation, leading pixels
 to aggregate seemingly at random at the borders of our simulation. This was eventually
 resolved by adding better bounds logic to our touching-aggregate function. However it remains
-unclear why poling the IMU changed our collision detection logic.
+unclear why polling the IMU changed our collision detection logic.
 
 
 ### Aggravating Angle Assessment
@@ -407,14 +396,14 @@ limitations of our models
 
 ### Restrictive Rounding
 When shifting the mean of our uniform distribution based on the tilt of our IMU we performed fixed point
-airthmeitc for the sake of computational speed,
+arithmetic for the sake of computational speed,
 and then converted values to integers. Our initial system took into account the sign of our tilt,
 and shifted the mean of our distribution accordingly, based on the between our current angle and 90 degrees.
 
 Because of the way our fixed to integer conversion works, numbers were rounded differently dependent on their sign.
 Namely, fixed point representations are converted to integers by right shifting `>>`. This means that integer values
 are truncated, not rounded. This meant that we were taking the floor of our fixed point number.
-This has an effect on the magnitude of a number agfter truncation based on its sign. Consider that `4.3` is truncated to `4`
+This has an effect on the magnitude of a number after truncation based on its sign. Consider that `4.3` is truncated to `4`
 while `-4.3` is truncated to `-5`.
 This, along with the details of our initial implementation, meant that our mean was incorrectly being biased towards
 negative numbers. This was apparent in our simulation as particles tending towards the top left, even when our IMU was held flat.
@@ -426,8 +415,6 @@ was "symmetric" on both positive and negative fixed point numbers.
 we need to be very aware of the implications of various implementations, as they can have compounding downstream effects.
 We were fortunate enough to figure out what was going on fairly quickly, but this may had not been obvious
 if we had been less aware of different number representations and how we convert between them.
-
-
 
 
 ## Conclusion
@@ -463,22 +450,25 @@ The group approves the video for inclusion on the course youtube channel.
 
 ### Hardware
 
-TODO: Add schematics of hardware
+{{ figure(src="lab4-final-dla-schematic.png", caption="System level diagram", width=500, height=500) }}
 
 ### Tasks
 The work was largely evenly split among team members, with slight focuses on certain.
 The following is a non-exhaustive list of topics focused on.
 
 **Nathaniel:** Setup and dev environment, collision detection, voltage divider, website, and report.
-**Angela:** Collision detection, voltage divider, aggregation algorithm.
-**William:** Random number generation, moition-random-distribution effects, serial.
+**Angela:** Collision detection, voltage divider, aggregation algorithm, website, and report.
+**William:** Random number generation, motion-random-distribution effects, serial, website, and report.
+
+### References
+[DLA Simulation]http://formandcode.com/code-examples/simulate-dla
+[DLA Repository](https://isaacshaker.github.io/DLA-Simulation/)
+[Random Bit](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html)
+[Cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/)
 
 ### Code
 
 Code can be found [here](../code).
-
-
-{{ webm(src="basic.webm", caption="This is here to show how to use images in source code", width=500) }}
 
 [normal distribution]: https://en.wikipedia.org/wiki/Normal_distribution
 [lab 3]: https://vanhunteradams.com/Pico/Helicopter/Helicopter.html
