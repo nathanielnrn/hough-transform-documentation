@@ -305,17 +305,59 @@ borders of our simulation, and some issues with a naive collision detection algo
 
 ## Results
 
+We visually tested the clusters and formations of each unique factor to guarantee the simulation would maintain uniform random motion. First we had to generate a basic DLA using no factors. Once that was complete, we tested the following factors: tilt, speed, cyclic, visibility, seed location, and reset. Because our main priority was resembling Brownian motion, we kept the particle count at around 7000-8000. This particle count was dense enough to fill our screen with clusters without risking a crash due to a computational overload.
+
+#### Basic DLA
+The basic DLA motion consists of a min speed = -2 and a max speed = 2. In order to ensure that particles resembled Brownian motion, we used the random number generator mentioned above. As shown below, the clustering motion branches out evenly from the center, indicating that the motion is truly Brownian. This motion occurs when the serial interface is either reset or no factors are activated.
+
+{{ webm(src="basic.webm", caption="Hand-activated Tilt", width=500) }}
 
 
-TODO: talk about density of particles needing tuning, maximum number of particles allowed (memory wise) (around 16k),
-slow downs encountered when computaiton was too expensive
-TODO: 
-Any and all test data, scope traces, waveforms, etc;
-speed of execution (hesitation, filcker, interactiveness, concurrency);
-accuracy (numeric, music frequencies, video signal timing, etc);
-how you enforced safety in the design;
-usability by you and other people;
+#### Tilt Factor
+The tilt factor is hand-activated, and it is responsible for creating a slight bias in any cardinal direction (North, South, East, West) and any ordinal direction (Northeast, Southeast, Southwest, Northwest). Because a bias is introduced, we do not expect the motion influenced by the tilt factor to be Brownian. As shown below, the particles are first provided a bias to the right and then a bias to the left. A common characteristic of the tilt factor is the tendency for particles to aggregate in bursts, which is the result of introducing multiple biases on the same seed. This factor is activated through serial.
 
+{{ webm(src="tilt.webm", caption="Hand-activated Tilt", width=500) }}
+
+#### Speed Factor
+The speed factor is hand-activated, and it is responsible for increasing the min speed and max speed bounds based on the variance of the z-acceleration. In order words, the movement of the particles will increase depending on how fast the IMU-glove is shaken. This feature was responsible for the conception of the collision detection. Before the collision detection, particles with increased speeds would cluster incorrectly, skipping over aggregate particles rather colliding with them. Now, the particles are capable of reaching min and max speeds of -10 and 10, respectively, while maintaining Brownian motion. As shown below, the particles are first moving very quickly as a response to the real-time IMU-glove movement. Then, the IMU-glove movement is stopped and the particles begin slowing down, showing how the particles movement respond to the dynamic hand motion. This factor is activated serial.
+
+{{ webm(src="speed.webm", caption="Hand-activated Speed", width=500) }}
+
+#### Cyclic Factor
+The cyclic factor is responsible for decaying aggregate particles and randomly respawning them, allowing for a simulation with an infinite runtime. Like the other factors, it is activated through serial, but an additional integer is provided to alter the decay time. Every aggregate particle is provided an internal decay counter, and the serial integer input is responsible for hastening the rate at which the internal decay counter activates a decay function. In the past, once the particles would all aggregate, the program would have to restart. As shown below, the particles decay at a rapid rate, creating a creeping aggregate motion throughout the screen.
+
+{{ webm(src="cyclic.webm", caption="Cyclic DLA Motion", width=500) }}
+
+#### Visibility Factor
+The visibility factor is responsible for hiding all moving particles, only highlighting the aggregate particles. The result is a cleaner clustering motion as the thousands of moving particles are not shown. As shown below, the basic DLA motion is highlighted without any background movement.
+
+{{ webm(src="visibility.webm", caption="No Background Visibility", width=500) }}
+
+
+#### Seed Location
+The seed location factor is responsible for adding an aggregate particle seed in a custom location. This custom location is determined in serial based on an input x and y coordinate. The custom seed is a permanent aggregate particle, allowing for more unique patterns. It was important to ensure that the custom seed would not disrupt the Brownian aggregate formations. However, as shown below, both seeds have Brownian aggregate formations without disrupting each other.
+
+{{ webm(src="short2seeds.webm", caption="Custom Seed Location", width=500) }}
+
+#### Reset
+The reset serial command is responsible for either committing a hard or soft reset. A hard reset is capable of reducing the program back to a basic DLA movement. All factors and parameters are reset, including custom seed locations. This is done when many factors were activated at once and the user wants a fresh start. The soft reset is capable of decaying all particle formations and randomly spawning them. This is done when exploring specific combinations of factors and wanting to see all the unique formations that can appear. Shown below is a hard reset.
+
+{{ webm(src="reset.webm", caption="Resetting Particles", width=500) }}
+
+#### Density of Particles
+Before we decided to run the program with 7000-8000 particles, we had troubles with the density of particle aggregation. Starting off, we only ran several hundred particles. As a result, the particles would finish aggregating very quickly, and the clusters would not be large enough to properly represent Brownian motion. We continued to increase the particle count, but as we continued beyond 7000-8000 particles, we noticed that the particle aggregations were densely population the screen. Due to an excess number of particles and a space limitation, dense clusters began to form in specific locations. Eventually, we decided that 7000-8000 particles was optimal for both creating Brownian clusters and filling up a significant portion of the screen.
+
+#### Maximum of Particles
+While we were capable of smoothly running 7000-8000 particles, program is capable of running 16000 particles based on memory limitations. However, as the particle count increases, there were noticeable reductions in frame rate. This reduction is especially noticeable depending on which factors are activated. Because tilt, speed, and cyclic are computationally intensive, these factors are the computational bottleneck. Additionally, as mentioned above, running the maximum number of particles would also significantly increase the particle density, straying the program away from Brownian clusters.
+
+#### Overall
+Because our program is an expansion upon lab 2 (Animating murmurations of starlings) and not hardware intensive, we did not have to perform much hardware debugging. Instead, we had to perform software debugging, graphing the IMU outputs like in lab 3 (PID control of a 1D helicopter) and visually checking the functionality of our particle aggregation and features. We focused on implementing features rather than optimizing the particle count and frame rate, so we do not have any results relating to speed or numerical accuracy. 
+
+#### Safety
+There are on significant safety concerns as our project mainly focuses on viewing simulations through the VGA. We ensured that the IMU safely captures hand motions using a customized glove. The human being used will not matter as the IMU is attached to the glove. The hand movements are completely safe as they are dependent on changing the angle and acceleration of the IMU. For the user, this results in tilting their hand and waving it back and forth, both of which are safe movements.
+
+#### Usability
+The program is extremely usable due to the IMU-glove functionality being simple. The only requirement is being able to wear the IMU-glove and create movement. Because our program does not integrate sound, the hearing impaired will still be able to properly engage with it. We created a simple color scheme with either bright green or black, allowing the visually impaired to properly engage with the display.
 
 ## Bugs of Note
 
@@ -390,9 +432,24 @@ if we had been less aware of different number representations and how we convert
 
 ## Conclusion
 
+#### Improvements and Extensions
+If we were to attempt this lab again, it would be interesting to continue adding features that simulate more natural patterns. We were able to generate snowflake-like structures as well as subtle rippling motion, but we were unable to recreate patterns such as a water droplet's wave. 
 
+For example, we could implement a "draw seed" feature that would allow a custom seed to manually be drawn on the screen. This feature would require two potentiometers, adjustable voltage dividers that can be used to implement custom particle movement. The current custom seed feature is only capable of adding a single seed at a time. However, this "draw seed" feature would be capable of drawing multiple seeds at once, perhaps leading to more complex cluster formations. 
 
+Additionally, there are methods of optimizing the DLA algorithm that lead to a more accurate collision algorithm, such as creating a variable step size. If we had more time and a stronger mathematics background, it would be nice to learn how to utilize concepts such as hyper-matrices to increase collision accuracy. While the current collision algorithm works fairly well, it would be interesting to see how our formations alter when using an optimized collision algorithm.
 
+For future extensions beyond adding more DLA features, we could expand our program to highlighting other particle models as well. Though the DLA patterns are interesting, there are many patterns that cannot be replicated using DLA. The Laplacian Growth model could be used to simulate crystal growth and electrodeposition. Other mathematical models could be used to simulate fungal growth or bacteria colonies. It would be worth comparing how all the models respond to adding the existing speed, tilt, and cyclic features as well.
+
+#### Final Thoughts
+After completing the previous labs, we were able to properly accumulate all of our knowledge into our final project. We were able to manipulate our IMU output so that it dynamically calculated speed and tilt. We ran our functions on two separate cores to maximize functionality. We created a serial interface that could interact with the IMU. While the results did not completely meet our expectations, we completed all the functionality we originally planned in the given timespan. As mentioned before, there are many ways for us to improve and extend our program. That being said, we still believe that our design adheres to the current standards of a final project. 
+
+On a personal note, it was especially exciting to see our program in practice. Seeing our project begin as an abstract and then turn into life was particularly rewarding, especially because there were many challenges along the way. The program often created patterns that were unexpected, leaving us mesmerized as we fiddled with the features ourselves.
+
+As mentioned in the previous section it would be interesting (although possibly difficult) to use a more complicated collision method that could potentially lead to more life-like formations. Due to the limited hardware, this program has a greater emphasis on software implementation, meaning that there is much more room for cheats and optimizations than we think.
+
+#### Acknowledgements
+We do not use any third-party music clips or images, so we do not have to include any licensing agreements. Because we based our implementation off of code from several public online demo sources, we have properly cited our sources below. While we used these sources as motivation, we created our own DLA design that utilizes a customized collision algorithm. Since the DLA is a common algorithm, we do not have any patent opportunities for our project. No NDA was required as all our hardware was provided in lab. Additionally, because we do not use any RF transmitters or have any legal considerations regarding the FDA, motor vehicle codes, and similar regulations, this project will be recreatable without the user ensuring that their setup passes specific certifications.
 
 ## Appendix A
 The group approves this report for inclusion on the course website.
