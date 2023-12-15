@@ -2,7 +2,7 @@
 {%- set relative_path = colocated_path ~ src -%}
 
 <figure>
-	<img src="{{config.base_url}}{{ relative_path }}" {% if alt %} alt="{{ alt }}"{% endif %}>
+	<img src="{{config.base_url}}{{ relative_path }}" {% if alt %} alt="{{ alt }}"{% endif %} width=550>
     {% if via %}
     <figcaption><a href="{{via}}">via</a></figcaption>
     {% else %}
