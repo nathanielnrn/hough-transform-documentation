@@ -3,7 +3,7 @@ title = "DLA - Documentation"
 description = "The documentation of our DLA project."
 template = "prose.html"
 
-url = "dla-coumentation/dla"
+url = "dla-documentation/dla"
 [extra]
 lang = 'en'
 math = true
@@ -21,7 +21,7 @@ As part of our [ECE 4760](https://ece4760.github.io/) final project, we created 
 cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation) (DLA) 
 simulator that can be controlled via hand motions.
 
-DLA is the process that simulates particles undergoing [Brownian](https://en.wikipedia.org/wiki/Brownian_motion) motion that form clusters and aggregate upon collisions. Our inspiration for this project comes from both the beautiful shapes that DLA creates and the interesting natural processes that DLA models. DLA also has a multitude of scientific applications, such as modeling snowflakes, crystals, or chemical reactions. Further, we wanted users to be able to interact with characteristics of the DLA algorithm to observe how slight modificactions to parameters can have large downstream effects to emergent behavior. 
+DLA is the process that simulates particles undergoing [Brownian](https://en.wikipedia.org/wiki/Brownian_motion) motion that form clusters and aggregate upon collisions. Our inspiration for this project comes from both the beautiful shapes that DLA creates and the interesting natural processes that DLA models. DLA also has a multitude of scientific applications, such as modeling snowflakes, crystals, or chemical reactions. Further, we wanted users to be able to interact with characteristics of the DLA algorithm to observe how slight modifications to parameters can have large downstream effects to emergent behavior. 
 
 We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay upon aggregation. The simulation is then displayed, real-time, on a screen
 via a VGA interface.
@@ -48,7 +48,7 @@ $$P(X=x)=\frac{1}{h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-0}{h})^2}.$$
 We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation.
 
 #### IMUs
-Intertial measurement units measure the acceleration and rotational velocity they experience.
+Inertial measurement units measure the acceleration and rotational velocity they experience.
 With the help of some [trigonometry and filtering](https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html#Accelerometer-vs.-Gyroscope), it is possible
 to determine the orientation of an IMU.
 
@@ -67,7 +67,7 @@ to, on average, move in a certain direction, as well as control the simulated sp
 #### Hardware/Software Tradeoffs
 
 One place we encountered some tradeoffs involves the polling rate of the IMU. To an extent, we could increase
-the responsiveness and accuracy of our orientaiton measurements by polling the IMU
+the responsiveness and accuracy of our orientation measurements by polling the IMU
 more rapidly. However, polling the IMU takes a nontrivial amount of time.
 In particular, time spent reading from the IMU is time not spent simulation particle motion. After a certain point,
 a high polling rate led to both undesired behavior and even crashes. This is expanded upon below.
@@ -82,7 +82,7 @@ For this reason, we continued using 4-bit color for our project.
 
 
 #### Existing Patents, Copyrights, and Trademarks
-Regarding patents, copyrights, or trademarks, as far as we know none are applicable to this project. We've sourced all online coding resources, that inspired us/were used for reference. Much of this work was enabled by some of Bruce Land's
+Regarding patents, copyrights, or trademarks, as far as we know none are applicable to this project. We've sourced all online coding resources that inspired us/were used for reference. Much of this work was enabled by some of Bruce Land's
 [C PICO SDK work](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/), without his protothread and VGA drivers
 this project would have been out of scope for the 5 weeks we had to complete it. 
 
@@ -132,7 +132,7 @@ The takeaway from this graph is that, over time, our particles behave as if they
 
 {{ figure(src="nearly-uniform-distribution.png", alt="A histogram. ", caption="Figure 4: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with uniformly sampled movement. Taken from 8,000 samples. The orange line is an actual normal distribution with appropriate mean and variance.") }}
 
-{{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 5: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled moved. Taken from 8,000 samples. The orange line is the same orange from Figure 1.") }}
+{{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 5: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled movement. Taken from 8,000 samples. The orange line is the same orange from Figure 1.") }}
 
 
 
@@ -150,14 +150,14 @@ Collision detection was implemented by with the help of fixed point precision ty
 square root approximation algorithm, and our pixel backing array.
 
 Our collision detector calculates the distance between a particle's current location
-and it's new desired location using the alpha max beta min algorithm.
+and its new desired location using the alpha max beta min algorithm.
 It then uses this distance to determine an increment, which can be thought of as a vector of unit length
 in the direction of the particles updated location. With the help of this "increment vector", each pixel in between
-the particle's current location and new location is checked to see if it is touching existing aggregate or not.
+the particle's current location and new location is checked to see if it is touching the existing aggregate or not.
 If a pixel is determined to
 be touching our aggregate, the particle is moved to that pixel (falling short of the intended update location)
 and it is mutated to be part of the collective aggregate (by changing its color to bright green). If the path
-between a particle's current location and new location is free of aggregat, the particle is moved to the
+between a particle's current location and new location is free of aggregate, the particle is moved to the
 intended update location and remains "active" (as opposed to aggregated).
 
 #### Touching Aggregate Detection
@@ -174,7 +174,7 @@ were read, corresponding with specific measurements of the IMU. While we initial
 IMU's raw gyroscope measurements around the x-axis and y-axis to compute rotational
 deltas, we found that just using accelerometer data proved accurate enough for responsive use.
 Getting rid of the gyroscopic factor would reduce the computational complexity of our
-simulation without affecting it's quality, so we opted to just use the accelerometer to determine our angle
+simulation without affecting its quality, so we opted to just use the accelerometer to determine our angle
 
 Our raw accelerometer data was used to compute the angle of our lever based on
 an inverse tan function (see Figure 6). The raw data from our accelerometer
@@ -226,7 +226,7 @@ Meaning rotation around an axis of 90 degrees had a (absolute) mean of `(max_spe
 You may be asking why we set `(max_speed - 1) / 2` and not `max_speed / 2` when our IMU was fully rotated? This is because if we had set the mean to be exactly `max_speed / 2` our particles would have only ever moved in a single direction.
 This makes the movement seem un-random nature and is not satisfying to interact with.
 For this reason we enforced the ranges of our uniform distribution to never be higher than `-1` and never be lower than `1`
-(depending on the direciton of tilt). This slightly changes the mean of our distribution.
+(depending on the direction of tilt). This slightly changes the mean of our distribution.
 
 #### Particle decay
 
@@ -239,7 +239,7 @@ appear, before disappearing and returning to be a "free" particle, undergoing Br
 30 times a second our simulation/animation [protothread](https://en.wikipedia.org/wiki/Protothread) was awoken. This thread
 was responsible for polling our IMU, performing collision detection, updating particle locations and colors, and finally
 writing to our pixel backing-array. While responsible for many tasks, in practice this protothread
-largely consists of a a bunch of function calls in a while loop. Some of these functions
+largely consists of a bunch of function calls in a while loop. Some of these functions
 are guarded by flags that let us turn features (such as variable speed, tilt bias) on and off.
 
 
@@ -250,7 +250,7 @@ Serial runs on it's own protothread and utilizes non-blocking serial read and wr
 obtained from Bruce Land's protothreads [modifications](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_protothreads/index_Protothreads.html). These non-blocking functions rely on the RP 2040s ability
 to signal when UART can be written to. The thread responsible for reading/writing yields until a character
 can be read/written via UART, and in this way only runs when needed. This allows for computational threads
-(such our simulator/animator) to run almost constantly.
+(such as simulator/animator) to run almost constantly.
 
 
 #### Bringing it all together
@@ -258,7 +258,7 @@ can be read/written via UART, and in this way only runs when needed. This allows
 After initializing all of our UART and IMU GPIOs, along with our PIO state machines, our serial and simulation/animation
 threads are initialized.
 Our serial thread is non-blocking, and simply uses protothreads to output to terminal
-and read in to an input buffer as needed. Some logic regarding flags is contained in this thread as well.
+and read into an input buffer as needed. Some logic regarding flags is contained in this thread as well.
 This thread is initialized on our second core. 
 
 Our simulation thread is initialized on our first core. In a given frame this thread polls our IMU and updates the parameters that describe our uniform distribution based on
@@ -267,7 +267,7 @@ Our collision detector updates the location and color of our particle, based on 
 moves an amount determined by our random sampling, or collides with aggregate in the way).
 The particle's old location is drawn over ("erasing" it) and the particle's new location is drawn to.
 
-The thread then yields such that it will awaken 1/30th of a second after the current frame began. In this way we enforce a simulation and animation speed of 30 fps.
+The thread then yields such that it will awaken 1/30th of a second after the current frame begins. In this way we enforce a simulation and animation speed of 30 fps.
 
 
 ## Testing
@@ -276,7 +276,7 @@ The thread then yields such that it will awaken 1/30th of a second after the cur
 
 We had used the VGA display and the IMU, previously as part of [lab 3] of the course. At setup, we had to make sure the connector was wired correctly and that the receiving monitor was functional (which was not always the case). If the receiving monitor did not properly display our program, we knew that either the wiring was incorrect or the monitor had to be swapped out. Luckily, being familiar with the IMU made it easy for us to leverage its acceleration and angle capabilities.
 
-When testing for user input, we wired up the UART connection to input keyboard statements using PuTTY. With this wired up, we set flags enabling/disabling specific features and test specific elements of our hardware. As we succesfulkly interfaced
+When testing for user input, we wired up the UART connection to input keyboard statements using PuTTY. With this wired up, we set flags enabling/disabling specific features and test specific elements of our hardware. As we successfully interfaced
 with our PuTTY terminal, we were confident in the UART implementation we were [using](https://vanhunteradams.com/Protocols/UART/UART.html).
 
 We did have some difficulty implementing the 4 bit green gradient as it required some additional circuits knowledge. Fortunately, the required summing circuit utilized resistors available in lab and the circuitry was not complicated. That being said, we were able to verify this 4 bit green gradient by using the VGA display and determining whether particles were properly decaying from the brightest green to the dimmest green. 
@@ -307,7 +307,7 @@ borders of our simulation, and some issues with a naive collision detection algo
 
 ## Results
 
-We visually tested the our simulation with various features and parameter values. Our initial, basic DLA simulation
+We visually tested our simulation with various features and parameter values. Our initial, basic DLA simulation
 had no motion controls and simply modeled Brownian motion aggregation of particles. Once that was complete, we tested our tilt, speed, cyclic, visibility, seed location, and reset. We found that for the space allocated in our simulation (an invisible
 bounding box in the snippets below), 8000 particles proved enough particles to be interesting while not creating too
 high of a particle density such that aggregation would occur extremely rapidly.
@@ -332,7 +332,7 @@ depending on how fast the IMU-glove is shaken. This feature was responsible for 
 Before the collision detection, particles with increased speeds would cluster incorrectly, skipping over aggregate particles 
 rather colliding with them. Now, the particles are capable of reaching max speeds of around 7 As shown below, the particles are 
 first moving very quickly as a response to the real-time IMU-glove movement. Then, the IMU-glove movement is stopped and the 
-particles begin slowing down, showing how the particles movement respond to the dynamic hand motion. This feature is activated 
+particles begin slowing down, showing how the particle movement responds to the dynamic hand motion. This feature is activated 
 via serial.
 
 {{ webm(src="speed.webm", caption="Hand-activated Speed", width=500) }}
@@ -362,7 +362,7 @@ while a soft reset respawns all particles, separating them from any created aggr
 
 
 #### Maximum of Particles
-While we were capable of smoothly running 7000-8000 particles, program is capable of running 16000 particles based on memory limitations. However, as the particle count increases, there were noticeable reductions in frame rate. This reduction is especially noticeable depending on which factors are activated. Because tilt, speed, and cyclic are computationally intensive, these factors are the computational bottleneck. Additionally, as mentioned above, running the maximum number of particles would also significantly increase the particle density, making all particles aggregate very rapidly.
+While we were capable of smoothly running 7000-8000 particles, the program is capable of running 16000 particles based on memory limitations. However, as the particle count increased, there were noticeable reductions in frame rate. This reduction is especially noticeable depending on which factors are activated. Because tilt, speed, and cyclic are computationally intensive, these factors are the computational bottleneck. Additionally, as mentioned above, running the maximum number of particles would also significantly increase the particle density, making all particles aggregate very rapidly.
 
 
 #### Safety
@@ -371,7 +371,7 @@ to alter the variance of z-acceleration could lead to someone getting smacked. U
 surroundings before controlling the simulation.
 
 #### Usability
-Our program requires users to be able freely move their hands to use the motion controls. However there are serial based
+Our program requires users to be able to freely move their hands to use the motion controls. However there are serial based
 workarounds for this. Unfortunately, the visual component of our simulation would not be very accessible for the visually impaired.
 
 ## Bugs of Note
@@ -405,7 +405,7 @@ led to our simulation crashing shortly after startup.
 It was unclear what the root cause of these issues were, as they persisted even when moving
 our repeating alarm timer to a different core. Which goes against our initial suspicion that
 our interrupts were interfering with in-flight writes/reads to our backing pixel array,
-which may have eventually lead to the reading of garbage data which softlocked our program.
+which may have eventually led to the reading of garbage data which softlocked our program.
 
 To resolve this, we moved our IMU polling trigger to occur within our simulation protothread.
 This meant that no calculations/pixel updates could be interrupted, and guaranteed
@@ -435,9 +435,8 @@ Luckily for our project, users did not often reach rotations of 90 degrees, as d
 not prove an issue in practice.
 
 **Takeaway:** It was discussed how in measuring rotation around 2 axes, we were essentially trying to model the IMU in 3 degrees of freedom.
-However, we were doing this with only 2 pieces of data in each axes: z acceleration and x/y acceleration. To this end our measurement
-were underdetermined, and caused the issues described above. We should aim to have fully determined systems, and if that is infeasibly be aware of the
-limitations of our models
+However, we were doing this with only 2 pieces of data in each axes: z acceleration and x/y acceleration. To this end, our measurements
+were underdetermined, causing the issues described above. We should aim to have fully determined systems, and if that is infeasible, we should at least be aware of the limitations of our models
 
 
 ### Restrictive Rounding
@@ -446,7 +445,7 @@ arithmetic for the sake of computational speed,
 and then converted values to integers. Our initial system took into account the sign of our tilt,
 and shifted the mean of our distribution accordingly, based on the between our current angle and 90 degrees.
 
-Because of the way our fixed to integer conversion works, numbers were rounded differently dependent on their sign.
+Because of the way our fixed to integer conversion works, numbers were rounded differently dependening on their sign.
 Namely, fixed point representations are converted to integers by right shifting `>>`. This means that integer values
 are truncated, not rounded. This meant that we were taking the floor of our fixed point number.
 This has an effect on the magnitude of a number after truncation based on its sign. Consider that `4.3` is truncated to `4`
@@ -474,7 +473,7 @@ We could also extend some of the features we have.
 For example, we could implement a "drawing" feature that would allow a custom aggregation seeds to be drawn on the screen
 based on motion controls and a cursor. The current custom seed feature is only capable of adding a single seed at a time. However, this "drawn seed" could perhaps lead to more complex cluster formations. 
 
-For future extensions beyond adding more DLA features, we could expand our program to highlighting other particle models as well that go beyond Brownian motion. Though the DLA patterns are interesting, there are many patterns that cannot be replicated using DLA. Things like [Laplacian Growth models](https://core.ac.uk/download/pdf/30841042.pdf) could be used to simulate crystal growth and electrodeposition. Other mathematical models could be used to simulate fungal growth or bacteria colonies. It would be worth comparing how all the models respond to adding the existing speed, tilt, and cyclic features as well.
+For future extensions beyond adding more DLA features, we could expand our program to highlight other particle models as well that go beyond Brownian motion. Though the DLA patterns are interesting, there are many patterns that cannot be replicated using DLA. Things like [Laplacian Growth models](https://core.ac.uk/download/pdf/30841042.pdf) could be used to simulate crystal growth and electrodeposition. Other mathematical models could be used to simulate fungal growth or bacteria colonies. It would be worth comparing how all the models respond to adding the existing speed, tilt, and cyclic features as well.
 
 It could also be interesting to explore possible optimizations in our drivers that could help us expand our simulation.
 In particular we used a 320x240 size screen instead of a 640x480 screen due to memory constraints. It would be interesting to
@@ -482,7 +481,7 @@ try and overcome this limitation to allow for higher resolution simulation.
 
 #### Final Thoughts
 While this project integrated concepts we've learned throughout the semester in a new way, and the DLA modeling itself
-was the result of our own implementation. We're excited in the future we build more of these components, such as the VGA driver, from scratch.
+was the result of our own implementation. We're excited in the future to build more of these components, such as the VGA driver, from scratch.
 
 On a personal note, it was especially exciting to see our program in action. Seeing our project begin as an abstract and then turn into life was particularly rewarding, especially because there were many challenges along the way. The program often created patterns that were unexpected, leaving us mesmerized as we fiddled with parameters of our program.
 
@@ -516,7 +515,7 @@ The following is a non-exhaustive list of topics focused on.
 **William:** Random number generation, motion-random-distribution effects, serial, website, and report.
 
 ### References
-[DLA Implementaiton 1](http://formandcode.com/code-examples/simulate-dla)
+[DLA Implementation 1](http://formandcode.com/code-examples/simulate-dla)
 
 [DLA Implementation 2](https://isaacshaker.github.io/DLA-Simulation/)
 
