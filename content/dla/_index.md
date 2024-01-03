@@ -13,7 +13,7 @@ comment = false
 toc = true
 +++
 
-# Off-grid Diffusion Limited Aggregation on Memory and a Computation Constrained Microcontroller
+# Motion Controlled Off-grid Diffusion Limited Aggregation on Memory and a Computation Constrained Microcontroller
 
 ## Project Introduction
 
@@ -21,9 +21,9 @@ As part of our [ECE 4760](https://ece4760.github.io/) final project, we created 
 cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation) (DLA) 
 simulator that can be controlled via hand motions.
 
-DLA is the process that simulates particles undergoing [Brownian](https://en.wikipedia.org/wiki/Brownian_motion) motion that form clusters and aggregate upon collisions. Our inspiration for this project comes from both the beautiful shapes that DLA creates and the interesting natural processes that DLA models. DLA also has a multitude of scientific applications, such as modeling snowflakes, crystals, or chemical reactions. Further, we wanted users to be able to interact with characteristics of the DLA algorithm to observe how slight modifications to parameters can have large downstream effects to emergent behavior. 
+DLA is the process that simulates particles undergoing [Brownian](https://en.wikipedia.org/wiki/Brownian_motion) motion that form clusters and aggregate when particles collide with existing aggregate.
 
-We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay upon aggregation. The simulation is then displayed, real-time, on a screen
+We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay a short time after aggregation. The simulation is then displayed, real-time, on a screen
 via a VGA interface.
 The user is able to interact with the simulation using hand motions by wearing a glove with an IMU attached. Shaking and tilting their hands in various directions will cause the particles to aggregate faster or move with a bias in certain directions.
 
@@ -359,10 +359,6 @@ The reset serial command is responsible for either committing a hard or soft res
 while a soft reset respawns all particles, separating them from any created aggregate.  Shown below is a hard reset.
 
 {{ webm(src="reset.webm", caption="Resetting Particles", width=500) }}
-
-
-#### Maximum of Particles
-While we were capable of smoothly running 7000-8000 particles, the program is capable of running 16000 particles based on memory limitations. However, as the particle count increased, there were noticeable reductions in frame rate. This reduction is especially noticeable depending on which factors are activated. Because tilt, speed, and cyclic are computationally intensive, these factors are the computational bottleneck. Additionally, as mentioned above, running the maximum number of particles would also significantly increase the particle density, making all particles aggregate very rapidly.
 
 
 #### Safety
