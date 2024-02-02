@@ -43,9 +43,11 @@ whose variance is proportional to time elapsed.
 
 In particular, linear Brownian motion is defined (see [page 21](https://www.stat.berkeley.edu/~aldous/205B/bmbook.pdf)) as motion such that for a timestep $h$
 the movement of a particle described by $B(t+h) - B(t)$ is normally distributed with mean 0 and standard deviation $h.$
-More explicitly this increment $X$ must be obtained with probability
-$$P(X=x)=\frac{1}{h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-0}{h})^2}.$$ 
-We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation.
+More explicitly this increment $X$ must be obtained with probability described
+by the probability density function:
+$$f(x)=\frac{1}{h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-\mu}{h})^2}.$$ 
+We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation. $\mu$ is the mean of our distribution, which is 0 when "tilt controls" are
+not enabled, indicating no bias in the motion of particles.
 
 #### IMUs
 Inertial measurement units measure the acceleration and rotational velocity they experience.
