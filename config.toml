@@ -5,8 +5,8 @@
 #
 #=========================================================================================
 
-base_url = "https://nathanielnrn.github.io/dla-documentation"      # Domain name of your website
-title = "Diffusion Limited Aggregation"
+base_url = "https://nathanielnrn.github.io/hough-transform-documentation"      # Domain name of your website
+title = "Hough Transforms"
 description = "Just trying to keep it together"
 default_language = "en"
 theme = "serene"
@@ -41,8 +41,8 @@ anchors = "on"
 
 [extra]
 
-name = "{Nathaniel, Angela, William}"                         # Your name
-id = "{nathanielnrn, ayc62, wty5}"                           # Your id / username / handle
+name = "{Brandon, Nathaniel, Tomas}"                         # Your name
+id = "{nathanielnrn, TODO: put net ids here}"                           # Your id / username / handle
 bio = ""                          # Your bio
 avatar = "img/avatar.jpeg"            # Your avatar
 links = [                             # Your links
@@ -54,7 +54,7 @@ links = [                             # Your links
 homepage_layout = "about"             # "about" | "list"
 
 sections = [
-    { name = "DLA", path = "/dla", is_external = false },
+    { name = "Hough", path = "/hough", is_external = false },
     #{ name = "projects", path = "/projects", is_external = false },
     # { name = "about", path = "/about", is_external = false },
     # { name = "github", path = "https://github.com/<your-username>", is_external = true },
@@ -82,7 +82,7 @@ outdate_alert_days = 120              # How many days will a post be outdated by
 outdate_alert_text_before = "This article was last updated "
 outdate_alert_text_after = " days ago and may be out of date."
 
-footer_copyright = "© 2024 Nathaniel, Angela, William"
+footer_copyright = "© 2024 Brandon, Nathaniel, Tomas"
 footer_credits = true                 # Whether to show "powered by zola and serene" in footer
 
 not_found_title = "404"

@@ -1,12 +1,11 @@
 +++
 template = 'home.html'
-title = 'DLA Simulator'
+title = 'Accelerated Hough Transformer'
 
 [extra]
 lang = 'en'
 +++
 
 We've made this site as a place to document the workings
-of our motion controlled Diffusion Limited
-Aggregation simulator we built using a Rasberry Pi RP2040. Click
+of our accelerated Hough Transformer which detects straight lines we built using a Terasic DE1-SoC. Click
 the link above to learn more.
