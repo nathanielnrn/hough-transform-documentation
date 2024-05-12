@@ -16,3 +16,9 @@ with the file located in the `content/dla/` directory.
 Rendering of math should work by just using $ and $$
 
 
+We can add webms in particular using
+`{{ webm(src="basic.webm", caption="Figure 1: Basic DLA (non-cyclic)", width=500) }}`
+
+Links are done by `[display text](url)`
+
+Headers are done with `###` (More `#` makes things smaller) 

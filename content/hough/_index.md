@@ -1,9 +1,9 @@
 +++
-title = "DLA - Documentation"
-description = "The documentation of our DLA project."
+title = "Hough Transform Line Detector - Documentation"
+description = "The documentation of our Hough Transform project."
 template = "prose.html"
 
-url = "dla-documentation/dla"
+url = "hough-transform-documentation/hough"
 [extra]
 lang = 'en'
 math = true
@@ -13,82 +13,144 @@ comment = false
 toc = true
 +++
 
-# Motion Controlled Off-grid Diffusion Limited Aggregation on Memory and a Computation Constrained Microcontroller
+# Line detection via accelerated Hough Transform on an Terasic DE1-SoC
 
 ## Project Introduction
 
-As part of our [ECE 4760](https://ece4760.github.io/) final project, we created a
-cyclic [Diffusion Limited Aggregation](https://en.wikipedia.org/wiki/Diffusion-limited_aggregation) (DLA) 
-simulator that can be controlled via hand motions.
+As part of our [ECE 5760](https://people.ece.cornell.edu/land/courses/ece5760/) final project, we accelerated line detection in a video 
+input using an accelerated [Hough Transform](https://homepages.inf.ed.ac.uk/rbf/HIPR2/hough.htm).
 
-DLA is the process that simulates particles undergoing [Brownian](https://en.wikipedia.org/wiki/Brownian_motion) motion that form clusters and aggregate when particles collide with existing aggregate.
+We will focus on the workings of a Hough Transform that finds straight lines in an edge-detected input image.
 
-We implemented two versions of DLA on a RP2040 microcontroller: basic off-lattice DLA, where particles stick infinitely upon aggregation, and cyclic DLA, where particles decay a short time after aggregation. The simulation is then displayed, real-time, on a screen
-via a VGA interface.
-The user is able to interact with the simulation using hand motions by wearing a glove with an IMU attached. Shaking and tilting their hands in various directions will cause the particles to aggregate faster or move with a bias in certain directions.
+At a high level, [line detecting] Hough Transforms track all possible lines that a given pixel may be a part of. Given an entire image,
+the line that has the most contributions is determined to be a real line in the image.
+
+In order to keep track of "all possible lines", a transformation is done from an input "image space" to a "Hough space."
+We accelerated this transformation stage on our Altera FPGA, and left sorting and line drawing to be performed on our board's HPS.
+
+## TODO: Add image/video?
+
 
 {{ webm(src="basic.webm", caption="Figure 1: Basic DLA (non-cyclic)", width=500) }}
 
-The following details the design of our simulator, the testing and performance of our system,
+The following details the design of our transformer, the testing and performance of our system,
 and some takeaways from the project.
 
 ## High Level Design
 
-#### Rationale and Background
+### Rationale and Background
 
-#### Brownian Motion
-DLA models aggregate particles whose primary motion is Brownian. Particles undergoing brownian motion can be modeled by moving an amount
-that is described by a [normal distribution]
-whose variance is proportional to time elapsed.
+From our limited experience with computer vision algorithms, we were under the impression that many algorithms are both simple enough
+and parallelizable enough to benefit from dedicated hardware acceleration.
+As a simple example, algorithms such as edge detection that realy on convolutional kernels can be accelerated with dedicated hardware 
+matrix multipliers.
 
-In particular, linear Brownian motion is defined (see [page 21](https://www.stat.berkeley.edu/~aldous/205B/bmbook.pdf)) as motion such that for a timestep $h$
-the movement of a particle described by $B(t+h) - B(t)$ is normally distributed with mean 0 and standard deviation $h.$
-More explicitly this increment $X$ must be obtained with probability described
-by the probability density function:
-$$f(x)=\frac{1}{h \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-\mu}{h})^2}.$$ 
-We note that for our purposes $h$ is arbitrary, and dependent on our method of simulation and random number generation. $\mu$ is the mean of our distribution, which is 0 when "tilt controls" are
-not enabled, indicating no bias in the motion of particles.
+With the notion that many CV algorithms could benefit from hardware acceleration, we explored a number of
+interesting algorithms we could work on before settling our sites on implementing a General Hough Transformation for our final project.
 
-#### IMUs
-Inertial measurement units measure the acceleration and rotational velocity they experience.
-With the help of some [trigonometry and filtering](https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html#Accelerometer-vs.-Gyroscope), it is possible
-to determine the orientation of an IMU.
-
-With this in mind, we set off to build a motion-controlled DLA simulator.
-
-At a high level, our design involves 3 components:
-1. The RP2040 microcontroller
-2. The IMU
-3. The VGA display
-
-The IMU measures its orientation, the VGA displays the simulation, and our RP2040 both simulates and interfaces with the IMU and VGA. The mean and variance of
-the normal distribution used to model particles' behavior could be changed depending
-on the orientation and acceleration of the IMU. Concretely, this meant that we could bias particles
-to, on average, move in a certain direction, as well as control the simulated speed at which the particles were moving.
-
-#### Hardware/Software Tradeoffs
-
-One place we encountered some tradeoffs involves the polling rate of the IMU. To an extent, we could increase
-the responsiveness and accuracy of our orientation measurements by polling the IMU
-more rapidly. However, polling the IMU takes a nontrivial amount of time.
-In particular, time spent reading from the IMU is time not spent simulation particle motion. After a certain point,
-a high polling rate led to both undesired behavior and even crashes. This is expanded upon below.
-We decreased the polling rate of the IMU to avoid these issues.
-
-Another tradeoff we dealt with involved the amount of bits used to describe a pixel's color. We were concerned
-that using 8 bit color (i.e storing the color as a `char`) would make us run into memory size limitations. For this reason
-we used 4 bit color in our program. While it turns out that we probably would have been fine using 8-bit color, as the number
-of particles we used was limited by their density in our "screen-space," we had at this point
-made some implementation choices that would have made it difficult to transition to using 8-bit color.
-For this reason, we continued using 4-bit color for our project.
+[General Hough Transformations](https://www.cs.utexas.edu/~dana/HoughT.pdf), as it turns out, are quite hard to accelerate within 4 weeks. As a result, we pivoted our project to focus on a line-detecting Hough Transform.
 
 
-#### Existing Patents, Copyrights, and Trademarks
-Regarding patents, copyrights, or trademarks, as far as we know none are applicable to this project. We've sourced all online coding resources that inspired us/were used for reference. Much of this work was enabled by some of Bruce Land's
-[C PICO SDK work](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/), without his protothread and VGA drivers
+
+#### Line Geometry
+
+To understand Hough Transforms, one must first recall some things about lines.
+Figure 2 shows a line with equation $y = -3x + 4$ over a domain of $0 \leq x \leq 3.$
+
+The equation of this line tells us that for every amount we move in the $x$ direction, we will move $-3$ amounts in the $y$ direction.
+This line is completely described by the coefficient of $x$, in this case $-3,$ and the offset amount $4.$
+In fact, all lines can be described in this slope-intercept form. This is generally written as $y = mx + b$ where $m$
+is the slope of our line and $b$ is the intercept of the line with the y-axis.
+
+
+{{ figure(src="lines.png", caption="Figure 2: Line of equation y = -3x + 4 restricted to the domain of 0 <= x <= 3.", width=500, height=500) }}
+
+
+We can also represent lines in a polar form. Instead of desrcibing a line with a slope $m$ and an intercept $b$,
+we describe the line as function of the length of the normal to the line (from the origin) and the angle of this normal with respect
+to the x-axis (ala unit circles). Zooming in on the same line as before, Figure 2 gives an example.
+
+{{ figure(src="polar.png", caption="Figure 3: Normal and angle to line of equation y = -3x + 4.", width=500, height=500) }}
+
+In this case our line could be described with a distance $\rho$ of $\sqrt{1.2^2 + 0.4^2} = 1.265$ and an angle $\theta$ of $1.25.$
+
+It is with these polar representations that we will be working for our Hough Transform.
+
+#### Hough Space
+
+It is helpful to imagine a 2d space which can represent lines in polar representation. With $\rho$ on the x-axis and $\theta$ on the y-axis, any line can be represented as a single point in this "Hough Space."
+
+#### Hough Transform Voting
+
+Hough Transforms working by going through each pixel in a source image and counting up "contributions" or "votes" of said to pixel to a given line.
+Consider that for a given point $(5,5)$ there can be infinitely many lines going through that point.
+Figure 4 discretizes a few of these lines.
+
+{{ figure(src="starburst.png", caption="Figure 4: Some of the lines going through point (5,5)", width=500, height=500) }}
+
+A Hough Transformer keeps track of the contributions of all pixels in an input image. It does this by incrementing the values associated with lines that go through a given pixel upon encountering a pixel of interest (usually just a white pixel, as input images are post edge-dectection).
+
+The contributions of a single pixel to our line hough space is shown in Figure 5.
+
+{{ figure(src="point-hough-space.png", caption="Figure 5: Hough Space contributions of a single point.", width=500, height=500) }}
+
+
+When taking the contributions of pixels compromising an entire line, the hough space will develop a single point that has a higher
+value than any other point in the space. This point represent the $\rho$ and $\theta$ of the entire line in the source image.
+Figures 6 shows our input image with a line at $y=50$ and Figure 7 shows the corresponding Hough space.
+
+{{ figure(src="line-input.png", caption="Figure 6: Input image to a Hough transformer with a line y=50. Note that positive y is down.", width=500, height=500) }}
+
+{{ figure(src="line-hough-space.png", caption="Figure 7: The Hough space corresponding to a line y=50. The point near the center corresponds with an angle of 180 degrees and a (normalized) distance of 610 (elaborated on in the implementation section).", width=500, height=500) }}
+
+In this way, a Hough Transformer can traverse over every pixel in an edge-detected input image and create local maxima in Hough Space that correspond with lines in the input image.
+
+It is then possible to find these local maxima via brute-force neighbor checking, and sort these points based on the number of votes 
+they have. If we sort through $n$ lines, we can extract the $n$ most-liniest-lines out of our Hough Space.
+
+
+#### High level Hough Transform
+
+We elaborate on each of these steps in the further below, our  Hough Transform can be broken up into the following steps at a high level:
+
+1. Traverse through input image and accumulate votes in the Hough Space.
+2. Find local maxima via an immediate-neighbor comparison algorithm.
+3. Sort the detected lines by number of votes.
+4. Extract 2 points representing said lines.
+5. Draw lines based on said 2 points.
+
+Initially, data was taken from the FPGA and all of the steps above were performed on the HPS before being transferred back to the FPGA
+in order to be displayed on a VGA system.
+
+### Hardware/Software Tradeoffs
+
+Considering the high level steps described above, it seems like a number of steps could be the target of our acceleration efforts.
+Preliminary testing indicated that step 1 took the longest amount of time out of all steps, ranging anywhere between ~45% and ~80%
+of the entire computation time.
+
+Furthermore, we aimed to minimize the amount of data transfered over Altera's Avalon Bus IP from the FPGA to the HPS, as having 
+multiple transfers saturated the bandwidth of the bus and led to glitches.
+
+These points combined made step 1 a very appealing target for our acceleration efforts as it minimized the number of data transfers
+required for our Hough Transform.
+
+
+Accumulating our Hough Space on the FPGA required a large amount of memory. Using the FPGAs on-chip SRAM as our memory store due to ease of interfacing, we found ourselves needing to
+reduce the resolution of our Hough Space in order to have our hardware design compile.
+The HPS was more than capable of using a full-resolution Hough Space for calculations, at the expense of real-time computational speed.
+
+
+
+
+### Existing Patents, Copyrights, and Trademarks
+We relied heavily on Altera IP to enable our Video-In hardware, as well as edge detection capabilities.
+We've sourced all online coding resources that inspired us/were used for reference. Much of this work was enabled by some of Bruce Land's
+[documentation](https://people.ece.cornell.edu/land/courses/ece5760/), and Hunter Adam's [VGA Driver](https://vanhunteradams.com/DE1/VGA_Driver/Driver.html) without both of these
 this project would have been out of scope for the 5 weeks we had to complete it. 
 
 ## Design
+
+# TODO:Haven't touched below this
 
 ### Hardware
 

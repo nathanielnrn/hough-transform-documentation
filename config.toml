@@ -42,7 +42,7 @@ anchors = "on"
 [extra]
 
 name = "{Brandon, Nathaniel, Tomas}"                         # Your name
-id = "{nathanielnrn, TODO: put net ids here}"                           # Your id / username / handle
+id = "{brandonpwood, nathanielnrn, tomaschoi03}"                           # Your id / username / handle
 bio = ""                          # Your bio
 avatar = "img/avatar.jpeg"            # Your avatar
 links = [                             # Your links
