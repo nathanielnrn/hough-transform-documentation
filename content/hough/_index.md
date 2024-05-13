@@ -134,25 +134,100 @@ multiple transfers saturated the bandwidth of the bus and led to glitches.
 These points combined made step 1 a very appealing target for our acceleration efforts as it minimized the number of data transfers
 required for our Hough Transform.
 
-
 Accumulating our Hough Space on the FPGA required a large amount of memory. Using the FPGAs on-chip SRAM as our memory store due to ease of interfacing, we found ourselves needing to
 reduce the resolution of our Hough Space in order to have our hardware design compile.
 The HPS was more than capable of using a full-resolution Hough Space for calculations, at the expense of real-time computational speed.
 
-
+Another issue that arose from using SRAM was the rigid interface we had due to using QSYS SRAM IP. Elaborated on in the hardware section, we had to double our accumulator's latency because only a single SRAM port was exposed to us in Verilog.
 
 
 ### Existing Patents, Copyrights, and Trademarks
-We relied heavily on Altera IP to enable our Video-In hardware, as well as edge detection capabilities.
+We relied heavily on Altera IP to enable our Video-In hardware, as well as edge detection capabilities. Any applicable trademarks
+to those properties are maintained.
 We've sourced all online coding resources that inspired us/were used for reference. Much of this work was enabled by some of Bruce Land's
 [documentation](https://people.ece.cornell.edu/land/courses/ece5760/), and Hunter Adam's [VGA Driver](https://vanhunteradams.com/DE1/VGA_Driver/Driver.html) without both of these
 this project would have been out of scope for the 5 weeks we had to complete it. 
 
 ## Design
 
-# TODO:Haven't touched below this
 
 ### Hardware
+
+We relied on a number of peripherals on the DE1-SoC. Among them, a
+[video-in ADC (section 4.3)](https://ftp.intel.com/Public/Pub/fpgaup/pub/Intel_Material/18.1/Computer_Systems/DE1-SoC/DE1-SoC_Computer_NiosII.pdf)
+that supports an NTSC video source and outputs a 320x240
+frame into the board's pixel buffer. A single bit enables edge detection, replacing raw input with edge detected image that displays
+bright pixel at edges, and black elsewhere.
+
+Our NTSC signal was obtained from a VideoSecu BC27B.
+
+We used a serial connection to interface with the OS of our board (linux installed on an SD card) via PuTTY.
+
+We used the board's built-in VGA port, along with Hunter's VGA Driver, elaborated on below.
+
+For debugging purposes we also used the board's built-in switches to change the behavior of our hardware while not having to recompile
+changes to our verilog.
+
+
+
+#### VGA Driver
+This excerpt is taken from our [lab-1](https://vanhunteradams.com/DE1/Lorenz/Lorenz.html)
+report and is included here for completeness.
+
+Our VGA driver was directly taken from the VGA driver present on [Hunter’s website](https://vanhunteradams.com/DE1/VGA_Driver/Driver.html).
+The VGA driver implements a state machine that takes in 8 bit color values and drives VGA signals on our DE1-SoC VGA port.
+
+This driver draws a 640x480 image by directly manipulating `hsync` and `vsync` lines. In particular, the driver draws row by row, driving `hsync` high for 640 + 16 cycles, going low for 96 sync cycles, and going high for 48 back porch cycles. Similarly, the `vsync` signal is high for 480 of these hsync rows, plus 10 more, low for 2 sync lines, and high for 33 more lines as part of the back porch. At each clock cycle, the driver splices the 8-bit color input it received and drives out color signals accordingly. Some logic in the driver keeps track of current count within a given row/column, and some simple arithmetic/resetting to 0 implements the VGA specification as described above.
+
+To interface with the outside world, the VGA driver outputs the next x and y values it is expecting to draw. In practice, this allowed us to stay in sync with the driver without having to manually sync up our state machine with it. 
+
+As the VGA driver outputs a 640 by 480 image, we constrained our driver to output from different FPGA SRAMs depending
+on the quadrant of the screen the VGA was currently drawing to. For example, the upper left quadrant output our edge-detected image, and
+the bottom right quadrant drew our detected lines on top of that image.
+
+Using a VGA driver implemented on hardware enabled us to manipulate our image on our FPGA and directly output said image. It also let usbe sure that we were not being bogged down by any overhead introduced from proprietary Qsys implementations/communication over the Avalon Bus.
+
+
+
+#### Address Calculator
+Our address calculator converts a given pixel and $\theta$ into an address in memory that corresponds with the unique
+line that goes through that point and whose normal makes an angle of $\theta$ with the x-axis. In Figure 3 one can consider that
+given $\theta = 1.25$ and a point $(1.2,0.4)$ the red line is the only line that can meet those constraints.
+
+In order to increment the correct point in Hough space, the $\rho$ of said line needs to be calculated. This can be modeled simply enough as follows.
+$$\rho = x * \cos(\theta) + y *\sin(\theta).$$
+
+We can then consider that our memory starts addressing at 0, so we need to offset our $\rho$ from a range of $[280,-280]$ to $[0,560].$
+$$\rho_{addr} = \rho + 280.$$
+
+Finally, to calculate our address, we recall that to imagine a 2d Hough space with $\rho$ on the x-axis,
+we want to increment our address by `RHO_COUNT` $\rho_{count}$ every time we increment $\theta.$
+
+As such we have that our address is
+$$addr = \theta_n * \rho_{count} + \rho_{addr}.$$
+
+Due to the nature of our local maxima checks in software, the actual address calculation implemented in hardware looks like
+$$addr = (\theta_n + 1) * (\rho_{count} + 2) + (\rho_{addr} + 1).$$
+
+These tweaks allow for the local maxima finder to avoid bound checks, by making the usable space of our memory start at the first column and first row, as opposed to the zeroth.
+
+Figure ?? shows an abstract schematic of our address calculator. In practice our calculator was implemented with 2 continuous assignments
+and a sine and cosine look up table.
+
+
+{{ figure(src="address-calc-diagram.png", caption="Figure ??: Schematic of our address calculator", width=500, height=500) }}
+
+
+#### Accumulator
+
+Our accumulator interfaces with an SRAM
+
+{{ figure(src="line-input.png", caption="Figure ??: Accumulator state machine", width=500, height=500) }}
+
+{{ figure(src="accumulator-interface.png", caption="Figure ??: The interface of our accumulator module.", width=500, height=500) }}
+
+# TODO:Haven't touched below this
+
 
 The heart of our system is a Raspberry Pi Pico, which features the RP2040 microcontroller.
 We implemented the circuitry for this lab using a breadboard, shown below Fig 1.
