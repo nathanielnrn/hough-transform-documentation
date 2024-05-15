@@ -226,6 +226,31 @@ Our accumulator interfaces with an SRAM
 
 {{ figure(src="accumulator-interface.png", caption="Figure ??: The interface of our accumulator module.", width=500, height=500) }}
 
+
+
+#### Dispatcher
+The accumulator expects x and y coordinates of the image whose pixel is not black. Therefore, we implemented a dispatcher that communicates with the accumulator to parse through the image. As shown in Figure ???, the dispatcher directly communicates with the SRAM holding the image pixel data from the video and the accumulator. At a very high level, the dispatcher takes in x and y coordinates of the image starting from the top right of the image, which is (0, 0), along with its corresponding pixel color. It performs a bitwise `AND` to determine whether the pixel is black, so `8’b000_000_00`, and outputs the x and y coordinates it received if the logic determines that the pixel is not black. Additionally, when it finds a pixel that is not black, it sends a go signal that tells the accumulator that it can start its computation. The `go` wire is directly connected to the `reset` wire of the accumulator, so the go signal actually simply resets the accumulator to pull it out of its own `done` state. 
+
+{{ figure(src="dispatcher_block.png", caption="Figure ??: Dispatcher block diagram", width=500, height=500) }}
+
+Figure ??? shows the FSM design that we are used for the dispatcher. There are three stages: `INIT`, `READY`, `WAIT`. The `INIT` state serves as a reset state that only resets all the register values to 0. The `READY` state is where the dispatcher actually performs logic operations. It increments through the x and y coordinates to look at the next pixel, sends x and y coordinates to the SRAM and accumulator, and determines whether the pixel is a `valid_pixel` (meaning not zero). In the `WAIT` state, the dispatcher remains dormant because it is waiting for the accumulator to be done performing its computation. We do not want the dispatcher to keep going through pixels in the picture when the accumulator has not finished and is not ready to take in a new x and y coordinate pair. The dispatcher will leave the `WAIT` state when it receives a signal from the accumulator called the `acc_done` that tells the dispatcher that the accumulator has finished and it is ready to receive new x and y coordinates. 
+
+{{ figure(src="dispatcher_fsm.png", caption="Figure ??: Dispatcher state machine", width=500, height=500) }}
+
+In addition, the dispatcher receives a `wait_sig` from a PIO port that also tells the dispatcher to wait. This signal comes from the C program, and it is set high right before we reset all the accumulator values. After every time we go through the image, we want to zero out the accumulator values since the accumulator values are calculated for a single frame. Therefore, to prevent the dispatcher and accumulator from doing work while we are resetting all the accumulator values, we send out a wait_sig that stops all the entire hardware computation. 
+
+
+
+#### Qsys
+
+
+
+#### System
+
+
+
+#### Testing
+
 # TODO:Haven't touched below this
 
 
