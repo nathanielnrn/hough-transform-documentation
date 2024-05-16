@@ -266,25 +266,6 @@ The original idea was to display the original video input, the edge detected dat
 {{ figure(src="working_verilog.png", caption="Figure ??: VGA screen output", width=500, height=500) }}
 
 
-#### Testing
-
-# TODO:Haven't touched below this
-
-
-The heart of our system is a Raspberry Pi Pico, which features the RP2040 microcontroller.
-We implemented the circuitry for this lab using a breadboard, shown below Fig 1.
-Similar to previous labs, our microcontroller communicates through UART to interface with a PuTTY terminal
-serial interface and utilizes the Pico's PIO state machines (see [chapter 3](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)) to implement [VGA drivers](https://vanhunteradams.com/Pico/VGA/VGA.html) that allow us to visualize our simulation.
-
-{{ figure(src="breadboard.png", caption="Figure 2: An image of our physical breadboard and glove control system. The IMU is attached to the top of the glove.", width=500, height=500) }}
-
-Figure 3 below visualizes how we integrated the VGA display, RP2040, IMU (MPU 6050), and Serial interface (USB-A and PuTTY terminal) together.
-
-{{ figure(src="lab4-final-dla-schematic.png", caption="Figure 3: Schematic of our hardware setup.", width=500, height=500) }}
-
-To allow for 4 bit color with a green gradient, the VGA connection utilizes a summing circuit, as seen in Figure 3 above. We use four resistors with the approximate resistances 1R, 2R, 4R, and 8R where R $\approx$ 100, based on the resistors
-we had available in the course lab. Looking at Figure 3, we see that if we set all four GPIOs to high, we get the brightest green, whereas if we only set the rightmost GPIO to high, we get the dimmest green.
-
 ### Software
 
 The software component of our Hough Transformer consists of a ported version of the 
@@ -308,6 +289,17 @@ also hoped to gain a deeper understanding.
 
 
 
+### Testing Strategy
+There are a few ways we ensure correctness of our system. The way we designed our design was from the bottom up. That is, we focused on the smaller individual blocks, whether it be in the hardware or software. For example, we implemented the memory blocks, the dispatcher, and the accumulator separately. On the software side, we ported the entire OpenCV Line Hough Transform implementation, but we did so module by module. At each of these steps, we tested. This means that we tested each block in isolation to ensure that the building blocks were correct. 
+
+Each of the hardware blocks that we implemented were tested through ModelSim. Mainly, we created testbenches for the dispatcher and the accumulator and ran them through ModelSim by feeding specific data. This allowed us to have more control over what inputs the blocks were getting, more specifics on how the logic flowed through the waveforms, and clearer proof that the modules were working as intended. Additionally, for the accumulator, we built a Python model that we would feed the same values as the ModelSim testbench. Then, we compared the output of the Python model and the Verilog model and ensured that the outputs were the same (or close enough that it didn’t cause different behavior). 
+
+We used the serial terminal to debug the C program. There were three main bugs that appeared in the software side: segmentation fault, incorrect line drawing, and incorrect line generation. All of these issues were debugged by printing to the serial interface. The segmentation faults were caused by memory mapping issues: when we were trying to address or allocate memory that was not available to us. This was usually due to mistakes on our part on the memory addressing or due to incorrect memory constants like the base and span. We brute forced the testing for this by printing between each memory mapping and found exactly where the program reached the segmentation fault. Then, we dug deeper to find out what was the problem. As described before, we used a line drawing function that took two points. However, generating the correct two points took longer than expected. This was because it was difficult to map the points we were expecting to see to the visual we were seeing on the VGA screen. We decided to use the serial terminal and we printed all the points generated, the points it chose, and the line that was drawn. We compared these values to the lines we were seeing on the VGA screen to determine whether the problem was originating in the coordinate generation function or somewhere else in the system. Luckily, we determined that the error was in the coordinate generation function because the points the program was choosing were out of the image, so the lines seemed to wrap around. Additionally, we observed interesting (but annoying) behavior in the C++ implementation of the OpenCV Hough Transform where the program was not assigning values to a vector as we were hoping. Instead of using the `assign` method, which was not assigning any value, we directly changed the value by looking at the specific element using `lines[i]`. This could have been caused by a change made in the porting process, a compiler difference, or some other mistake we made along the way. However, the important thing is that we were able to catch this issue by printing many variables before and after they were supposed to change and fixed the logic if they were not changing. 
+
+Testing module by module gave us more confidence that when putting all these blocks together, the only bugs would be due to the way the modules are connected. Once we put it all together, the main method of testing was through visual observation. We tested by directing the camera towards different images like clear shapes, many wires that had no clear lines, or empty space. We will explain the steps we took to observe and measure the performance of our entire Line Hough Transform in the following section. 
+
+
+# TODO: erase below this
 
 
 The software we built for our simulator can be broken into a number of components.
