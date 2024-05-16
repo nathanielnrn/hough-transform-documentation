@@ -237,11 +237,21 @@ Figure ??? shows the FSM design that we used for the dispatcher. There are three
 
 {{ figure(src="dispatcher_fsm.png", caption="Figure ??: Dispatcher state machine", width=500, height=500) }}
 
-In addition, the dispatcher receives a `wait_sig` from a PIO port that also tells the dispatcher to wait. This signal comes from the C program, and it is set high right before we reset all the accumulator values. After every time we go through the image, we want to zero out the accumulator values since the accumulator values are calculated for a single frame. Therefore, to prevent the dispatcher and accumulator from doing work while we are resetting all the accumulator values, we send out a wait_sig that stops all the entire hardware computation. 
+In addition, the dispatcher receives a `wait_sig` from a PIO port that also tells the dispatcher to wait. This signal comes from the C program, and it is set high right before we reset all the accumulator values. After every time we go through the image, we want to zero out the accumulator values since the accumulator values are calculated for a single frame. Therefore, to prevent the dispatcher and accumulator from doing work while we are resetting all the accumulator values, we send out a `wait_sig` that stops all the entire hardware computation. 
 
 
 
-#### Qsys
+#### Platform Designer
+The Qsys layout’s most significant components are the Video-In Subsystem, the three On-Chip Memory blocks, and the one PIO port. The Video-In Subsystem consists of a series of Altera IP blocks connected to each other to process input data from the camera. In the Video-In Subsystem, there is a block of IP called the Edge Detection System, which allows us to obtain edge detection for “free”. In fact, if we had to instantiate an Edge Detection System on its own or implemented one in Verilog, it would have cost us more memory, which as we explain later was very limited. The Edge Detection IP takes streaming input data and sends streaming output data. The streaming interfaces on their own require additional IP blocks to wrap them in order to obtain the data as we intended. Luckily, the Video-In Subsystem already took care of this for us. In its core, the Edge Detection IP is a Sobel Filter, along with additional blocks that enhance the edge detection. 
+
+{{ figure(src="edge_detection_ip.png", caption="Figure ??: Edge Detection IP Block from Altera Video IP Core", width=500, height=500) }}
+
+Additionally, we instantiated three On-Chip Memory blocks on Qsys. The first memory block served the purpose of storing the data directly obtained from the Video-In Subsystem. Therefore, it contained data for a 320x240 picture (76,800 elements), where each pixel was 8 bits of data. The second memory block stored the accumulator data, which was around 102,000 elements of 8 bit data. The accumulator amount was represented in 8 bits and the memory was around 102,000 elements because it was 180 degrees x 560 rho values. The third memory block stored the lines that would be superimposed onto the original image, so it had the same dimensions as the first On-Chip Memory that contained the video data.
+
+Lastly, we had the `wait_sig` PIO, which allowed the C program to momentarily pause all computation done by the Verilog. This helped to reset entire arrays of data without having to account for extra data being generated while the resetting was in progress. 
+
+{{ figure(src="top_qsys.png", width=500, height=500) }}
+{{ figure(src="bottom_qsys.png", caption="Figure ??: Qsys Layout of our Design", width=500, height=500) }}
 
 
 
