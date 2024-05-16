@@ -296,25 +296,6 @@ The original idea was to display the original video input, the edge detected dat
 {{ figure(src="working_verilog.png", caption="Figure ??: VGA screen output", width=500, height=500) }}
 
 
-#### Testing
-
-# TODO:Haven't touched below this
-
-
-The heart of our system is a Raspberry Pi Pico, which features the RP2040 microcontroller.
-We implemented the circuitry for this lab using a breadboard, shown below Fig 1.
-Similar to previous labs, our microcontroller communicates through UART to interface with a PuTTY terminal
-serial interface and utilizes the Pico's PIO state machines (see [chapter 3](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)) to implement [VGA drivers](https://vanhunteradams.com/Pico/VGA/VGA.html) that allow us to visualize our simulation.
-
-{{ figure(src="breadboard.png", caption="Figure 2: An image of our physical breadboard and glove control system. The IMU is attached to the top of the glove.", width=500, height=500) }}
-
-Figure 3 below visualizes how we integrated the VGA display, RP2040, IMU (MPU 6050), and Serial interface (USB-A and PuTTY terminal) together.
-
-{{ figure(src="lab4-final-dla-schematic.png", caption="Figure 3: Schematic of our hardware setup.", width=500, height=500) }}
-
-To allow for 4 bit color with a green gradient, the VGA connection utilizes a summing circuit, as seen in Figure 3 above. We use four resistors with the approximate resistances 1R, 2R, 4R, and 8R where R $\approx$ 100, based on the resistors
-we had available in the course lab. Looking at Figure 3, we see that if we set all four GPIOs to high, we get the brightest green, whereas if we only set the rightmost GPIO to high, we get the dimmest green.
-
 ### Software
 
 The software component of our Hough Transformer consists of a ported version of the 
@@ -376,11 +357,21 @@ Our VGA driver combines these 2 values (performing a simple sum) before displayi
 At this point we have succesfully found lines on a source image using a Hough Transform!!
 
 
-### Challenges of Note
 
 The design and build process spanned approximately 4 weeks, and we encountered a number of challenges throughout this time.
 We detail below some of these challenges how we overcame them,
 and any takeaways we have.
+
+### Testing Strategy
+There are a few ways we ensure correctness of our system. The way we designed our design was from the bottom up. That is, we focused on the smaller individual blocks, whether it be in the hardware or software. For example, we implemented the memory blocks, the dispatcher, and the accumulator separately. On the software side, we ported the entire OpenCV Line Hough Transform implementation, but we did so module by module. At each of these steps, we tested. This means that we tested each block in isolation to ensure that the building blocks were correct. 
+
+Each of the hardware blocks that we implemented were tested through ModelSim. Mainly, we created testbenches for the dispatcher and the accumulator and ran them through ModelSim by feeding specific data. This allowed us to have more control over what inputs the blocks were getting, more specifics on how the logic flowed through the waveforms, and clearer proof that the modules were working as intended. Additionally, for the accumulator, we built a Python model that we would feed the same values as the ModelSim testbench. Then, we compared the output of the Python model and the Verilog model and ensured that the outputs were the same (or close enough that it didn’t cause different behavior). 
+
+We used the serial terminal to debug the C program. There were three main bugs that appeared in the software side: segmentation fault, incorrect line drawing, and incorrect line generation. All of these issues were debugged by printing to the serial interface. The segmentation faults were caused by memory mapping issues: when we were trying to address or allocate memory that was not available to us. This was usually due to mistakes on our part on the memory addressing or due to incorrect memory constants like the base and span. We brute forced the testing for this by printing between each memory mapping and found exactly where the program reached the segmentation fault. Then, we dug deeper to find out what was the problem. As described before, we used a line drawing function that took two points. However, generating the correct two points took longer than expected. This was because it was difficult to map the points we were expecting to see to the visual we were seeing on the VGA screen. We decided to use the serial terminal and we printed all the points generated, the points it chose, and the line that was drawn. We compared these values to the lines we were seeing on the VGA screen to determine whether the problem was originating in the coordinate generation function or somewhere else in the system. Luckily, we determined that the error was in the coordinate generation function because the points the program was choosing were out of the image, so the lines seemed to wrap around. Additionally, we observed interesting (but annoying) behavior in the C++ implementation of the OpenCV Hough Transform where the program was not assigning values to a vector as we were hoping. Instead of using the `assign` method, which was not assigning any value, we directly changed the value by looking at the specific element using `lines[i]`. This could have been caused by a change made in the porting process, a compiler difference, or some other mistake we made along the way. However, the important thing is that we were able to catch this issue by printing many variables before and after they were supposed to change and fixed the logic if they were not changing. 
+
+Testing module by module gave us more confidence that when putting all these blocks together, the only bugs would be due to the way the modules are connected. Once we put it all together, the main method of testing was through visual observation. We tested by directing the camera towards different images like clear shapes, many wires that had no clear lines, or empty space. We will explain the steps we took to observe and measure the performance of our entire Line Hough Transform in the following section. 
+
+### Challenges of Note
 
 #### Structural Connections
 
@@ -430,127 +421,42 @@ while a soft reset respawns all particles, separating them from any created aggr
 
 
 #### Safety
+
+## Results
+
+TODO: Need to include the following 
+1.any and all test data, scope traces, waveforms, etc
+2.speed of execution (hesitation, filcker, interactiveness, concurrency)
+3.accuracy (numeric, music frequencies, video signal timing, etc)
+4.how you enforced safety in the design.
+5.usability by you and other people
+
+
+#### Safety (for reference but TODO: change)
 There are no significant safety concerns. A minor concern could be that waving one's hand rapidly up and down
 to alter the variance of z-acceleration could lead to someone getting smacked. Users should be aware their
 surroundings before controlling the simulation.
 
-#### Usability
+#### Usability (for reference but TODO: change)
 Our program requires users to be able to freely move their hands to use the motion controls. However there are serial based
 workarounds for this. Unfortunately, the visual component of our simulation would not be very accessible for the visually impaired.
 
 
 
-
-### Rotten Randomness
-Before settling on the approach of approximating a normal distribution
-over time by sampling from a uniform distribution, we attempted a few ways
-to sample from a normal distribution for every particle, once a frame.
-One approach involved summing over multiple calls to `rand()` in order to approximate
-a normal distribution within a single frame. Because this involved 10s of function calls per particle,
-it severely limited the speed of our due to the increased computation complexity.
-Another approach involved [sampling a random bit](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html) using the RP 2040's ring oscillator clock (ROSC).
-With these random bits it is possible to generate a wide variety of distributions, including
-a normal one. Furthermore, it is possible to perform many of the tasks required
-to generate a normal distribution by utilizing the RP 2040's DMA channels, at little to no
-cost to the CPU.
-
-While the second approach in particular is attractive due to the minimal cpu overhead,
-testing found that the simple approach that we went with,
-generating a normal distribution "over time" simulated well and was both nice
-to interact with via motion controls, and behaved inline with other DLA simulations. For this reason
-we were happy to keep using `rand()` and move on to other parts of our system.
-
-### Polling Problems
-Initially, polling our IMU at a rate of 1,000 Hz via a repeating alarm timer
-led to our simulation crashing shortly after startup.
-It was unclear what the root cause of these issues were, as they persisted even when moving
-our repeating alarm timer to a different core. Which goes against our initial suspicion that
-our interrupts were interfering with in-flight writes/reads to our backing pixel array,
-which may have eventually led to the reading of garbage data which softlocked our program.
-
-To resolve this, we moved our IMU polling trigger to occur within our simulation protothread.
-This meant that no calculations/pixel updates could be interrupted, and guaranteed
-the sequentiality of our polling `->` simulate step.
-
-Moving our IMU polling trigger to our simulation protothread meant that our IMU was only polled
-30 times a second, as opposed to 1,000. However, we found that this frequency still provided accurate enough readings
-for our motion controls to feel responsive.
-
-
-### Bonkers Borders
-In addition to crashes, enabling IMU polling changed the behavior of pixel aggregation, leading pixels
-to aggregate seemingly at random at the borders of our simulation. This was eventually
-resolved by adding better bounds logic to our touching-aggregate function. However it remains
-unclear why polling the IMU changed our collision detection logic.
-
-
-### Aggravating Angle Assessment
-During testing, we noticed that if we rotated our IMU to close to 90 degrees along the x-axis, the rotational measurements of our
-y-axis would become inaccurate. The same occurred if we swapped the axes of rotation. We learned that using acceleration along axes is limited in that
-at extreme angles we lose a degree of information. Consider rotating around an axis pointed in front of you (y axis pointing forward, x-axis to the left,
-z-axis pointing towards the sky). Our IMU calculates
-rotation around the y-axis by comparing z and x-axis accelerations. Consider that if we rotate along the x axis so that our y-axis is now pointing up
-(z axis pointing towards us, x axis pointing to the left), rotation around the y-axis no longer changes the acceleration experienced in both the x-axis and z-axis, rather, both remain close to 0. This makes measurement of rotation around y very difficult and sensitive to noise.
-
-Luckily for our project, users did not often reach rotations of 90 degrees, as doing so was quite uncomfortable with our glove. So this did
-not prove an issue in practice.
-
-**Takeaway:** It was discussed how in measuring rotation around 2 axes, we were essentially trying to model the IMU in 3 degrees of freedom.
-However, we were doing this with only 2 pieces of data in each axes: z acceleration and x/y acceleration. To this end, our measurements
-were underdetermined, causing the issues described above. We should aim to have fully determined systems, and if that is infeasible, we should at least be aware of the limitations of our models
-
-
-### Restrictive Rounding
-When shifting the mean of our uniform distribution based on the tilt of our IMU we performed fixed point
-arithmetic for the sake of computational speed,
-and then converted values to integers. Our initial system took into account the sign of our tilt,
-and shifted the mean of our distribution accordingly, based on the between our current angle and 90 degrees.
-
-Because of the way our fixed to integer conversion works, numbers were rounded differently dependening on their sign.
-Namely, fixed point representations are converted to integers by right shifting `>>`. This means that integer values
-are truncated, not rounded. This meant that we were taking the floor of our fixed point number.
-This has an effect on the magnitude of a number after truncation based on its sign. Consider that `4.3` is truncated to `4`
-while `-4.3` is truncated to `-5`.
-This, along with the details of our initial implementation, meant that our mean was incorrectly being biased towards
-negative numbers. This was apparent in our simulation as particles tending towards the top left, even when our IMU was held flat.
-
-To fix this, we negated some fixed point numbers before truncating them and negating them again. In this way, our truncation
-was "symmetric" on both positive and negative fixed point numbers.
-
-**Takeaway:** Implementation matters! Especially when developing in C on things like microcontrollers,
-we need to be very aware of the implications of various implementations, as they can have compounding downstream effects.
-We were fortunate enough to figure out what was going on fairly quickly, but this may had not been obvious
-if we had been less aware of different number representations and how we convert between them.
-
-
 ## Conclusion
 
-#### Improvements and Extensions
-If we were to attempt this lab again, it would be interesting to continue tuning our decay and aggregation parameters that give rise to interesting
-emergent patterns. We were able to generate crystal-like structures as well as subtle rippling motion, but we were unable to recreate some of the patterns seen [here](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/) (which helped inspire this project).
-
-We could also extend some of the features we have.
-
-For example, we could implement a "drawing" feature that would allow a custom aggregation seeds to be drawn on the screen
-based on motion controls and a cursor. The current custom seed feature is only capable of adding a single seed at a time. However, this "drawn seed" could perhaps lead to more complex cluster formations. 
-
-For future extensions beyond adding more DLA features, we could expand our program to highlight other particle models as well that go beyond Brownian motion. Though the DLA patterns are interesting, there are many patterns that cannot be replicated using DLA. Things like [Laplacian Growth models](https://core.ac.uk/download/pdf/30841042.pdf) could be used to simulate crystal growth and electrodeposition. Other mathematical models could be used to simulate fungal growth or bacteria colonies. It would be worth comparing how all the models respond to adding the existing speed, tilt, and cyclic features as well.
-
-It could also be interesting to explore possible optimizations in our drivers that could help us expand our simulation.
-In particular we used a 320x240 size screen instead of a 640x480 screen due to memory constraints. It would be interesting to
-try and overcome this limitation to allow for higher resolution simulation.
-
-#### Final Thoughts
-While this project integrated concepts we've learned throughout the semester in a new way, and the DLA modeling itself
-was the result of our own implementation. We're excited in the future to build more of these components, such as the VGA driver, from scratch.
-
-On a personal note, it was especially exciting to see our program in action. Seeing our project begin as an abstract and then turn into life was particularly rewarding, especially because there were many challenges along the way. The program often created patterns that were unexpected, leaving us mesmerized as we fiddled with parameters of our program.
-
-As mentioned in the previous section it would be interesting (although possibly difficult) to use a more complex model
-of motion that could potentially lead to more life-like formations.
+TODO: need to include the following
+1.Analyse your design in terms of how the results met your expectations. What might you do differently next time?
+2.How did your design conform to the applicable standards?
+3.Intellectual property considerations.
+    a. Did you reuse code or someone else's design? Did you use any of Altera's IP?
+    b. Did you use code in the public domain?
+    c. Are you reverse-engineering a design? How did you deal with patent/trademark issues?
+    d. Did you have to sign non-disclosure to get a sample part?
+    e. Are there patent opportunites for your project?
 
 
-#### Intellectual Property
+#### Intellectual Property (for reference but TODO: change)
 There are no intellectual property concerns we are aware of. We are grateful for
 Bruce and Hunter's available software libraries.
 
@@ -565,7 +471,7 @@ The group approves this report for inclusion on the course website.
 The group approves the video for inclusion on the course youtube channel.
 
 
-### Tasks
+### Tasks (TODO: need to write)
 The work was largely evenly split among team members, with slight focuses on certain.
 The following is a non-exhaustive list of topics focused on.
 
@@ -576,15 +482,15 @@ The following is a non-exhaustive list of topics focused on.
 **William:** Random number generation, motion-random-distribution effects, serial, website, and report.
 
 ### References
-[DLA Implementation 1](http://formandcode.com/code-examples/simulate-dla)
+[Altera Video IP Core](https://people.ece.cornell.edu/land/courses/ece5760/DE1_SOC/Video_core.pdf)
 
-[DLA Implementation 2](https://isaacshaker.github.io/DLA-Simulation/)
+[ECE5760 DE1-SoC Example Projects](https://people.ece.cornell.edu/land/courses/ece5760/DE1_SOC/HPS_peripherials/Examples_version_18.html)
 
-[Cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/)
+[OpenCV Hough Transform](https://github.com/egonSchiele/OpenCV/blob/master/modules/imgproc/src/hough.cpp)
 
-[Random Bits](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_random/index_random.html)
+[Sobel Edge Detection Project from ECE5760 SP23 (used for system structure inspiration)](https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2023/cp444_xz598/cp444_xz598/index.html)
 
-### Code
+### Code (TODO: need to write)
 
 Code can be found [here](../code).
 
