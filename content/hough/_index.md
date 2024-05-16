@@ -29,7 +29,7 @@ In order to keep track of "all possible lines", a transformation is done from an
 We accelerated this transformation stage on our Altera FPGA, and left sorting and line drawing to be performed on our board's HPS.
 
 ## TODO: Add image/video?
-
+https://www.youtube.com/watch?v=mXqz-rAfwIw
 
 {{ webm(src="basic.webm", caption="Figure 1: Basic DLA (non-cyclic)", width=500) }}
 
@@ -286,7 +286,7 @@ also hoped to gain a deeper understanding.
 #### Hough Space Traversal
 
 
-
+TODO : Finish
 
 
 ### Testing Strategy
@@ -308,6 +308,9 @@ TODO: Need to include the following
 3.accuracy (numeric, music frequencies, video signal timing, etc)
 4.how you enforced safety in the design.
 5.usability by you and other people
+
+### Results
+We were able to demonstrate a 
 
 
 #### Safety (for reference but TODO: change)
