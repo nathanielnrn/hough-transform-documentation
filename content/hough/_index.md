@@ -197,6 +197,9 @@ given $\theta = 1.25$ and a point $(1.2,0.4)$ the red line is the only line that
 In order to increment the correct point in Hough space, the $\rho$ of said line needs to be calculated. This can be modeled simply enough as follows.
 $$\rho = x * \cos(\theta) + y *\sin(\theta).$$
 
+It should be mentioned that the multiplies above are performed in 11.7 fixed point to optimially utilizes our board's 18-bit multipliers.
+To enable this, our $x$ and $y$ values are shifted left by 7 before being multiplied by an 11.7 representaiton of our co/sine values.
+
 We can then consider that our memory starts addressing at 0, so we need to offset our $\rho$ from a range of $[280,-280]$ to $[0,560].$
 $$\rho_{addr} = \rho + 280.$$
 
@@ -220,12 +223,39 @@ and a sine and cosine look up table.
 
 #### Accumulator
 
-Our accumulator interfaces with an SRAM
+Our accumulator interfaces with a single SRAM, representing a 2-d Hough space and x and y data, along with some inputs for parameters 
+used in the address calculation.
+The entire module begins accumulating at the of the `reset` signal.
 
-{{ figure(src="line-input.png", caption="Figure ??: Accumulator state machine", width=500, height=500) }}
+As shown in Figure ??, our accumulator takes a cycle to read the current value from our accumulator, writes this value incremented by 1
+to the same address in the next cycle, then returns to the read cycle, having incremented an internal register
+holding the current value of $\theta.$
+
+{{ figure(src="accumulator-fsm.png", caption="Figure ??: The state diagram of our accumulator module.", width=500, height=500) }}
+
+Our sine tables were constructed such that each address of the table corresponds to the value of the trigonometric function in degrees.
+This allowed us to avoid representing our $\theta$ in a fixed point, and instead we simply stored the current degree of $\theta.$
+Degree's increased resolution compared to radians allowed us to perform this simplificaiton without losing accuracy in our transformer.
+
+When $\theta$ reaches 179 (degrees) and has finished writing, our accumulator transitions to its done state, where it stays until
+being reset.
+
+
+Figure 5 shows the contributions of a single pixel to a hough space. In the figure, the faint line seens corresponds to
+the lines that may go through said pixel.
+
+The contributions of an entire horizontal line, say that in Figure ??, can be seen in Figure ?? + 1
+
+{{ figure(src="line-input.png", caption="Figure ??: The input of an entire line to our accumulator. This would
+take multiple go-done rounds to fully accumulate.", width=500, height=500) }}
+
+{{ figure(src="line-hough-space.png", caption="Figure ??: The total accumulation of the input line in Figure ?? in our Hough space. Note there is a single point with a maximum value in the Hough space. This corresponds with the polar representation of our input line.", width=500, height=500) }}
+
+The actual accumulator interface is shown below in Figure ??:
 
 {{ figure(src="accumulator-interface.png", caption="Figure ??: The interface of our accumulator module.", width=500, height=500) }}
 
+With our accumulator in place, we needed a dispatcher to traverse over our edge detected image and tell the accumulator when to accumulate for a given pixel.
 
 
 #### Dispatcher
@@ -297,217 +327,86 @@ via the same Avalon Bus previously mentioned.
 #### Porting Process
 
 The porting process was somewhat involved, as the OpenCV implementation relies on many OpenCV primitive and library functions
-that we hoped to avoid relying on in our code. We were both hesitant to attempt installing such a large library on our DE1-SoC and
-also hoped to gain a deeper understanding.
+that we hoped to avoid relying on in our [code](../code). We were both hesitant to attempt installing such a large library on our DE1-SoC and
+also hoped to gain a deeper understanding of the Hough Transformation algorithm through the porting process.
 
+Porting the Hough transformation largely consisted of removing branches in function calls that dealt with representations we weren't
+interested in (say, packed polar line representation) and simplifying special OpenCV specific function calls and types into simpler versions. For example, `cvRound()` was replaced with the `math.h` `round()` function, and `Vec2f` vectors, which hold 2 floats, were converted into `stlib` `vector`s holding a simple struct of 2 floats.
+
+A line drawing method was ported that took in 2 points an drew a straight line between them in a `char` array. In order to interface
+with our polar line representation, 
+a function was made from scratch that converted the polar representation of a line into 2 distinct points describing
+the bound of our line within our src image (for example, a horizontal line of $y=50$ would be represented by $(0,50)$ and $(319,50)$
+as these fit within the bounds of our 320 x 240 source image).
+
+Finally, some `C++` intricacies requires us to modify the assignment of some elemnents into arrays. In particular, using `assign()`
+on some of the converted `std::vector`s did not deep copy the elements passed in, and use of an `=` assignment was necesarry to overcome 
+this limitation.
 
 
 #### Hough Space Traversal
 
+Having exported one port of our Hough space SRAM to the HPS in Qsys, we were able to traverse through our Hough space simply by initializing a `char` pointer to the memory address dictated by Qsys and performing pointer arithmetic in order to access
+our 8-bit accumulation values.
+
+The pointer arithmetic corresponds with the shape of our accumulator SRAM, and loads the values on our SRAM into memory
+accesible by our HPS.
+
+```C
+		for(theta_n = 0; theta_n < 180; ++theta_n){
+			for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
+				accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
+				accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
+			}
+		}
+```
+
+`accum` is then passed into a function that finds local maxima within the array (by performing a naive neighbor check).
+These maxima (and their values) are sorted via `std::sort`, and the 10 highest points are written to a `lines` vector.
+
+#### Line drawing
+At this point, polar line representation is converted into two points as described above, and lines are drawn onto a 320 x 240 (flattened) `char` array by traversing through the locations of all pixels between the two points and writing red values to those locations.
+
+The contents of this `char` array is then written to our hardware SRAMs, again via memory mapping.
+
+At this point, we an SRAM containing our source image accessible in hardware, along with an SRAM containing all zeroes, except
+for pixels on lines found in our original source image.
+Our VGA driver combines these 2 values (performing a simple sum) before displaying them on our screen. (Figure ??).
+
+At this point we have succesfully found lines on a source image using a Hough Transform!!
 
 
+### Challenges of Note
 
+The design and build process spanned approximately 4 weeks, and we encountered a number of challenges throughout this time.
+We detail below some of these challenges how we overcame them,
+and any takeaways we have.
 
+#### Structural Connections
 
+One of the most mechanical, and arguably simple, part of our project also ate up the bulk of our time.
+Keeping all of the structural connections in our Verilog correct proved harder than we imagined, and bugs with our
+wiring led to hours of delays. It seems like this time sink resulted from a mixture of poor naming discipline
+and long compilation times in particular. Multiple time we encountered issues where compilation began, (breaking) changes
+were made in our Verilog, and when compilation finished and things worked, we would forget to revert to the compiled source code.
+Additionally, long names such as `onchip_camera_in_to_onchip_copy_0_s2_address` and `hps_to_onchip_sram_s2_address`, both connected
+to 2 different SRAMs, made keep track of modules and wires difficult.
 
-The software we built for our simulator can be broken into a number of components.
-We will describe each component as it stands alone, and then describe how these components integrate together.
+A more disciplined approach to both naming and version tracking would probably help alleviate some of these issues.
 
+#### Porting to `C++`
 
-#### Random number generator
+Porting the OpenCV functions we needed took longer than we expected, both because we underestimated the amount of methods we would need
+to port, and because `C++` can behave peculiarly in certain cases. Mentioned above, one bug saw `=` assign a deep copy, while `assign()`
+did not. We suspect certain macros/flags in OpenCV allow `assign()` to work properly within the library, while requiring us to use `=`
+when those flags aren't present.
 
-Simulating brownian motion requires drawing from a [normal distribution]. Most modern languages
-have implementations of functions that do this built in to their [standard libraries](https://cplusplus.com/reference/random/normal_distribution/).
+Additionally, some of the optimizations OpenCV performs are hard to parse at first glance, and are not well commented.
+For example, to speed up local maxima checking, no bound checks are performed. To enable this, any 2d space (say our image) has rows/
+columns added at the edges of the space. So a 3x3 image is converted into a 5x5 matrix, with the image data being stored in the 3 x 3 
+center pixelsof the 5 x 5 image. This allows for neighbors of the physical point $(1,1)$ to be checked, as $(0,1)$ and $(1,0)$ are
+guaranteed to be in bounds.
 
-C, however, lacks such functionality.
-
-What C does offer is a [`rand()` function](https://en.cppreference.com/w/c/numeric/random/rand) that returns a value sampled from a uniform distribution between 0 and some constant `RAND_MAX`. We use this uniform distribution to approximate
-a normal distribution by drawing from `rand()` multiple times and updating a particle based on that value.
-Over many time steps, the motion of a given particle will approximate a normal distribution as a result of the [Central Limit Theorem](https://en.wikipedia.org/wiki/Central_limit_theorem).
-As our particles are updated 30 times a second, and the sampling distribution tends to normal over time,
-we can get a good approximation of brownian motion with this uniform distribution. Figure 4 shows the empirical probability distribution of displacement
-of a particle over 15 timesteps (equivalent to half a second), using this "sum of uniform samples" method.
-Figure 5 shows the empirical probability distribution of displacement of a particle over 15 timesteps sampling from a normal distribution at
-each time step.
-The distributions between each method are very similar, with our uniform distribution method being slightly biased towards the right.
-We believe this is an artifact of the visualization of our as our uniform distribution has integer values, and our simulation did not
-show any obvious tendency to positive values at runtime.
-The takeaway from this graph is that, over time, our particles behave as if they were moving randomly with movement at each timestep being samples from a normal distribution.
-
-{{ figure(src="nearly-uniform-distribution.png", alt="A histogram. ", caption="Figure 4: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with uniformly sampled movement. Taken from 8,000 samples. The orange line is an actual normal distribution with appropriate mean and variance.") }}
-
-{{ figure(src="normal-sums.png", alt="A histogram. ", caption="Figure 5: A histogram visualizing the distribution of the displacement of a particle over 15 timesteps with normally sampled movement. Taken from 8,000 samples. The orange line is the same orange from Figure 1.") }}
-
-
-
-
-#### Particle State and Collision Detection
-
-Our particles consisted of `x` and `y` coordinates stored as `short`s, `color` stored as a `char`,
-and a `cyclic_counter` that tracked how long a particle was aggregated for. In order
-to minimize memory usage, our `color` member variable also acted as a way to determine if a particle
-was aggregated or not. Particles that were not aggregated had a color of either `1` (dimmest possible green)
-or `0` (black), while particles that were aggregated had colors ranging from `2-15`, (increasingly bright shades of green). 
-All particles were stored in an array.
-
-Collision detection was implemented by with the help of fixed point precision types, with 16 decimal places, a [alpha max beta min](https://en.wikipedia.org/wiki/Alpha_max_plus_beta_min_algorithm)
-square root approximation algorithm, and our pixel backing array.
-
-Our collision detector calculates the distance between a particle's current location
-and its new desired location using the alpha max beta min algorithm.
-It then uses this distance to determine an increment, which can be thought of as a vector of unit length
-in the direction of the particles updated location. With the help of this "increment vector", each pixel in between
-the particle's current location and new location is checked to see if it is touching the existing aggregate or not.
-If a pixel is determined to
-be touching our aggregate, the particle is moved to that pixel (falling short of the intended update location)
-and it is mutated to be part of the collective aggregate (by changing its color to bright green). If the path
-between a particle's current location and new location is free of aggregate, the particle is moved to the
-intended update location and remains "active" (as opposed to aggregated).
-
-#### Touching Aggregate Detection
-Recall that our aggregate consists of various shades of green (represented as `color` values from `2-15`). A pixel is deemed to be touching aggregate if the sum of the colors of the 8 pixels surrounding it surpasses some threshold. This threshold can be tuned to change the emergent behavior of aggregation, but was often left at `15` as this often produced interesting results.
-As an example, with a threshold of `15` a pixel would be deemed to be touching aggregate if it neighbored at least a single
-"bright green" pixel, or at least 2 pixels with color values of `8` (theoretically, half as bright as a "bright green"), and so on.
-
-#### Angle detection
-
-The following is adapted from our [lab 3] report. And is included here for completeness:
-
-Our raw MPU6050 IMU measurements were received via I2C, where specific registers
-were read, corresponding with specific measurements of the IMU. While we initially planned to utilize the
-IMU's raw gyroscope measurements around the x-axis and y-axis to compute rotational
-deltas, we found that just using accelerometer data proved accurate enough for responsive use.
-Getting rid of the gyroscopic factor would reduce the computational complexity of our
-simulation without affecting its quality, so we opted to just use the accelerometer to determine our angle
-
-Our raw accelerometer data was used to compute the angle of our lever based on
-an inverse tan function (see Figure 6). The raw data from our accelerometer
-was low passed, as noise in the raw data is amplified through
-the inverse tan function. See the next section for more information.
-
-Figure 6 shows how accelerometer data can be used to calculate an angle of an IMU.
-In our case, we were interested in measuring rotation around the x and y axes.
-Taking the inverse tangent of acceleration in the z direction and the direction that
-we are *not* calculating (i.e to determine x-axis rotation we need y-axis acceleration)
-gives us the rotation around that axis.
-
-{{ figure(src="angles.png", alt="A lever and acceleration vectors, along with an angle theta.", caption="Figure 6: An image showing how acceleration data can be used to calculate an angle. Taken from the <a href='https://vanhunteradams.com/Pico/ReactionWheel/Complementary_Filters.html'>course website</a>.") }}
-
-
-#### Low pass
-The following is adapted from  our [lab 3] report and is included for completeness:
-
-A software [low-pass](https://vanhunteradams.com/Pico/ReactionWheel/Digital_Lowpass_Filters.html)
-filter was used on our raw accelerometer data.
-
-This software filter essentially averages our readings in relation to our current
-data over multiple periods of time, smoothing out any high frequencies. We applied
-low pass filters to our accelerometer data because the effects of noise would be greatly
-amplified through an inverse tan function, leading to very noisy angle values.
-
-
-#### Acceleration Variance Detection
-The variance of the acceleration in the z axis our IMU underwent over a period of 0.66 seconds was tracked.
-This was accomplished by maintaining a rolling average and storing the previous 20 z-acceleration values
-obtained from our IMU and calculating the variance of our Z acceleration:
-$$\text{Var}(Z) = \mathbb{E}[(Z - \mathbb{E}[Z])^2]$$
-
-The variance calculation was performed naively (iterating over all values in our array), but proved fast
-enough to be computed in the span of a single frame.
-
-#### Particle Movement
-
-Our particle movement was implemented by moving a particle in the x and y directions
-an amount obtained by sampling from a uniform distribution. 
-The `max_speed` variable is dependent on the variance of our z-acceleration. It describes the magnitude
-of the most a particle could move in a direction. So if `max_speed` was 6, a particle could never move more than
-`6` or `-6` in either direction.
-
-The mean of this distribution depended on the angle of our IMU. Rotation along the y-axis of the IMU (pointing towards the screen) corresponded with the horizontal movement of our particles, and likewise for the x-axis and vertical movement.
-The mean of our distributions moved stepwise linearly based on the ratio of the angle of our IMU with 90.
-Meaning rotation around an axis of 90 degrees had a (absolute) mean of `(max_speed - 1) / 2`, while a rotation of 0 degrees (i.e the IMU was flat) had a mean of 0.
-
-You may be asking why we set `(max_speed - 1) / 2` and not `max_speed / 2` when our IMU was fully rotated? This is because if we had set the mean to be exactly `max_speed / 2` our particles would have only ever moved in a single direction.
-This makes the movement seem un-random nature and is not satisfying to interact with.
-For this reason we enforced the ranges of our uniform distribution to never be higher than `-1` and never be lower than `1`
-(depending on the direction of tilt). This slightly changes the mean of our distribution.
-
-#### Particle decay
-
-We were interested in simulating [cyclic DLA](https://ciphrd.com/2020/07/21/cyclic-diffusion-limited-aggregation/).
-To this end, our particle structs store a `cyclic_counter` member variable that counted the number of frames
-a particle had been aggregated for. The more time a particle had been aggregated for, the dimmer the aggregated particle would
-appear, before disappearing and returning to be a "free" particle, undergoing Brownian motion independent of the aggregate. This feature is displayed when explaining cyclic factor results.
-
-#### Simulation/Animation
-30 times a second our simulation/animation [protothread](https://en.wikipedia.org/wiki/Protothread) was awoken. This thread
-was responsible for polling our IMU, performing collision detection, updating particle locations and colors, and finally
-writing to our pixel backing-array. While responsible for many tasks, in practice this protothread
-largely consists of a bunch of function calls in a while loop. Some of these functions
-are guarded by flags that let us turn features (such as variable speed, tilt bias) on and off.
-
-
-#### Serial
-Part of our simulation interfaces via [UART](https://vanhunteradams.com/Protocols/UART/UART.html) to
-a PuTTY terminal to allow us to turn feature flags on and off, and reset our simulation.
-Serial runs on it's own protothread and utilizes non-blocking serial read and write functions,
-obtained from Bruce Land's protothreads [modifications](https://people.ece.cornell.edu/land/courses/ece4760/RP2040/C_SDK_protothreads/index_Protothreads.html). These non-blocking functions rely on the RP 2040s ability
-to signal when UART can be written to. The thread responsible for reading/writing yields until a character
-can be read/written via UART, and in this way only runs when needed. This allows for computational threads
-(such as simulator/animator) to run almost constantly.
-
-
-#### Bringing it all together
-
-After initializing all of our UART and IMU GPIOs, along with our PIO state machines, our serial and simulation/animation
-threads are initialized.
-Our serial thread is non-blocking, and simply uses protothreads to output to terminal
-and read into an input buffer as needed. Some logic regarding flags is contained in this thread as well.
-This thread is initialized on our second core. 
-
-Our simulation thread is initialized on our first core. In a given frame this thread polls our IMU and updates the parameters that describe our uniform distribution based on
-our IMUs acceleration variance and tilt. Then, two samples are drawn from our distribution and fed to our collision detector.
-Our collision detector updates the location and color of our particle, based on the aggregate currently present (i.e. a particle
-moves an amount determined by our random sampling, or collides with aggregate in the way).
-The particle's old location is drawn over ("erasing" it) and the particle's new location is drawn to.
-
-The thread then yields such that it will awaken 1/30th of a second after the current frame begins. In this way we enforce a simulation and animation speed of 30 fps.
-
-
-## Testing
-
-### Hardware
-
-We had used the VGA display and the IMU, previously as part of [lab 3] of the course. At setup, we had to make sure the connector was wired correctly and that the receiving monitor was functional (which was not always the case). If the receiving monitor did not properly display our program, we knew that either the wiring was incorrect or the monitor had to be swapped out. Luckily, being familiar with the IMU made it easy for us to leverage its acceleration and angle capabilities.
-
-When testing for user input, we wired up the UART connection to input keyboard statements using PuTTY. With this wired up, we set flags enabling/disabling specific features and test specific elements of our hardware. As we successfully interfaced
-with our PuTTY terminal, we were confident in the UART implementation we were [using](https://vanhunteradams.com/Protocols/UART/UART.html).
-
-We did have some difficulty implementing the 4 bit green gradient as it required some additional circuits knowledge. Fortunately, the required summing circuit utilized resistors available in lab and the circuitry was not complicated. That being said, we were able to verify this 4 bit green gradient by using the VGA display and determining whether particles were properly decaying from the brightest green to the dimmest green. 
-
-### Software
-Like previous labs, we utilized serial's print capabilities to allow us to examine the values of variables in real time. Beyond that, a large amount of testing was done by looking at our IMU acceleration and complementary angle graphs to determine whether the particle motion was correct. For the features that did not utilize the IMU, their effectiveness could be verified by looking at the program and comparing it to the expected result.
-
-#### Angle Graphs
-We used software (modified from [here](https://vanhunteradams.com/Pico/Helicopter/Display.html)) to graph the measured angle of 
-our rotation around both the `x` and `y` axis. This allowed us to both examine the behavior of our angle measurements with
-respect to noise and responsiveness, and qualitatively view the effects of changes we made to our measurement algorithm.
-In particular, graphing proved invaluable to help us notice that changing our polling rates had down stream effects on
-measured angles, and required modification to our low pass algorithm to account for these changes.
-
-Furthermore, our graph helped us verify that our parameter changes were behaving as expected. In particular, our graph
-allowed us to tell at what angle the mean of our uniform distribution shifted (which was a stepwise function). We verified
-that our mean shifted at the intended angles through user testing.
-
-#### Simulation
-Having an obvious visual component to our simulation made testing for its correctness easy.
-After making changes to our algorithms,
-we verified visually if our simulation behaved as expected. We compared our simulation both to other,
-examples of [DLA](https://isaacshaker.github.io/DLA-Simulation/) and to previous iterations of our own work.
-Examining incremental changes to our simulation algorithms helped us uncover a number of issues, described in detail below.
-Among the issues we discovered was a shift in the mean of the movement of our particles from
-conversion from fixed point to integer values, incorrect aggregation occurring at the
-borders of our simulation, and some issues with a naive collision detection algorithm.
 
 ## Results
 
@@ -516,41 +415,6 @@ had no motion controls and simply modeled Brownian motion aggregation of particl
 bounding box in the snippets below), 8000 particles proved enough particles to be interesting while not creating too
 high of a particle density such that aggregation would occur extremely rapidly.
 
-#### Basic DLA
-The basic DLA motion consists of a min speed = -2 and a max speed = 2. As shown below, the clustering motion branches out evenly from the center, and matches the patterns generated by many other DLA simulators (see the References section). 
-
-{{ webm(src="basic.webm", caption="Basic DLA", width=500) }}
-
-
-#### Tilt Factor
-Activating our tilt feature shifted the mean of the normal distribution modeling the motion of
-our particles, and is responsible for creating a slight bias in particles' movements. As shown below, the particles are first provided a bias to the right and then a bias to the left. A common characteristic of the tilt factor is the tendency for particles to clump into high density areas, which aggregate very rapidly once a single part of that "group"
-reaches some aggregate. This feature can be turned on/off via serial.
-
-{{ webm(src="tilt.webm", caption="Hand-activated Tilt", width=500) }}
-
-#### Speed Factor
-The speed factor, modified by the variance in acceleration in the z-direction, is responsible for increasing the min speed and 
-max speed bounds based on the variance of the z-acceleration. In order words, the movement of the particles will increase 
-depending on how fast the IMU-glove is shaken. This feature was responsible for the conception of the collision detection. 
-Before the collision detection, particles with increased speeds would cluster incorrectly, skipping over aggregate particles 
-rather colliding with them. Now, the particles are capable of reaching max speeds of around 7 As shown below, the particles are 
-first moving very quickly as a response to the real-time IMU-glove movement. Then, the IMU-glove movement is stopped and the 
-particles begin slowing down, showing how the particle movement responds to the dynamic hand motion. This feature is activated 
-via serial.
-
-{{ webm(src="speed.webm", caption="Hand-activated Speed", width=500) }}
-
-#### Cyclic Factor
-The cyclic factor is responsible for decaying aggregate particles and randomly respawning them, allowing for continuous
-simulation. Like the other features, it is activated through serial, but an additional integer is provided to alter the decay rate. In the past, once the particles would all aggregate, the program would have to restart. As shown below, the particles decay at a rapid rate, creating a creeping motion of our aggregate throughout the screen.
-
-{{ webm(src="cyclic.webm", caption="Cyclic DLA Motion", width=500) }}
-
-#### Visibility Feature
-The visibility feature is responsible for hiding all moving particles, only highlighting the aggregate particles. The result is a cleaner clustering motion as the thousands of moving particles are not shown. As shown below, the basic DLA motion is highlighted without any background movement.
-
-{{ webm(src="visibility.webm", caption="No Background Visibility", width=500) }}
 
 
 #### Seed Location
@@ -574,10 +438,7 @@ surroundings before controlling the simulation.
 Our program requires users to be able to freely move their hands to use the motion controls. However there are serial based
 workarounds for this. Unfortunately, the visual component of our simulation would not be very accessible for the visually impaired.
 
-## Bugs of Note
 
-We detail below some of the bugs we encountered while building our simulator, how we overcame them,
-and any takeaways we have.
 
 
 ### Rotten Randomness
