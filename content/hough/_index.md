@@ -250,7 +250,7 @@ Additionally, we instantiated three On-Chip Memory blocks on Qsys. The first mem
 
 Lastly, we had the `wait_sig` PIO, which allowed the C program to momentarily pause all computation done by the Verilog. This helped to reset entire arrays of data without having to account for extra data being generated while the resetting was in progress. 
 
-{{ figure(src="top_qsys.png", width=500, height=500) }}
+{{ figure(src="top_qsys.png", caption="", width=500, height=500) }}
 {{ figure(src="bottom_qsys.png", caption="Figure ??: Qsys Layout of our Design", width=500, height=500) }}
 
 
