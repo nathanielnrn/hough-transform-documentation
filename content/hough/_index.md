@@ -197,6 +197,9 @@ given $\theta = 1.25$ and a point $(1.2,0.4)$ the red line is the only line that
 In order to increment the correct point in Hough space, the $\rho$ of said line needs to be calculated. This can be modeled simply enough as follows.
 $$\rho = x * \cos(\theta) + y *\sin(\theta).$$
 
+It should be mentioned that the multiplies above are performed in 11.7 fixed point to optimially utilizes our board's 18-bit multipliers.
+To enable this, our $x$ and $y$ values are shifted left by 7 before being multiplied by an 11.7 representaiton of our co/sine values.
+
 We can then consider that our memory starts addressing at 0, so we need to offset our $\rho$ from a range of $[280,-280]$ to $[0,560].$
 $$\rho_{addr} = \rho + 280.$$
 
@@ -220,12 +223,39 @@ and a sine and cosine look up table.
 
 #### Accumulator
 
-Our accumulator interfaces with an SRAM
+Our accumulator interfaces with a single SRAM, representing a 2-d Hough space and x and y data, along with some inputs for parameters 
+used in the address calculation.
+The entire module begins accumulating at the of the `reset` signal.
 
-{{ figure(src="line-input.png", caption="Figure ??: Accumulator state machine", width=500, height=500) }}
+As shown in Figure ??, our accumulator takes a cycle to read the current value from our accumulator, writes this value incremented by 1
+to the same address in the next cycle, then returns to the read cycle, having incremented an internal register
+holding the current value of $\theta.$
+
+{{ figure(src="accumulator-fsm.png", caption="Figure ??: The state diagram of our accumulator module.", width=500, height=500) }}
+
+Our sine tables were constructed such that each address of the table corresponds to the value of the trigonometric function in degrees.
+This allowed us to avoid representing our $\theta$ in a fixed point, and instead we simply stored the current degree of $\theta.$
+Degree's increased resolution compared to radians allowed us to perform this simplificaiton without losing accuracy in our transformer.
+
+When $\theta$ reaches 179 (degrees) and has finished writing, our accumulator transitions to its done state, where it stays until
+being reset.
+
+
+Figure 5 shows the contributions of a single pixel to a hough space. In the figure, the faint line seens corresponds to
+the lines that may go through said pixel.
+
+The contributions of an entire horizontal line, say that in Figure ??, can be seen in Figure ?? + 1
+
+{{ figure(src="line-input.png", caption="Figure ??: The input of an entire line to our accumulator. This would
+take multiple go-done rounds to fully accumulate.", width=500, height=500) }}
+
+{{ figure(src="line-hough-space.png", caption="Figure ??: The total accumulation of the input line in Figure ?? in our Hough space. Note there is a single point with a maximum value in the Hough space. This corresponds with the polar representation of our input line.", width=500, height=500) }}
+
+The actual accumulator interface is shown below in Figure ??:
 
 {{ figure(src="accumulator-interface.png", caption="Figure ??: The interface of our accumulator module.", width=500, height=500) }}
 
+With our accumulator in place, we needed a dispatcher to traverse over our edge detected image and tell the accumulator when to accumulate for a given pixel.
 
 
 #### Dispatcher
@@ -278,16 +308,59 @@ via the same Avalon Bus previously mentioned.
 #### Porting Process
 
 The porting process was somewhat involved, as the OpenCV implementation relies on many OpenCV primitive and library functions
-that we hoped to avoid relying on in our code. We were both hesitant to attempt installing such a large library on our DE1-SoC and
-also hoped to gain a deeper understanding.
+that we hoped to avoid relying on in our [code](../code). We were both hesitant to attempt installing such a large library on our DE1-SoC and
+also hoped to gain a deeper understanding of the Hough Transformation algorithm through the porting process.
 
+Porting the Hough transformation largely consisted of removing branches in function calls that dealt with representations we weren't
+interested in (say, packed polar line representation) and simplifying special OpenCV specific function calls and types into simpler versions. For example, `cvRound()` was replaced with the `math.h` `round()` function, and `Vec2f` vectors, which hold 2 floats, were converted into `stlib` `vector`s holding a simple struct of 2 floats.
+
+A line drawing method was ported that took in 2 points an drew a straight line between them in a `char` array. In order to interface
+with our polar line representation, 
+a function was made from scratch that converted the polar representation of a line into 2 distinct points describing
+the bound of our line within our src image (for example, a horizontal line of $y=50$ would be represented by $(0,50)$ and $(319,50)$
+as these fit within the bounds of our 320 x 240 source image).
+
+Finally, some `C++` intricacies requires us to modify the assignment of some elemnents into arrays. In particular, using `assign()`
+on some of the converted `std::vector`s did not deep copy the elements passed in, and use of an `=` assignment was necesarry to overcome 
+this limitation.
 
 
 #### Hough Space Traversal
 
+Having exported one port of our Hough space SRAM to the HPS in Qsys, we were able to traverse through our Hough space simply by initializing a `char` pointer to the memory address dictated by Qsys and performing pointer arithmetic in order to access
+our 8-bit accumulation values.
 
-TODO : Finish
+The pointer arithmetic corresponds with the shape of our accumulator SRAM, and loads the values on our SRAM into memory
+accesible by our HPS.
 
+```C
+		for(theta_n = 0; theta_n < 180; ++theta_n){
+			for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
+				accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
+				accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
+			}
+		}
+```
+
+`accum` is then passed into a function that finds local maxima within the array (by performing a naive neighbor check).
+These maxima (and their values) are sorted via `std::sort`, and the 10 highest points are written to a `lines` vector.
+
+#### Line drawing
+At this point, polar line representation is converted into two points as described above, and lines are drawn onto a 320 x 240 (flattened) `char` array by traversing through the locations of all pixels between the two points and writing red values to those locations.
+
+The contents of this `char` array is then written to our hardware SRAMs, again via memory mapping.
+
+At this point, we an SRAM containing our source image accessible in hardware, along with an SRAM containing all zeroes, except
+for pixels on lines found in our original source image.
+Our VGA driver combines these 2 values (performing a simple sum) before displaying them on our screen. (Figure ??).
+
+At this point we have succesfully found lines on a source image using a Hough Transform!!
+
+
+
+The design and build process spanned approximately 4 weeks, and we encountered a number of challenges throughout this time.
+We detail below some of these challenges how we overcame them,
+and any takeaways we have.
 
 ### Testing Strategy
 There are a few ways we ensure correctness of our system. The way we designed our design was from the bottom up. That is, we focused on the smaller individual blocks, whether it be in the hardware or software. For example, we implemented the memory blocks, the dispatcher, and the accumulator separately. On the software side, we ported the entire OpenCV Line Hough Transform implementation, but we did so module by module. At each of these steps, we tested. This means that we tested each block in isolation to ensure that the building blocks were correct. 
@@ -298,7 +371,56 @@ We used the serial terminal to debug the C program. There were three main bugs t
 
 Testing module by module gave us more confidence that when putting all these blocks together, the only bugs would be due to the way the modules are connected. Once we put it all together, the main method of testing was through visual observation. We tested by directing the camera towards different images like clear shapes, many wires that had no clear lines, or empty space. We will explain the steps we took to observe and measure the performance of our entire Line Hough Transform in the following section. 
 
+### Challenges of Note
 
+#### Structural Connections
+
+One of the most mechanical, and arguably simple, part of our project also ate up the bulk of our time.
+Keeping all of the structural connections in our Verilog correct proved harder than we imagined, and bugs with our
+wiring led to hours of delays. It seems like this time sink resulted from a mixture of poor naming discipline
+and long compilation times in particular. Multiple time we encountered issues where compilation began, (breaking) changes
+were made in our Verilog, and when compilation finished and things worked, we would forget to revert to the compiled source code.
+Additionally, long names such as `onchip_camera_in_to_onchip_copy_0_s2_address` and `hps_to_onchip_sram_s2_address`, both connected
+to 2 different SRAMs, made keep track of modules and wires difficult.
+
+A more disciplined approach to both naming and version tracking would probably help alleviate some of these issues.
+
+#### Porting to `C++`
+
+Porting the OpenCV functions we needed took longer than we expected, both because we underestimated the amount of methods we would need
+to port, and because `C++` can behave peculiarly in certain cases. Mentioned above, one bug saw `=` assign a deep copy, while `assign()`
+did not. We suspect certain macros/flags in OpenCV allow `assign()` to work properly within the library, while requiring us to use `=`
+when those flags aren't present.
+
+Additionally, some of the optimizations OpenCV performs are hard to parse at first glance, and are not well commented.
+For example, to speed up local maxima checking, no bound checks are performed. To enable this, any 2d space (say our image) has rows/
+columns added at the edges of the space. So a 3x3 image is converted into a 5x5 matrix, with the image data being stored in the 3 x 3 
+center pixelsof the 5 x 5 image. This allows for neighbors of the physical point $(1,1)$ to be checked, as $(0,1)$ and $(1,0)$ are
+guaranteed to be in bounds.
+
+
+## Results
+
+We visually tested our simulation with various features and parameter values. Our initial, basic DLA simulation
+had no motion controls and simply modeled Brownian motion aggregation of particles. Once that was complete, we tested our tilt, speed, cyclic, visibility, seed location, and reset. We found that for the space allocated in our simulation (an invisible
+bounding box in the snippets below), 8000 particles proved enough particles to be interesting while not creating too
+high of a particle density such that aggregation would occur extremely rapidly.
+
+
+
+#### Seed Location
+The seed location feature is responsible for adding an aggregate particle seed in a custom location. This custom location is determined in serial based on an input x and y coordinate. The custom seed is a permanent aggregate particle, allowing for more unique patterns.
+
+{{ webm(src="short2seeds.webm", caption="Custom Seed Location", width=500) }}
+
+#### Reset
+The reset serial command is responsible for either committing a hard or soft reset. Turns off all activated features,
+while a soft reset respawns all particles, separating them from any created aggregate.  Shown below is a hard reset.
+
+{{ webm(src="reset.webm", caption="Resetting Particles", width=500) }}
+
+
+#### Safety
 
 ## Results
 
