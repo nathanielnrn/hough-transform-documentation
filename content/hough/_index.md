@@ -29,7 +29,11 @@ In order to keep track of "all possible lines", a transformation is done from an
 We accelerated this transformation stage on our Altera FPGA, and left sorting and line drawing to be performed on our board's HPS.
 
 ## TODO: Add image/video?
+
+
 https://www.youtube.com/watch?v=mXqz-rAfwIw
+
+
 
 {{ webm(src="basic.webm", caption="Figure 1: Basic DLA (non-cyclic)", width=500) }}
 
