@@ -233,7 +233,7 @@ The accumulator expects x and y coordinates of the image whose pixel is not blac
 
 {{ figure(src="dispatcher_block.png", caption="Figure ??: Dispatcher block diagram", width=500, height=500) }}
 
-Figure ??? shows the FSM design that we are used for the dispatcher. There are three stages: `INIT`, `READY`, `WAIT`. The `INIT` state serves as a reset state that only resets all the register values to 0. The `READY` state is where the dispatcher actually performs logic operations. It increments through the x and y coordinates to look at the next pixel, sends x and y coordinates to the SRAM and accumulator, and determines whether the pixel is a `valid_pixel` (meaning not zero). In the `WAIT` state, the dispatcher remains dormant because it is waiting for the accumulator to be done performing its computation. We do not want the dispatcher to keep going through pixels in the picture when the accumulator has not finished and is not ready to take in a new x and y coordinate pair. The dispatcher will leave the `WAIT` state when it receives a signal from the accumulator called the `acc_done` that tells the dispatcher that the accumulator has finished and it is ready to receive new x and y coordinates. 
+Figure ??? shows the FSM design that we used for the dispatcher. There are three stages: `INIT`, `READY`, `WAIT`. The `INIT` state serves as a reset state that only resets all the register values to 0. The `READY` state is where the dispatcher actually performs logic operations. It increments through the x and y coordinates to look at the next pixel, sends x and y coordinates to the SRAM and accumulator, and determines whether the pixel is a `valid_pixel` (meaning not zero). In the `WAIT` state, the dispatcher remains dormant because it is waiting for the accumulator to be done performing its computation. We do not want the dispatcher to keep going through pixels in the picture when the accumulator has not finished and is not ready to take in a new x and y coordinate pair. The dispatcher will leave the `WAIT` state when it receives a signal from the accumulator called the `acc_done` that tells the dispatcher that the accumulator has finished and it is ready to receive new x and y coordinates. 
 
 {{ figure(src="dispatcher_fsm.png", caption="Figure ??: Dispatcher state machine", width=500, height=500) }}
 
@@ -276,6 +276,29 @@ To allow for 4 bit color with a green gradient, the VGA connection utilizes a su
 we had available in the course lab. Looking at Figure 3, we see that if we set all four GPIOs to high, we get the brightest green, whereas if we only set the rightmost GPIO to high, we get the dimmest green.
 
 ### Software
+
+The software component of our Hough Transformer consists of a ported version of the 
+OpenCV standard Hough Lines [implementation](https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/hough.cpp#L110-L229).
+A porting of related [drawing functions](https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/drawing.cpp#L263) was also required, as the Hough Lines implementation assumes appropriate functions exist.
+
+At a high level, our software is responsible for traversing through our Hough Space via an Avalon Bus and finding local maxima in our Hough Space. These maxima are then sorted, and lines are drawn that correspond to said maxima. This image is then sent back to our FPGA
+via the same Avalon Bus previously mentioned.
+
+#### Porting Process
+
+The porting process was somewhat involved, as the OpenCV implementation relies on many OpenCV primitive and library functions
+that we hoped to avoid relying on in our code. We were both hesitant to attempt installing such a large library on our DE1-SoC and
+also hoped to gain a deeper understanding.
+
+
+
+#### Hough Space Traversal
+
+
+
+
+
+
 
 The software we built for our simulator can be broken into a number of components.
 We will describe each component as it stands alone, and then describe how these components integrate together.
