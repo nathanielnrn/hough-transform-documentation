@@ -452,7 +452,7 @@ We were able to acquire extemely precise timing data by breaking out our `done` 
 | Image    | Scope   | 
 | -------- | ------- |
 | <img src = "image_1.png" style="width:250px" > | <img src = "scope_1.png" style="width:250px" > |
-| <img src = "image_2.png" style="width:250px" > | <img src = "scope_2.png" style="width:250px" > |
+| <img src = "Image_2.png" style="width:250px" > | <img src = "scope_2.png" style="width:250px" > |
 | <img src = "image_3.png" style="width:250px" >| <img src = "scope_3.png" style="width:250px" >|
 
 </center>
@@ -497,7 +497,7 @@ The nature of our project is inherently visual, meaning some consideration need 
 <!-- |<img src = "scope_1.png" style="width:250px" >  -->
 <!-- <img src = "scope_1.png" style="width:250px" > |  -->
 
-</center>
+<!-- </center> -->
 
 <!-- TODO: Need to include the following 
 1.any and all test data, scope traces, waveforms, etc
