@@ -28,11 +28,18 @@ the line that has the most contributions is determined to be a real line in the 
 In order to keep track of "all possible lines", a transformation is done from an input "image space" to a "Hough space."
 We accelerated this transformation stage on our Altera FPGA, and left sorting and line drawing to be performed on our board's HPS.
 
-## TODO: Add image/video?
-
+<!-- ## TODO: Add image/video? -->
+<iframe
+  width="640"
+  height="480"
+  src="https://www.youtube.com/watch?v=mXqz-rAfwIw"
+  frameborder="0"
+  allowfullscreen
+>
+</iframe>
 <!-- https://www.youtube.com/watch?v=mXqz-rAfwIw -->
 
-{{ webm(src="basic.webm", caption="Figure 1: Basic DLA (non-cyclic)", width=500) }}
+<!-- {{ webm(src="basic.webm", caption="Figure 1: Basic DLA (non-cyclic)", width=500) }} -->
 
 The following details the design of our transformer, the testing and performance of our system,
 and some takeaways from the project.
@@ -127,7 +134,9 @@ in order to be displayed on a VGA system.
 
 Considering the high level steps described above, it seems like a number of steps could be the target of our acceleration efforts.
 Preliminary testing indicated that step 1 took the longest amount of time out of all steps, ranging anywhere between ~45% and ~80%
-of the entire computation time.
+of the entire computation time, shown below.
+
+<img src = "compute_time_pie.png" width = 500 >
 
 Furthermore, we aimed to minimize the amount of data transfered over Altera's Avalon Bus IP from the FPGA to the HPS, as having 
 multiple transfers saturated the bandwidth of the bus and led to glitches.
@@ -372,6 +381,31 @@ We used the serial terminal to debug the C program. There were three main bugs t
 
 Testing module by module gave us more confidence that when putting all these blocks together, the only bugs would be due to the way the modules are connected. Once we put it all together, the main method of testing was through visual observation. We tested by directing the camera towards different images like clear shapes, many wires that had no clear lines, or empty space. We will explain the steps we took to observe and measure the performance of our entire Line Hough Transform in the following section. 
 
+#### Accumulator Testing
+
+Our accumulator was tested by creating a small Verilog testbench that simulated the input of an entire line to our accumulator, one
+pixel at a time.
+
+Unfortunately, we are not aware of a way to simulate SRAM in Modelsim, so it at first seemed difficult to analyze the behavior of
+our accumulator.
+Fortunately, we were able to get around this by exporting the addresses output by our accumulator and writing a Python script to
+perform accumulation for us in a correctly sized accumulation array.
+
+The results of which can be seen in Figure ??. Note that this differs from Figure ?? which displays the expected result,
+while the displays the result of our hardware (with a halved $\rho$ resolution).
+
+{{ figure(src="modelsim-hough-space.png", caption="Figure ??: The accumulation of our accumulator being input
+a single vertical line.", width=500, height=500) }}
+
+Seeing a strong correlation between the expected and actual results of our accumulator we could focus on our toplevel structurs and FSMs.
+
+We also were able to visualize the hough space of our accumulator in real time. An example of which can be seen in Figure ??. 
+Unfortunately memory constraints prevented us from visualizing the hough space along with the lines themselves. So this visualization
+was used as a qualitative intermedfdiate step in getting our project working.
+
+{{ figure(src="hough-visual.png", caption="Figure ??: Realtime visualization of our accumulated Hough space.", width=500, height=500) }}
+
+
 ### Challenges of Note
 
 #### Structural Connections
@@ -551,9 +585,12 @@ The following is a non-exhaustive list of topics focused on.
 
 [Sobel Edge Detection Project from ECE5760 SP23 (used for system structure inspiration)](https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2023/cp444_xz598/cp444_xz598/index.html)
 
-### Code (TODO: need to write)
-
+### Code
 Code can be found [here](../code).
 
-[normal distribution]: https://en.wikipedia.org/wiki/Normal_distribution
-[lab 3]: https://vanhunteradams.com/Pico/Helicopter/Helicopter.html
+[Lab-1](https://vanhunteradams.com/DE1/Lorenz/Lorenz.html)
+
+[VGA Implementation](https://vanhunteradams.com/DE1/VGA_Driver/Driver.html).
+
+<!-- [normal distribution]: https://en.wikipedia.org/wiki/Normal_distribution
+[lab 3]: https://vanhunteradams.com/Pico/Helicopter/Helicopter.html -->
