@@ -248,12 +248,8 @@ being reset.
 Figure 5 shows the contributions of a single pixel to a hough space. In the figure, the faint line seens corresponds to
 the lines that may go through said pixel.
 
-The contributions of an entire horizontal line, say that in Figure ??, can be seen in Figure ?? + 1
+The contributions of an entire horizontal line, say that in Figure 6, can be seen in Figure 7.
 
-{{ figure(src="line-input.png", caption="Figure ??: The input of an entire line to our accumulator. This would
-take multiple go-done rounds to fully accumulate.", width=500, height=500) }}
-
-{{ figure(src="line-hough-space.png", caption="Figure ??: The total accumulation of the input line in Figure ?? in our Hough space. Note there is a single point with a maximum value in the Hough space. This corresponds with the polar representation of our input line.", width=500, height=500) }}
 
 The actual accumulator interface is shown below in Figure ??:
 
@@ -338,12 +334,12 @@ The pointer arithmetic corresponds with the shape of our accumulator SRAM, and l
 accesible by our HPS.
 
 ```C
-		for(theta_n = 0; theta_n < 180; ++theta_n){
-			for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
-				accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
-				accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
-			}
-		}
+for(theta_n = 0; theta_n < 180; ++theta_n){
+	for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
+		accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
+		accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
+	}
+}
 ```
 
 `accum` is then passed into a function that finds local maxima within the array (by performing a naive neighbor check).
@@ -395,6 +391,11 @@ a single vertical line.", width=500, height=500) }}
 
 Seeing a strong correlation between the expected and actual results of our accumulator we could focus on our toplevel structurs and FSMs.
 
+We also were able to visualize the hough space of our accumulator in real time. An example of which can be seen in Figure ??. 
+Unfortunately memory constraints prevented us from visualizing the hough space along with the lines themselves. So this visualization
+was used as a qualitative intermedfdiate step in getting our project working.
+
+{{ figure(src="hough-visual.png", caption="Figure ??: Realtime visualization of our accumulated Hough space.", width=500, height=500) }}
 
 ### Challenges of Note
 
