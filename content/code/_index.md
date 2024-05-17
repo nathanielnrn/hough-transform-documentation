@@ -545,7 +545,7 @@ int shared_time;
 int shared_note;
 char shared_str[64];
 
-	
+  
 volatile signed int *color_in_ptr; 
 volatile signed int *color_out_ptr; 
 volatile signed int *color_wr_addr_ptr; 
@@ -560,102 +560,102 @@ double elapsedTime;
 struct timespec delay_time;
 
 bool check(Point pt){
-	return (pt.x >= 0) && (pt.x <= 340) && (pt.y <= 240) && (pt.y >= 0);
+  return (pt.x >= 0) && (pt.x <= 340) && (pt.y <= 240) && (pt.y >= 0);
 }
 void coords(double m, double b, int*x0, int*x1, int*y0, int*y1){
-	
-	Point pt1, pt2, pt3, pt4;
+  
+  Point pt1, pt2, pt3, pt4;
 
-	pt1.x = round((240-b)/m);
-	pt1.y = 240;
+  pt1.x = round((240-b)/m);
+  pt1.y = 240;
 
-	pt2.x = round(-b/m);
-	pt2.y = 0;
+  pt2.x = round(-b/m);
+  pt2.y = 0;
 
-	pt3.x = 320;
-	pt3.y = round(m*320 + b);
+  pt3.x = 320;
+  pt3.y = round(m*320 + b);
 
-	pt4.x = 0;
-	pt4.y = round(b);
+  pt4.x = 0;
+  pt4.y = round(b);
 
-	bool v1, v2, v3, v4;
-	v1 = check(pt1);
-	v2 = check(pt2);
-	v3 = check(pt3);
-	v4 = check(pt4);
+  bool v1, v2, v3, v4;
+  v1 = check(pt1);
+  v2 = check(pt2);
+  v3 = check(pt3);
+  v4 = check(pt4);
 
-	// Forgive me lord.
-	if(v1){
-		if(v2){
-			*x0 = pt1.x;
-			*y0 = pt1.y;
-			*x1 = pt2.x;
-			*y1 = pt2.y;
-		}else{
-			if(v3){
-			*x0 = pt1.x;
-			*y0 = pt1.y;
-			*x1 = pt3.x;
-			*y1 = pt3.y;
-			}else{
-				if(v4){
-					*x0 = pt1.x;
-					*y0 = pt1.y;
-					*x1 = pt4.x;
-					*y1 = pt4.y;
-				}else{
-					*x0 = 0;
-					*y0 = 0;
-					*x1 = 0;
-					*y1 = 0;
-					// printf("WARNING: Invalid Line \n");	
-				}
-			}
-		}
-	}else{
-		if(v2){
-			if(v3){
-					*x0 = pt2.x;
-					*y0 = pt2.y;
-					*x1 = pt3.x;
-					*y1 = pt3.y;
-			}else{
-				if(v4){
-					*x0 = pt2.x;
-					*y0 = pt2.y;
-					*x1 = pt4.x;
-					*y1 = pt4.y;
-				}else{
-					*x0 = 0;
-					*y0 = 0;
-					*x1 = 0;
-					*y1 = 0;
-					// printf("WARNING: Invalid Line \n");						
-				}
-			}
-		}else{
-			if(v3){
-				if(v4){
-					*x0 = pt3.x;
-					*y0 = pt3.y;
-					*x1 = pt4.x;
-					*y1 = pt4.y;
-				}else{
-					*x0 = 0;
-					*y0 = 0;
-					*x1 = 0;
-					*y1 = 0;
-					// printf("WARNING: Invalid Line \n");
-				}
-			}else{
-				*x0 = 0;
-				*y0 = 0;
-				*x1 = 0;
-				*y1 = 0;
-				// printf("WARNING: Invalid Line \n");
-			}
-		}
-	}
+  // Forgive me lord.
+  if(v1){
+    if(v2){
+      *x0 = pt1.x;
+      *y0 = pt1.y;
+      *x1 = pt2.x;
+      *y1 = pt2.y;
+    }else{
+      if(v3){
+      *x0 = pt1.x;
+      *y0 = pt1.y;
+      *x1 = pt3.x;
+      *y1 = pt3.y;
+      }else{
+        if(v4){
+          *x0 = pt1.x;
+          *y0 = pt1.y;
+          *x1 = pt4.x;
+          *y1 = pt4.y;
+        }else{
+          *x0 = 0;
+          *y0 = 0;
+          *x1 = 0;
+          *y1 = 0;
+          // printf("WARNING: Invalid Line \n");	
+        }
+      }
+    }
+  }else{
+    if(v2){
+      if(v3){
+          *x0 = pt2.x;
+          *y0 = pt2.y;
+          *x1 = pt3.x;
+          *y1 = pt3.y;
+      }else{
+        if(v4){
+          *x0 = pt2.x;
+          *y0 = pt2.y;
+          *x1 = pt4.x;
+          *y1 = pt4.y;
+        }else{
+          *x0 = 0;
+          *y0 = 0;
+          *x1 = 0;
+          *y1 = 0;
+          // printf("WARNING: Invalid Line \n");						
+        }
+      }
+    }else{
+      if(v3){
+        if(v4){
+          *x0 = pt3.x;
+          *y0 = pt3.y;
+          *x1 = pt4.x;
+          *y1 = pt4.y;
+        }else{
+          *x0 = 0;
+          *y0 = 0;
+          *x1 = 0;
+          *y1 = 0;
+          // printf("WARNING: Invalid Line \n");
+        }
+      }else{
+        *x0 = 0;
+        *y0 = 0;
+        *x1 = 0;
+        *y1 = 0;
+        // printf("WARNING: Invalid Line \n");
+      }
+    }
+  }
 
 }
 
@@ -663,174 +663,174 @@ void coords(double m, double b, int*x0, int*x1, int*y0, int*y1){
 
 int main(void)
 {
-	delay_time.tv_nsec = 10 ;
-	delay_time.tv_sec = 0 ;
+  delay_time.tv_nsec = 10 ;
+  delay_time.tv_sec = 0 ;
 
   
-	// === get FPGA addresses ==================
+  // === get FPGA addresses ==================
     // Open /dev/mem
-	if( ( fd = open( "/dev/mem", ( O_RDWR | O_SYNC ) ) ) == -1 ) 	{
-		printf( "ERROR: could not open \"/dev/mem\"...\n" );
-		return( 1 );
-	}
+  if( ( fd = open( "/dev/mem", ( O_RDWR | O_SYNC ) ) ) == -1 ) 	{
+    printf( "ERROR: could not open \"/dev/mem\"...\n" );
+    return( 1 );
+  }
 
-	h2p_lw_virtual_base = mmap( NULL, HW_REGS_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, HW_REGS_BASE );	
-	if( h2p_lw_virtual_base == MAP_FAILED ) {
-		printf( "ERROR: mmap1() failed...\n" );
-		close( fd );
-		return(1);
-	}
+  h2p_lw_virtual_base = mmap( NULL, HW_REGS_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, HW_REGS_BASE );	
+  if( h2p_lw_virtual_base == MAP_FAILED ) {
+    printf( "ERROR: mmap1() failed...\n" );
+    close( fd );
+    return(1);
+  }
     h2p_lw_video_in_control_addr=(volatile unsigned int *)(h2p_lw_virtual_base+VIDEO_IN_BASE+0x0c);
-	h2p_lw_video_in_resolution_addr=(volatile unsigned int *)(h2p_lw_virtual_base+VIDEO_IN_BASE+0x08);
-	*(h2p_lw_video_in_control_addr) = 0x04 ; // turn on video capture
-	*(h2p_lw_video_in_resolution_addr) = 0x00f00140 ;  // high 240 low 320
-	h2p_lw_video_edge_control_addr=(volatile unsigned int *)(h2p_lw_virtual_base+VIDEO_IN_BASE+0x10);
-	*h2p_lw_video_edge_control_addr = 0x01 ; // 1 means edges
-	// *h2p_lw_video_edge_control_addr = 0x00 ; // 1 means edges
+  h2p_lw_video_in_resolution_addr=(volatile unsigned int *)(h2p_lw_virtual_base+VIDEO_IN_BASE+0x08);
+  *(h2p_lw_video_in_control_addr) = 0x04 ; // turn on video capture
+  *(h2p_lw_video_in_resolution_addr) = 0x00f00140 ;  // high 240 low 320
+  h2p_lw_video_edge_control_addr=(volatile unsigned int *)(h2p_lw_virtual_base+VIDEO_IN_BASE+0x10);
+  *h2p_lw_video_edge_control_addr = 0x01 ; // 1 means edges
+  // *h2p_lw_video_edge_control_addr = 0x00 ; // 1 means edges
 
-	
-	// === get video input =======================
-	// on-chip sRAM
-	video_in_virtual_base = mmap( NULL, FPGA_ONCHIP_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, FPGA_ONCHIP_BASE); 
-	if( video_in_virtual_base == MAP_FAILED ) {
-		printf( "ERROR: mmap3() failed...\n" );
-		close( fd );
-		return(1);
-	}
-	// format the pointer
-	video_in_ptr =(unsigned int *)(video_in_virtual_base);
+  
+  // === get video input =======================
+  // on-chip sRAM
+  video_in_virtual_base = mmap( NULL, FPGA_ONCHIP_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, FPGA_ONCHIP_BASE); 
+  if( video_in_virtual_base == MAP_FAILED ) {
+    printf( "ERROR: mmap3() failed...\n" );
+    close( fd );
+    return(1);
+  }
+  // format the pointer
+  video_in_ptr =(unsigned int *)(video_in_virtual_base);
 // 0x00040000
-	// for srams using not lw
-	sram_master_base = mmap( NULL, 0x00040000, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, 0xc0000000); 
-	if( sram_master_base == MAP_FAILED ) {
-		printf( "ERROR: mmap3() failed...\n" );
-		close( fd );
-		return(1);
-	}
-	// format the pointer
-	// sram_master_ptr =(unsigned int *)(sram_master_base);
-	lines_ptr = (char *)(sram_master_base + 0x20000); // Lines 
-	hps_copy_sram2_ptr = (char *)(sram_master_base); // Hough Space
+  // for srams using not lw
+  sram_master_base = mmap( NULL, 0x00040000, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, 0xc0000000); 
+  if( sram_master_base == MAP_FAILED ) {
+    printf( "ERROR: mmap3() failed...\n" );
+    close( fd );
+    return(1);
+  }
+  // format the pointer
+  // sram_master_ptr =(unsigned int *)(sram_master_base);
+  lines_ptr = (char *)(sram_master_base + 0x20000); // Lines 
+  hps_copy_sram2_ptr = (char *)(sram_master_base); // Hough Space
 
-	wait_accum_ptr = (volatile bool *)(sram_master_base+0x40000);
+  wait_accum_ptr = (volatile bool *)(sram_master_base+0x40000);
 
 
-	// ===========================================
+  // ===========================================
 
-	/* create a message to be displayed on the VGA 
+  /* create a message to be displayed on the VGA 
           and LCD displays */
-	char text_top_row[40] = "DE1-SoC ARM/FPGA\0";
-	char text_bottom_row[40] = "Cornell ece5760\0";
-	char num_string[20], time_string[50] ;
-	
-	// a pixel from the video
-	int pixel_color;
-	// video input index
-	int i,j;
+  char text_top_row[40] = "DE1-SoC ARM/FPGA\0";
+  char text_bottom_row[40] = "Cornell ece5760\0";
+  char num_string[20], time_string[50] ;
+  
+  // a pixel from the video
+  int pixel_color;
+  // video input index
+  int i,j;
 
-	// HoughLinesStandard parameters
+  // HoughLinesStandard parameters
 
-	std::vector<LinePolar> lines(5);
+  std::vector<LinePolar> lines(5);
 
-	float rho;
-	rho = 1.0;
+  float rho;
+  rho = 1.0;
 
-	float theta;
-	theta = PI/180.0;
+  float theta;
+  theta = PI/180.0;
 
-	int threshold;
-	threshold = 1;
+  int threshold;
+  threshold = 1;
 
-	int linesMax;
-	linesMax = lines.size();
+  int linesMax;
+  linesMax = lines.size();
 
-	double min_theta;
-	min_theta = 0.0;
+  double min_theta;
+  min_theta = 0.0;
 
-	double max_theta;
-	max_theta = PI;
+  double max_theta;
+  max_theta = PI;
 
-	char *color;
+  char *color;
 
-	char sw_m10k[76800];
+  char sw_m10k[76800];
 
-	char black[76800];
-	// Init Black
-	for(int i = 0; i < 76800; i++){
-		black[i] = 0;
-	}
-
-
-	int accum[(179 + 2) * (561 + 2)];
-	int rho_count = 561;
-	int rho_n;
-	int theta_n;
-	char* accum_val;
-
-	*wait_accum_ptr = 0;	
-
-	while(1) 
-	{
-
-		// Init Black
-		for(int i = 0; i < 76800; i++){
-			black[i] = 0;
-		}
-
-		// Time full Computation
-		gettimeofday(&t1, NULL);
-
-		// Get edge-detected video copy from FPGA sram
-		//ALSO rho is x axis and y is theta, not other way around
-	
-		for(theta_n = 0; theta_n < 180; ++theta_n){
-			for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
-				accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
-				accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
-			}
-			// printf("\n");
-		}
-
-		HoughLinesStandard(lines, rho, theta, threshold, linesMax, min_theta, max_theta, accum );
-		
-		//zero after houghlinesstandard call
-		*wait_accum_ptr = 1;
-		for(theta_n = 0; theta_n < 180; ++theta_n){
-			for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
-				*(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1)) = 0;
-			}
-		}
-		*wait_accum_ptr = 0;
+  char black[76800];
+  // Init Black
+  for(int i = 0; i < 76800; i++){
+    black[i] = 0;
+  }
 
 
-		
-		// Draw the lines calculated in lines vector from above
-		for( size_t i = 0; i < lines.size(); i++ ) {
-			float rho_out = lines[i].rho, theta = lines[i].angle;
-			Point pt1, pt2;
-			double a = cos(theta), b = sin(theta);
+  int accum[(179 + 2) * (561 + 2)];
+  int rho_count = 561;
+  int rho_n;
+  int theta_n;
+  char* accum_val;
+
+  *wait_accum_ptr = 0;	
+
+  while(1) 
+  {
+
+    // Init Black
+    for(int i = 0; i < 76800; i++){
+      black[i] = 0;
+    }
+
+    // Time full Computation
+    gettimeofday(&t1, NULL);
+
+    // Get edge-detected video copy from FPGA sram
+    //ALSO rho is x axis and y is theta, not other way around
+  
+    for(theta_n = 0; theta_n < 180; ++theta_n){
+      for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
+        accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
+        accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
+      }
+      // printf("\n");
+    }
+
+    HoughLinesStandard(lines, rho, theta, threshold, linesMax, min_theta, max_theta, accum );
+    
+    //zero after houghlinesstandard call
+    *wait_accum_ptr = 1;
+    for(theta_n = 0; theta_n < 180; ++theta_n){
+      for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
+        *(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1)) = 0;
+      }
+    }
+    *wait_accum_ptr = 0;
 
 
-			double m = -(a/b);
-			double y_int = rho_out/b; 
-			
-			coords(m, y_int, &pt1.x, &pt2.x, &pt1.y, &pt2.y);
-			line(black, pt1, pt2);
-			}
+    
+    // Draw the lines calculated in lines vector from above
+    for( size_t i = 0; i < lines.size(); i++ ) {
+      float rho_out = lines[i].rho, theta = lines[i].angle;
+      Point pt1, pt2;
+      double a = cos(theta), b = sin(theta);
 
-		int count = 0;
-		for(j = 0; j < 240; ++j){ //theta
-			for(i = 0; i < 320; ++i){ //rho
-				*(lines_ptr + (i) + (j*320)) = black[i+(j*320)];
-			}
-		}
-		
-		// stop timer
-		 gettimeofday(&t2, NULL);
-		 elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
-		 elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-		
-	} // end while(1)
+
+      double m = -(a/b);
+      double y_int = rho_out/b; 
+      
+      coords(m, y_int, &pt1.x, &pt2.x, &pt1.y, &pt2.y);
+      line(black, pt1, pt2);
+      }
+
+    int count = 0;
+    for(j = 0; j < 240; ++j){ //theta
+      for(i = 0; i < 320; ++i){ //rho
+        *(lines_ptr + (i) + (j*320)) = black[i+(j*320)];
+      }
+    }
+    
+    // stop timer
+     gettimeofday(&t2, NULL);
+     elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+    
+  } // end while(1)
 } // end main
 
 ```
@@ -1237,7 +1237,7 @@ begin
 8'd177: sine = 18'h7;
 8'd178: sine = 18'h4;
 8'd179: sine = 18'h2;
-	endcase
+  endcase
 end
 endmodule
 
@@ -1431,22 +1431,22 @@ begin
 8'd177: cosine = 18'h3ff80;
 8'd178: cosine = 18'h3ff80;
 8'd179: cosine = 18'h3ff80;
-	endcase
+  endcase
 end
 endmodule
 
 
 module signed_mult (out, a, b);
-	output 	signed  [17:0]	out;
-	input 	signed	[17:0] 	a;
-	input 	signed	[17:0] 	b;
-	// intermediate full bit length
-	wire 	signed	[35:0]	mult_out;
-	assign mult_out = a * b;
-	// select bits for 11.7 fixed point
-	//in our mult we have 14 fractional bits and 22 integer bits
-	// the decimal lands between 13 and 14 (0-indexed).
-	assign out = {mult_out[35], mult_out[23:7]};
+  output 	signed  [17:0]	out;
+  input 	signed	[17:0] 	a;
+  input 	signed	[17:0] 	b;
+  // intermediate full bit length
+  wire 	signed	[35:0]	mult_out;
+  assign mult_out = a * b;
+  // select bits for 11.7 fixed point
+  //in our mult we have 14 fractional bits and 22 integer bits
+  // the decimal lands between 13 and 14 (0-indexed).
+  assign out = {mult_out[35], mult_out[23:7]};
 endmodule
 ```
 
@@ -1462,10 +1462,10 @@ module not_zero
     input acc_done,
 
     output [8:0] sram_x_out,
-	  output [8:0] sram_y_out,
+    output [8:0] sram_y_out,
     output go,
-	  output [8:0] acc_x_out,
-	  output [8:0] acc_y_out,
+    output [8:0] acc_x_out,
+    output [8:0] acc_y_out,
 
     input wait_sig
     
@@ -1555,7 +1555,7 @@ module not_zero
         curr_y_cood <= 9'd0;
 
         prev_x_cood <= 0 ;
-		    prev_y_cood <= 0 ;
+        prev_y_cood <= 0 ;
       end
 
       READY: begin
@@ -1633,34 +1633,34 @@ assign sram1_read_addr  =  ({7'b0, vga_next_x}) + (({7'b0,vga_next_y})*17'd320) 
 //traverse over x and y coordinates
 always @(posedge CLOCK_50) begin //M10k_pll
 
-	// reset state machine and read/write controls
-	if (~KEY[0]) begin
-		state <= 0 ;
-		video_in_x_cood <= 0 ;
-		video_in_y_cood <= 0 ;
+  // reset state machine and read/write controls
+  if (~KEY[0]) begin
+    state <= 0 ;
+    video_in_x_cood <= 0 ;
+    video_in_y_cood <= 0 ;
 
-		timer <= 0;
-	end
-	else begin
-		timer <= timer + 1;
-	end
-	
-	// and put in a small delay to aviod bus hogging
-	// timer delay can be set to 2**n-1, so 3, 7, 15, 31
-	// bigger numbers mean slower frame update to VGA
-	if (state==0 && SW[0] && (timer & 30)==0 ) begin //
+    timer <= 0;
+  end
+  else begin
+    timer <= timer + 1;
+  end
+  
+  // and put in a small delay to aviod bus hogging
+  // timer delay can be set to 2**n-1, so 3, 7, 15, 31
+  // bigger numbers mean slower frame update to VGA
+  if (state==0 && SW[0] && (timer & 30)==0 ) begin //
 
-		if (video_in_x_cood >= 10'd319) begin
-			video_in_x_cood <= 10'd0 ;
-			if (video_in_y_cood >= 10'd239) 
-				video_in_y_cood <= 10'd0 ;
-			else 
-				video_in_y_cood <= video_in_y_cood + 10'd1 ;
-		end
-		else 
-			video_in_x_cood <= video_in_x_cood + 10'd1 ;
-	end
-	
+    if (video_in_x_cood >= 10'd319) begin
+      video_in_x_cood <= 10'd0 ;
+      if (video_in_y_cood >= 10'd239) 
+        video_in_y_cood <= 10'd0 ;
+      else 
+        video_in_y_cood <= video_in_y_cood + 10'd1 ;
+    end
+    else 
+      video_in_x_cood <= video_in_x_cood + 10'd1 ;
+  end
+  
 end // always @(posedge state_clock)
 
 
@@ -1684,22 +1684,22 @@ reg [8:0] acc_sram_y_cood;
 
 //Acc test state transitions
 always @(posedge CLOCK_50) begin
-	if (~KEY[0]) begin
-		acc_state <= STATE_ACC_INIT;
-	end else begin
-		case (acc_state)
-		  STATE_ACC_INIT: begin
-				acc_state <= STATE_ACC_TRAVERSE;
-		  end
-		  STATE_ACC_TRAVERSE: begin
-				// acc_state <= (acc_done && acc_x_coord >= 9'd319) ? STATE_ACC_DISPLAY : STATE_ACC_TRAVERSE;
-				acc_state <= (acc_done) ? STATE_ACC_DISPLAY : STATE_ACC_TRAVERSE;
+  if (~KEY[0]) begin
+    acc_state <= STATE_ACC_INIT;
+  end else begin
+    case (acc_state)
+      STATE_ACC_INIT: begin
+        acc_state <= STATE_ACC_TRAVERSE;
+      end
+      STATE_ACC_TRAVERSE: begin
+        // acc_state <= (acc_done && acc_x_coord >= 9'd319) ? STATE_ACC_DISPLAY : STATE_ACC_TRAVERSE;
+        acc_state <= (acc_done) ? STATE_ACC_DISPLAY : STATE_ACC_TRAVERSE;
 
-		  end
-		  STATE_ACC_DISPLAY: begin
-				acc_state <= STATE_ACC_DISPLAY;
-		  end
-		endcase
+      end
+      STATE_ACC_DISPLAY: begin
+        acc_state <= STATE_ACC_DISPLAY;
+      end
+    endcase
   end
 end
 
@@ -1707,36 +1707,36 @@ assign acc_sram_read_addr = {8'b0, acc_sram_x_cood}  + ({8'b0,acc_sram_y_cood} *
 
  //acc test state reg updates
 always @(posedge CLOCK_50) begin
-	case (acc_state)
-		STATE_ACC_INIT: begin
-			acc_sram_x_cood <= 0;
-			acc_sram_y_cood <= 0;
-			// acc_x_coord <= 9'd0;
-			// acc_y_coord <= 9'd50;
-			// acc_reset <= 1'b0;
-		end
-		STATE_ACC_TRAVERSE: begin
-			acc_sram_x_cood <= acc_sram_x_cood;
-			acc_sram_y_cood <= acc_sram_y_cood;
-			// acc_reset <= acc_done; //TODO: Make sure this isnt staying high for 2 cycles
-			// acc_x_coord <= acc_done ? acc_x_coord + 9'd1 : acc_x_coord;
-			// acc_y_coord <= 9'd50;
-		end
-		STATE_ACC_DISPLAY: begin
-			if (acc_sram_x_cood >= 9'd319) begin
-				acc_sram_x_cood <= 9'd0 ;
-				if (acc_sram_y_cood >= 9'd239) 
-					acc_sram_y_cood <= 9'd0 ;
-				else 
-					acc_sram_y_cood <= acc_sram_y_cood + 9'd1 ;
-			end
-			else 
-				acc_sram_x_cood <= acc_sram_x_cood + 9'd1 ;
-			// acc_reset <= 1'b0;
-			// acc_x_coord <= acc_x_coord;
-			// acc_y_coord <= acc_y_coord;
-		end
-	endcase
+  case (acc_state)
+    STATE_ACC_INIT: begin
+      acc_sram_x_cood <= 0;
+      acc_sram_y_cood <= 0;
+      // acc_x_coord <= 9'd0;
+      // acc_y_coord <= 9'd50;
+      // acc_reset <= 1'b0;
+    end
+    STATE_ACC_TRAVERSE: begin
+      acc_sram_x_cood <= acc_sram_x_cood;
+      acc_sram_y_cood <= acc_sram_y_cood;
+      // acc_reset <= acc_done; //TODO: Make sure this isnt staying high for 2 cycles
+      // acc_x_coord <= acc_done ? acc_x_coord + 9'd1 : acc_x_coord;
+      // acc_y_coord <= 9'd50;
+    end
+    STATE_ACC_DISPLAY: begin
+      if (acc_sram_x_cood >= 9'd319) begin
+        acc_sram_x_cood <= 9'd0 ;
+        if (acc_sram_y_cood >= 9'd239) 
+          acc_sram_y_cood <= 9'd0 ;
+        else 
+          acc_sram_y_cood <= acc_sram_y_cood + 9'd1 ;
+      end
+      else 
+        acc_sram_x_cood <= acc_sram_x_cood + 9'd1 ;
+      // acc_reset <= 1'b0;
+      // acc_x_coord <= acc_x_coord;
+      // acc_y_coord <= acc_y_coord;
+    end
+  endcase
 end
 
 reg [7:0] force_color;
@@ -1747,11 +1747,11 @@ reg [7:0] force_color;
 //  VIDEO M10K Stuff
 //=======================================================
 M10K_76800_8 video_m10k( //8 bit colors with 240 rows * 320 pixels/row
-	.clk(CLOCK_50),
-	.read_address(src_copy_read_addr),
+  .clk(CLOCK_50),
+  .read_address(src_copy_read_addr),
     .out(not_zero_color),
-	.we(1'b1),
-	.write_address(sram1_read_addr), //this sounds backwards but fine, connects Qsys camera-in sram to verilog module
+  .we(1'b1),
+  .write_address(sram1_read_addr), //this sounds backwards but fine, connects Qsys camera-in sram to verilog module
     .in(no_top_line)
 );
 
@@ -1783,11 +1783,11 @@ not_zero dispatch
     .color(not_zero_color),
     .acc_done(acc_done),
     .go(acc_reset),
-	.acc_x_out(acc_x_in),
-	.acc_y_out(acc_y_in),
-	.sram_x_out(sram_x_in),
-	.sram_y_out(sram_y_in),
-	.wait_sig(wait_dispatch)
+  .acc_x_out(acc_x_in),
+  .acc_y_out(acc_y_in),
+  .sram_x_out(sram_x_in),
+  .sram_y_out(sram_y_in),
+  .wait_sig(wait_dispatch)
   );
 
 //=======================================================
@@ -1810,19 +1810,19 @@ wire acc_done;
 wire [16:0] acc_sram_read_addr;
 
 accumulator acc(
-	.reset(acc_reset),
-	.clk(CLOCK_50),
+  .reset(acc_reset),
+  .clk(CLOCK_50),
 
-	.THETA_COUNT(theta_count),
-	.RHO_COUNT(rho_count),
+  .THETA_COUNT(theta_count),
+  .RHO_COUNT(rho_count),
 
-	.x_in(acc_x_in),
-	.y_in(acc_y_in),
-	.prev_rho_theta_read_in(acc_read_data),
-	.curr_addr_out(acc_address),
-	.accumulator_write_out_data(acc_write_out_data),
-	.mem_write_en(acc_mem_write_en),
-	.done(acc_done)
+  .x_in(acc_x_in),
+  .y_in(acc_y_in),
+  .prev_rho_theta_read_in(acc_read_data),
+  .curr_addr_out(acc_address),
+  .accumulator_write_out_data(acc_write_out_data),
+  .mem_write_en(acc_mem_write_en),
+  .done(acc_done)
 );
 
 
@@ -1837,45 +1837,45 @@ reg [7:0] vga_data;
 // assign vga_data = (vga_next_x <= 320 && vga_next_y <= 240) ? m10k_out : 8'b000_000_00;
 always @(*) begin
 
-	if (vga_next_x <= 320 && vga_next_y <= 240) begin // top left
-		vga_data = SW[6] ? 8'b111111_11 : (SW[8] ? (video_in_read_data) : (video_in_read_data + lines_read_data));
-	end
+  if (vga_next_x <= 320 && vga_next_y <= 240) begin // top left
+    vga_data = SW[6] ? 8'b111111_11 : (SW[8] ? (video_in_read_data) : (video_in_read_data + lines_read_data));
+  end
 
-	else if (vga_next_x >= 320 && vga_next_y <= 240) begin // top right
-			vga_data = SW[7] ?  lines_read_data : (video_in_read_data + lines_read_data);
-	end
+  else if (vga_next_x >= 320 && vga_next_y <= 240) begin // top right
+      vga_data = SW[7] ?  lines_read_data : (video_in_read_data + lines_read_data);
+  end
 
 
-	else begin
-		vga_data = 8'b000_000_00;
-	end
-	
+  else begin
+    vga_data = 8'b000_000_00;
+  end
+  
 end
 
 reg vga_reset;
 
 always @(posedge my_clk)begin
-	if (~KEY[0]) begin
-		vga_reset <= 1;
-	end else begin
-		vga_reset <= 0;
-	end
+  if (~KEY[0]) begin
+    vga_reset <= 1;
+  end else begin
+    vga_reset <= 0;
+  end
 end
-					
+          
 vga_driver DUT   (	.clock(my_clk), 
-					.reset(vga_reset),
-					.color_in(SW[4] ? 8'b000_111_00 : vga_data),	// Pixel color (8-bit) from memory
-					// .color_in(8'b000_111_00),	// Pixel color (8-bit) from memory
-					.next_x(vga_next_x),		// This (and next_y) used to specify memory read address
-					.next_y(vga_next_y),		// This (and next_x) used to specify memory read address
-					.hsync(VGA_HS),
-					.vsync(VGA_VS),
-					.red(VGA_R),
-					.green(VGA_G),
-					.blue(VGA_B),
-					.sync(VGA_SYNC_N),
-					.clk(VGA_CLK),
-					.blank(VGA_BLANK_N)
+          .reset(vga_reset),
+          .color_in(SW[4] ? 8'b000_111_00 : vga_data),	// Pixel color (8-bit) from memory
+          // .color_in(8'b000_111_00),	// Pixel color (8-bit) from memory
+          .next_x(vga_next_x),		// This (and next_y) used to specify memory read address
+          .next_y(vga_next_y),		// This (and next_x) used to specify memory read address
+          .hsync(VGA_HS),
+          .vsync(VGA_VS),
+          .red(VGA_R),
+          .green(VGA_G),
+          .blue(VGA_B),
+          .sync(VGA_SYNC_N),
+          .clk(VGA_CLK),
+          .blank(VGA_BLANK_N)
 );
 
 //=======================================================
@@ -1884,41 +1884,41 @@ vga_driver DUT   (	.clock(my_clk),
 
 Computer_System The_System (
 
-	// Video In M10k SRAM 1
-	.onchip_sram_s2_address          (sram1_read_addr),
-	.onchip_sram_s2_chipselect       (1'b1),
-	.onchip_sram_s2_clken            (1'b1),
-	.onchip_sram_s2_write            (1'b0),
-	.onchip_sram_s2_readdata         (video_in_read_data),
-	.onchip_sram_s2_writedata        (),
+  // Video In M10k SRAM 1
+  .onchip_sram_s2_address          (sram1_read_addr),
+  .onchip_sram_s2_chipselect       (1'b1),
+  .onchip_sram_s2_clken            (1'b1),
+  .onchip_sram_s2_write            (1'b0),
+  .onchip_sram_s2_readdata         (video_in_read_data),
+  .onchip_sram_s2_writedata        (),
 
     //HOUGH SPACE SRAM
-	//2nd sram is what we want to output in the upper right corner of the vga
-	.hps_to_onchip_sram_s2_address    (acc_address), 
-	.hps_to_onchip_sram_s2_write      (acc_mem_write_en),
-	.hps_to_onchip_sram_s2_readdata   (acc_read_data),  
-	.hps_to_onchip_sram_s2_writedata  (acc_write_out_data),   
-	.hps_to_onchip_sram_s2_chipselect (1'b1),    
-	.hps_to_onchip_sram_s2_clken      (1'b1),
+  //2nd sram is what we want to output in the upper right corner of the vga
+  .hps_to_onchip_sram_s2_address    (acc_address), 
+  .hps_to_onchip_sram_s2_write      (acc_mem_write_en),
+  .hps_to_onchip_sram_s2_readdata   (acc_read_data),  
+  .hps_to_onchip_sram_s2_writedata  (acc_write_out_data),   
+  .hps_to_onchip_sram_s2_chipselect (1'b1),    
+  .hps_to_onchip_sram_s2_clken      (1'b1),
 
 
      // Just lines (ie black[])
-	.onchip_camera_in_to_onchip_copy_0_s2_address     (sram1_read_addr),
-	.onchip_camera_in_to_onchip_copy_0_s2_chipselect  (1'b1),    
-	.onchip_camera_in_to_onchip_copy_0_s2_clken       (1'b1),
-	.onchip_camera_in_to_onchip_copy_0_s2_write       (1'b0),
-	.onchip_camera_in_to_onchip_copy_0_s2_readdata    (lines_read_data),  
-	.onchip_camera_in_to_onchip_copy_0_s2_writedata   (),   
+  .onchip_camera_in_to_onchip_copy_0_s2_address     (sram1_read_addr),
+  .onchip_camera_in_to_onchip_copy_0_s2_chipselect  (1'b1),    
+  .onchip_camera_in_to_onchip_copy_0_s2_clken       (1'b1),
+  .onchip_camera_in_to_onchip_copy_0_s2_write       (1'b0),
+  .onchip_camera_in_to_onchip_copy_0_s2_readdata    (lines_read_data),  
+  .onchip_camera_in_to_onchip_copy_0_s2_writedata   (),   
 
-	.wait_signal_dispatcher_export(wait_dispatch),
+  .wait_signal_dispatcher_export(wait_dispatch),
 
-	// PLLs
-	.vga_pll_locked_export			(vga_pll_lock),           //       vga_pio_locked.export
-	.vga_pll_outclk0_clk				(vga_pll),              //      vga_pio_outclk0.clk
-	// .m10k_pll_locked_export			(M10k_pll_locked),          //      m10k_pll_locked.export
-	// .m10k_pll_outclk0_clk			(M10k_pll),            //     m10k_pll_outclk0.clk
+  // PLLs
+  .vga_pll_locked_export			(vga_pll_lock),           //       vga_pio_locked.export
+  .vga_pll_outclk0_clk				(vga_pll),              //      vga_pio_outclk0.clk
+  // .m10k_pll_locked_export			(M10k_pll_locked),          //      m10k_pll_locked.export
+  // .m10k_pll_outclk0_clk			(M10k_pll),            //     m10k_pll_outclk0.clk
 
-	// HPS data pio ports
+  // HPS data pio ports
 
 // More generated code omitted.
 
@@ -2103,7 +2103,7 @@ module M10K_76800_8( //8 bit colors with 240 rows * 320 pixels/row
     input [16:0] write_address, read_address,
     input we, clk
 );
-	 // force M10K ram style
+   // force M10K ram style
     reg [7:0] mem [76800:0]  /* synthesis ramstyle = "no_rw_check, M10K" */;
 
     always @ (posedge clk) begin
