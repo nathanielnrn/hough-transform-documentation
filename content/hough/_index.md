@@ -136,7 +136,7 @@ Considering the high level steps described above, it seems like a number of step
 Preliminary testing indicated that step 1 took the longest amount of time out of all steps, ranging anywhere between ~45% and ~80%
 of the entire computation time, shown below.
 
-<img src = "compute_time_pie.png" width = 500 >
+{{ figure(src="compute_time_pie.png", caption="Figure 8: Software Implementation Computation Time Distribution.", width=500, height=500) }}
 
 Furthermore, we aimed to minimize the amount of data transfered over Altera's Avalon Bus IP from the FPGA to the HPS, as having 
 multiple transfers saturated the bandwidth of the bus and led to glitches.
@@ -224,11 +224,10 @@ $$addr = (\theta_n + 1) * (\rho_{count} + 2) + (\rho_{addr} + 1).$$
 
 These tweaks allow for the local maxima finder to avoid bound checks, by making the usable space of our memory start at the first column and first row, as opposed to the zeroth.
 
-Figure ?? shows an abstract schematic of our address calculator. In practice our calculator was implemented with 2 continuous assignments
+Figure 9 shows an abstract schematic of our address calculator. In practice our calculator was implemented with 2 continuous assignments
 and a sine and cosine look up table.
 
-
-{{ figure(src="address-calc-diagram.png", caption="Figure ??: Schematic of our address calculator", width=500, height=500) }}
+{{ figure(src="address-calc-diagram.png", caption="Figure 9: Schematic of our address calculator", width=500, height=500) }}
 
 
 #### Accumulator
@@ -237,11 +236,11 @@ Our accumulator interfaces with a single SRAM, representing a 2-d Hough space an
 used in the address calculation.
 The entire module begins accumulating at the of the `reset` signal.
 
-As shown in Figure ??, our accumulator takes a cycle to read the current value from our accumulator, writes this value incremented by 1
+As shown in Figure 10, our accumulator takes a cycle to read the current value from our accumulator, writes this value incremented by 1
 to the same address in the next cycle, then returns to the read cycle, having incremented an internal register
 holding the current value of $\theta.$
 
-{{ figure(src="accumulator-fsm.png", caption="Figure ??: The state diagram of our accumulator module.", width=500, height=500) }}
+{{ figure(src="accumulator-fsm.png", caption="Figure 10: The state diagram of our accumulator module.", width=500, height=500) }}
 
 Our sine tables were constructed such that each address of the table corresponds to the value of the trigonometric function in degrees.
 This allowed us to avoid representing our $\theta$ in a fixed point, and instead we simply stored the current degree of $\theta.$
@@ -254,28 +253,28 @@ being reset.
 Figure 5 shows the contributions of a single pixel to a hough space. In the figure, the faint line seens corresponds to
 the lines that may go through said pixel.
 
-The contributions of an entire horizontal line, say that in Figure ??, can be seen in Figure ?? + 1
+The contributions of an entire horizontal line, say that in Figure 11, can be seen in Figure 12
 
-{{ figure(src="line-input.png", caption="Figure ??: The input of an entire line to our accumulator. This would
+{{ figure(src="line-input.png", caption="Figure 11: The input of an entire line to our accumulator. This would
 take multiple go-done rounds to fully accumulate.", width=500, height=500) }}
 
-{{ figure(src="line-hough-space.png", caption="Figure ??: The total accumulation of the input line in Figure ?? in our Hough space. Note there is a single point with a maximum value in the Hough space. This corresponds with the polar representation of our input line.", width=500, height=500) }}
+{{ figure(src="line-hough-space.png", caption="Figure 12: The total accumulation of the input line in Figure 11 in our Hough space. Note there is a single point with a maximum value in the Hough space. This corresponds with the polar representation of our input line.", width=500, height=500) }}
 
-The actual accumulator interface is shown below in Figure ??:
+The actual accumulator interface is shown below in Figure 13:
 
-{{ figure(src="accumulator-interface.png", caption="Figure ??: The interface of our accumulator module.", width=500, height=500) }}
+{{ figure(src="accumulator-interface.png", caption="Figure 13: The interface of our accumulator module.", width=500, height=500) }}
 
 With our accumulator in place, we needed a dispatcher to traverse over our edge detected image and tell the accumulator when to accumulate for a given pixel.
 
 
 #### Dispatcher
-The accumulator expects x and y coordinates of the image whose pixel is not black. Therefore, we implemented a dispatcher that communicates with the accumulator to parse through the image. As shown in Figure ???, the dispatcher directly communicates with the SRAM holding the image pixel data from the video and the accumulator. At a very high level, the dispatcher takes in x and y coordinates of the image starting from the top right of the image, which is (0, 0), along with its corresponding pixel color. It performs a bitwise `AND` to determine whether the pixel is black, so `8’b000_000_00`, and outputs the x and y coordinates it received if the logic determines that the pixel is not black. Additionally, when it finds a pixel that is not black, it sends a go signal that tells the accumulator that it can start its computation. The `go` wire is directly connected to the `reset` wire of the accumulator, so the go signal actually simply resets the accumulator to pull it out of its own `done` state. 
+The accumulator expects x and y coordinates of the image whose pixel is not black. Therefore, we implemented a dispatcher that communicates with the accumulator to parse through the image. As shown in Figure 14, the dispatcher directly communicates with the SRAM holding the image pixel data from the video and the accumulator. At a very high level, the dispatcher takes in x and y coordinates of the image starting from the top right of the image, which is (0, 0), along with its corresponding pixel color. It performs a bitwise `AND` to determine whether the pixel is black, so `8’b000_000_00`, and outputs the x and y coordinates it received if the logic determines that the pixel is not black. Additionally, when it finds a pixel that is not black, it sends a go signal that tells the accumulator that it can start its computation. The `go` wire is directly connected to the `reset` wire of the accumulator, so the go signal actually simply resets the accumulator to pull it out of its own `done` state. 
 
-{{ figure(src="dispatcher_block.png", caption="Figure ??: Dispatcher block diagram", width=500, height=500) }}
+{{ figure(src="dispatcher_block.png", caption="Figure 14: Dispatcher block diagram", width=500, height=500) }}
 
-Figure ??? shows the FSM design that we used for the dispatcher. There are three stages: `INIT`, `READY`, `WAIT`. The `INIT` state serves as a reset state that only resets all the register values to 0. The `READY` state is where the dispatcher actually performs logic operations. It increments through the x and y coordinates to look at the next pixel, sends x and y coordinates to the SRAM and accumulator, and determines whether the pixel is a `valid_pixel` (meaning not zero). In the `WAIT` state, the dispatcher remains dormant because it is waiting for the accumulator to be done performing its computation. We do not want the dispatcher to keep going through pixels in the picture when the accumulator has not finished and is not ready to take in a new x and y coordinate pair. The dispatcher will leave the `WAIT` state when it receives a signal from the accumulator called the `acc_done` that tells the dispatcher that the accumulator has finished and it is ready to receive new x and y coordinates. 
+Figure 15 shows the FSM design that we used for the dispatcher. There are three stages: `INIT`, `READY`, `WAIT`. The `INIT` state serves as a reset state that only resets all the register values to 0. The `READY` state is where the dispatcher actually performs logic operations. It increments through the x and y coordinates to look at the next pixel, sends x and y coordinates to the SRAM and accumulator, and determines whether the pixel is a `valid_pixel` (meaning not zero). In the `WAIT` state, the dispatcher remains dormant because it is waiting for the accumulator to be done performing its computation. We do not want the dispatcher to keep going through pixels in the picture when the accumulator has not finished and is not ready to take in a new x and y coordinate pair. The dispatcher will leave the `WAIT` state when it receives a signal from the accumulator called the `acc_done` that tells the dispatcher that the accumulator has finished and it is ready to receive new x and y coordinates. 
 
-{{ figure(src="dispatcher_fsm.png", caption="Figure ??: Dispatcher state machine", width=500, height=500) }}
+{{ figure(src="dispatcher_fsm.png", caption="Figure 15: Dispatcher state machine", width=500, height=500) }}
 
 In addition, the dispatcher receives a `wait_sig` from a PIO port that also tells the dispatcher to wait. This signal comes from the C program, and it is set high right before we reset all the accumulator values. After every time we go through the image, we want to zero out the accumulator values since the accumulator values are calculated for a single frame. Therefore, to prevent the dispatcher and accumulator from doing work while we are resetting all the accumulator values, we send out a `wait_sig` that stops all the entire hardware computation. 
 
@@ -284,26 +283,26 @@ In addition, the dispatcher receives a `wait_sig` from a PIO port that also tell
 #### Platform Designer
 The Qsys layout’s most significant components are the Video-In Subsystem, the three On-Chip Memory blocks, and the one PIO port. The Video-In Subsystem consists of a series of Altera IP blocks connected to each other to process input data from the camera. In the Video-In Subsystem, there is a block of IP called the Edge Detection System, which allows us to obtain edge detection for “free”. In fact, if we had to instantiate an Edge Detection System on its own or implemented one in Verilog, it would have cost us more memory, which as we explain later was very limited. The Edge Detection IP takes streaming input data and sends streaming output data. The streaming interfaces on their own require additional IP blocks to wrap them in order to obtain the data as we intended. Luckily, the Video-In Subsystem already took care of this for us. In its core, the Edge Detection IP is a Sobel Filter, along with additional blocks that enhance the edge detection. 
 
-{{ figure(src="edge_detection_ip.png", caption="Figure ??: Edge Detection IP Block from Altera Video IP Core", width=500, height=500) }}
+{{ figure(src="edge_detection_ip.png", caption="Figure 16: Edge Detection IP Block from Altera Video IP Core", width=500, height=500) }}
 
 Additionally, we instantiated three On-Chip Memory blocks on Qsys. The first memory block served the purpose of storing the data directly obtained from the Video-In Subsystem. Therefore, it contained data for a 320x240 picture (76,800 elements), where each pixel was 8 bits of data. The second memory block stored the accumulator data, which was around 102,000 elements of 8 bit data. The accumulator amount was represented in 8 bits and the memory was around 102,000 elements because it was 180 degrees x 560 rho values. The third memory block stored the lines that would be superimposed onto the original image, so it had the same dimensions as the first On-Chip Memory that contained the video data.
 
 Lastly, we had the `wait_sig` PIO, which allowed the C program to momentarily pause all computation done by the Verilog. This helped to reset entire arrays of data without having to account for extra data being generated while the resetting was in progress. 
 
 {{ figure(src="top_qsys.png", caption="", width=500, height=500) }}
-{{ figure(src="bottom_qsys.png", caption="Figure ??: Qsys Layout of our Design", width=500, height=500) }}
+{{ figure(src="bottom_qsys.png", caption="Figure 17: Qsys Layout of our Design", width=500, height=500) }}
 
 
 
 #### System
 
-Figure ??? shows the entire system at a very high level. For reference, blue is for any blocks instantiated in Qsys, orange is for blocks instantiated in Verilog, yellow is for logic done in the software, and green is the camera. The camera takes in data and directly stores each edge-detected frame into a dual ported SRAM. An M10k block implemented in Verilog reads from this SRAM and stores a copy of its data. The reason we added this M10k block to store a copy of the data was to be able to display the Qsys SRAM data onto the VGA driver. The Qsys SRAM can only be read or written from one address. Therefore, we were not able to both have the dispatcher and VGA driver read from the M10k at the same time for the x and y coordinates they both wanted. Basically, the VGA driver and the dispatcher requested different x and y coordinates at same times, so we needed a copy so that one reads from one and the other reads from the copy. Therefore, the dispatcher reads its desired x and y coordinates, along with its pixel color data, from the Video M10k. The accumulator communicates with the dispatcher to output its accumulation data into a Qsys SRAM called `acc_sram`. This SRAM is connected in Qsys to the HPS bus. This allows the C program to read and write the acc_sram by accessing the memory areas where the block is located. We want to write to the SRAM when we reset all the accumulator values once we move to the next frame. We want to read from the SRAM to perform the necessary remaining computations of the Line Hough Transform, which are finding the local maximum of the accumulator values, sorting through them, and drawing the lines. The C program then directly accesses another Qsys SRAM that is connected to the HPS bus and writes the lines to it. This is done, again, by writing to the specific memory locations where the SRAM is located in the bus. In the Verilog, we add the lines data with the original video data, which is located in the first Qsys SRAM we talked about called Video In SRAM. The VGA driver reads this and outputs it to the VGA screen. 
+Figure 18 shows the entire system at a very high level. For reference, blue is for any blocks instantiated in Qsys, orange is for blocks instantiated in Verilog, yellow is for logic done in the software, and green is the camera. The camera takes in data and directly stores each edge-detected frame into a dual ported SRAM. An M10k block implemented in Verilog reads from this SRAM and stores a copy of its data. The reason we added this M10k block to store a copy of the data was to be able to display the Qsys SRAM data onto the VGA driver. The Qsys SRAM can only be read or written from one address. Therefore, we were not able to both have the dispatcher and VGA driver read from the M10k at the same time for the x and y coordinates they both wanted. Basically, the VGA driver and the dispatcher requested different x and y coordinates at same times, so we needed a copy so that one reads from one and the other reads from the copy. Therefore, the dispatcher reads its desired x and y coordinates, along with its pixel color data, from the Video M10k. The accumulator communicates with the dispatcher to output its accumulation data into a Qsys SRAM called `acc_sram`. This SRAM is connected in Qsys to the HPS bus. This allows the C program to read and write the acc_sram by accessing the memory areas where the block is located. We want to write to the SRAM when we reset all the accumulator values once we move to the next frame. We want to read from the SRAM to perform the necessary remaining computations of the Line Hough Transform, which are finding the local maximum of the accumulator values, sorting through them, and drawing the lines. The C program then directly accesses another Qsys SRAM that is connected to the HPS bus and writes the lines to it. This is done, again, by writing to the specific memory locations where the SRAM is located in the bus. In the Verilog, we add the lines data with the original video data, which is located in the first Qsys SRAM we talked about called Video In SRAM. The VGA driver reads this and outputs it to the VGA screen. 
 
-{{ figure(src="hough_system.png", caption="Figure ??: High Level Diagram of Entire System", width=500, height=500) }}
+{{ figure(src="hough_system.png", caption="Figure 18: High Level Diagram of Entire System", width=500, height=500) }}
 
 The original idea was to display the original video input, the edge detected data, the hough space, and the line drawn original image in the four quadrants of the VGA screen. The main problem with this was that we were running out of memory. To have the VGA driver read this data, we needed it to be in a Verilog instantiated M10k block. As stated before, the Qsys memory blocks do not allow us to read and write from different addresses. These read/write wires were already occupied for the data flow required in the logic computation. Therefore, we would have needed to store a copy of the data stored in the Qsys SRAMs into M10k blocks and have the VGA driver read from these. The video related memory blocks had 76800(240x320) elements of 8 bits and the hough space data was stored in 204386 elements of 10 bits memory. Once we added up all the memory space we needed to achieve this four quadrant display and compared it to the available memory, we realized that this would be impossible. Therefore, to still prove correct functionality, we displayed the edge detected image and the edge detected + lines drawn image.
 
-{{ figure(src="working_verilog.png", caption="Figure ??: VGA screen output", width=500, height=500) }}
+{{ figure(src="working_verilog.png", caption="Figure 19: VGA screen output", width=500, height=500) }}
 
 
 ### Software
@@ -362,7 +361,7 @@ The contents of this `char` array is then written to our hardware SRAMs, again v
 
 At this point, we an SRAM containing our source image accessible in hardware, along with an SRAM containing all zeroes, except
 for pixels on lines found in our original source image.
-Our VGA driver combines these 2 values (performing a simple sum) before displaying them on our screen. (Figure ??).
+Our VGA driver combines these 2 values (performing a simple sum) before displaying them on our screen. (Figure 19).
 
 At this point we have succesfully found lines on a source image using a Hough Transform!!
 
@@ -391,19 +390,19 @@ our accumulator.
 Fortunately, we were able to get around this by exporting the addresses output by our accumulator and writing a Python script to
 perform accumulation for us in a correctly sized accumulation array.
 
-The results of which can be seen in Figure ??. Note that this differs from Figure ?? which displays the expected result,
+The results of which can be seen in Figure 20. Note that this differs from Figure 12 which displays the expected result,
 while the displays the result of our hardware (with a halved $\rho$ resolution).
 
-{{ figure(src="modelsim-hough-space.png", caption="Figure ??: The accumulation of our accumulator being input
+{{ figure(src="modelsim-hough-space.png", caption="Figure 20: The accumulation of our accumulator being input
 a single vertical line.", width=500, height=500) }}
 
 Seeing a strong correlation between the expected and actual results of our accumulator we could focus on our toplevel structurs and FSMs.
 
-We also were able to visualize the hough space of our accumulator in real time. An example of which can be seen in Figure ??. 
+We also were able to visualize the hough space of our accumulator in real time. An example of which can be seen in Figure 21. 
 Unfortunately memory constraints prevented us from visualizing the hough space along with the lines themselves. So this visualization
 was used as a qualitative intermedfdiate step in getting our project working.
 
-{{ figure(src="hough-visual.png", caption="Figure ??: Realtime visualization of our accumulated Hough space.", width=500, height=500) }}
+{{ figure(src="hough-visual.png", caption="Figure 21: Realtime visualization of our accumulated Hough space.", width=500, height=500) }}
 
 
 ### Challenges of Note
@@ -456,18 +455,17 @@ We were able to acquire extemely precise timing data by breaking out our `done` 
 | <img src = "image_2.png" style="width:250px" > | <img src = "scope_2.png" style="width:250px" > |
 | <img src = "image_3.png" style="width:250px" >| <img src = "scope_3.png" style="width:250px" >|
 
+</center>
+
 Shown in order, image 1 contains some a scene with a single shifted rectangle, used as our "moderate complexity" case, image 2 shows a mess of cables, our "high complexity" case and image 3 is a blank sheet of paper, our "low complexity" case.
 
 Shown below is the performance of both the software implementation and the hardware implementation, measured in compute time (per image) over each test case.
 
 
-<center>
+{{ figure(src="compute_time_chart.png", caption="Figure 22: Comparison between Hardware and Software Implementation of Stages of Line Hough Transform.", width=500, height=500) }}
 
-<img src = "compute_time_chart.png">
 
-</center>
-
-We can see a dramatic speed-up in the cmopute time, so much so that the hardware time almost needs a log scale to be seen. We can see the dramtic increase in accumulator time for complex images and be assured that we picked the right computation to port to hardware.
+We can see a dramatic speed-up in the compute time, so much so that the hardware time almost needs a log scale to be seen. We can see the dramatic increase in accumulator time for complex images and be assured that we picked the right computation to port to hardware.
 
 
 What's interesting is that both of the operations essentially scale with O(N), where N is the number of non-zero pixels in the image after edge detection and thresholding (a good proxy for "complexity"). Both the software and hardware sweep over a constant subset of angels in the Hough space for each non-zero point.
