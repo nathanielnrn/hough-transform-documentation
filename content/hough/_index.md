@@ -253,12 +253,8 @@ being reset.
 Figure 5 shows the contributions of a single pixel to a hough space. In the figure, the faint line seens corresponds to
 the lines that may go through said pixel.
 
-The contributions of an entire horizontal line, say that in Figure 11, can be seen in Figure 12
+The contributions of an entire horizontal line, say that in Figure 6, can be seen in Figure 7.
 
-{{ figure(src="line-input.png", caption="Figure 11: The input of an entire line to our accumulator. This would
-take multiple go-done rounds to fully accumulate.", width=500, height=500) }}
-
-{{ figure(src="line-hough-space.png", caption="Figure 12: The total accumulation of the input line in Figure 11 in our Hough space. Note there is a single point with a maximum value in the Hough space. This corresponds with the polar representation of our input line.", width=500, height=500) }}
 
 The actual accumulator interface is shown below in Figure 13:
 
@@ -343,12 +339,12 @@ The pointer arithmetic corresponds with the shape of our accumulator SRAM, and l
 accesible by our HPS.
 
 ```C
-		for(theta_n = 0; theta_n < 180; ++theta_n){
-			for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
-				accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
-				accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
-			}
-		}
+for(theta_n = 0; theta_n < 180; ++theta_n){
+  for(rho_n = 0; rho_n < rho_count; ++ rho_n ){
+    accum_val = (char*)(hps_copy_sram2_ptr + ((theta_n + 1) * (rho_count + 2)) + (rho_n + 1));
+    accum[((theta_n + 1) * (rho_count + 2)) + (	rho_n + 1)] = *accum_val;
+  }
+}
 ```
 
 `accum` is then passed into a function that finds local maxima within the array (by performing a naive neighbor check).
@@ -526,15 +522,15 @@ workarounds for this. Unfortunately, the visual component of our simulation woul
 
 We were actually a bit worried that we wouldn't see much of an acceleration in the image processing and we pleasantly surprised by how much faster the hardware implementation was. Since our time complexity is essentially the same, and the FPGA clock is much slower than the HPS, we were worried we might actually just slow the processing down. However, we reaped several benefits from implementing it on the FPGA that we did not anticipate:
 
-	1. Parallelization of the Canny Edge Detection
+  1. Parallelization of the Canny Edge Detection
 
 As mentioned above, we were very fortunate to be able to utilize the existing edge-detection IP to save a ton of time converting on the front end. Additionally, by directly sending this to the hardware implementation, we avoided serial address computation (saving us a few cycles per pixel).
 
-	2. Parallelization of the image-space traversal
+  2. Parallelization of the image-space traversal
 
 By separating the dispatcher and compute modules, we're able to skip over empty image-space pixels while the compute module traverses the hough-space. Additionally, since both representations are stored on the FPGA we're able to update the addresses in parallel and essentially traverse 2 pixels (one in hough-space and one in image-space) per cycle.
 
-	3. Parallelization of the computation of rho
+  3. Parallelization of the computation of rho
 One of the most cycle-intensive computations is computing the rho from a given x, y, and theta, requiring multiple multiplications and adds, likely taking multiple cycles to compute a rho for each pixel. On the FPGA, this is easily parallelized and peformed in a single cycle.
 
 
