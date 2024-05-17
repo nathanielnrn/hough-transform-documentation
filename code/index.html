@@ -1,0 +1,2072 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content="light dark" name=color-scheme><meta content="Code listing for our Hough Transform project." name=description><title>Hough Transform - Code</title><link href=https://nathanielnrn.github.io/hough-transform-documentation/img/favicon-32x32.png rel=icon sizes=32x32 type=image/png><link href=https://nathanielnrn.github.io/hough-transform-documentation/img/favicon-16x16.png rel=icon sizes=16x16 type=image/png><link href=https://nathanielnrn.github.io/hough-transform-documentation/img/apple-touch-icon.png rel=apple-touch-icon sizes=180x180><link href=https://fonts.googleapis.com rel=preconnect><link crossorigin href=https://fonts.gstatic.com rel=preconnect><link href="https://fonts.googleapis.com/css2?family=Signika&display=swap" rel=stylesheet><style>body{--primary-color:#698bcf;--primary-pale-color:#698bcf1c;--text-color:#3c4043;--text-pale-color:#9aa2b9;--bg-color:#fff;--highlight-mark-color:#5f75b045;--callout-note-color:#698bcf;--callout-important-color:#9971d9;--callout-warning-color:#c99054;--callout-alert-color:#d35757;--callout-question-color:#4985a2;--callout-tip-color:#3ea06f;--main-font:'Signika',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--code-font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--homepage-max-width:750px;--main-max-width:750px;--avatar-size:70px;--paragraph-font-size:18px;--paragraph-line-height:1.75;--aside-font-size:16px;--img-border-radius:0;--inline-code-border-radius:2px}body.dark{--primary-color:#698bcf;--primary-pale-color:#698bcf1c;--text-color:#9197a5;--text-pale-color:#5d6470;--bg-color:#202124;--highlight-mark-color:#5f75b045;--callout-note-color:#698bcf;--callout-important-color:#9971d9;--callout-warning-color:#c99054;--callout-alert-color:#d35757;--callout-question-color:#4985a2;--callout-tip-color:#3ea06f}</style><link href=https://nathanielnrn.github.io/hough-transform-documentation/main.css rel=stylesheet><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css integrity=sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI rel=stylesheet><script crossorigin defer integrity=sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t src=https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js></script><script crossorigin defer integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 src=https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false})})</script><body class=prose-page><script>if(localStorage.getItem('theme')=='dark'){document.body.classList.add('dark');const a=document.querySelector('link#hl');if(a)a.href='/hl-dark.css'}</script><header class=blur><div id=header-wrapper><nav><a href=https://nathanielnrn.github.io/hough-transform-documentation>{brandonpwood, nathanielnrn, tomaschoi03}</a><span class=separator>::</span><a href=https://nathanielnrn.github.io/hough-transform-documentation/hough>Hough</a></nav><div id=btns><button aria-label="theme switch" data-moon-icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>' data-sun-icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>' id=theme-toggle><svg viewbox="0 0 24 24" height=24 width=24 xmlns=http://www.w3.org/2000/svg><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill=currentColor></path></svg></button></div></div></header><div id=wrapper><main><div><div data-check-icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z" fill="currentColor"></path></svg>' data-copy-icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" fill="currentColor"></path></svg>' id=copy-cfg style=display:none></div><article data-backlink-icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M9.41421 8L18.0208 16.6066L16.6066 18.0208L8 9.41421V17H6V6H17V8H9.41421Z" fill="currentColor"></path></svg>' class=prose><p>See the <a href=../hough>documentation</a> of this code.<p>What follows is an abridged version of our Verilog code (generated segments removed) and our C code. The full repo is available upon <a href=mailto:nathanielnrn99@gmail.com>request</a>.<h1 id=c>C++</h1><h2 id=hough-and-line-drawer>Hough and Line Drawer</h2><pre class=language-cpp data-lang=cpp style=background:#282a36;color:#f8f8f2><code class=language-cpp data-lang=cpp><span style=color:#6272a4>// By downloading, copying, installing or using the software you agree to this license.
+</span><span style=color:#6272a4>// If you do not agree to this license, do not download, install,
+</span><span style=color:#6272a4>// copy or use the software.
+</span><span>
+</span><span>
+</span><span style=color:#6272a4>//                           License Agreement
+</span><span style=color:#6272a4>//                For Open Source Computer Vision Library
+</span><span style=color:#6272a4>//                        (3-clause BSD License)
+</span><span>
+</span><span style=color:#6272a4>// Copyright (C) 2000-2020, Intel Corporation, all rights reserved.
+</span><span style=color:#6272a4>// Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+</span><span style=color:#6272a4>// Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+</span><span style=color:#6272a4>// Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+</span><span style=color:#6272a4>// Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+</span><span style=color:#6272a4>// Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+</span><span style=color:#6272a4>// Copyright (C) 2019-2020, Xperience AI, all rights reserved.
+</span><span style=color:#6272a4>// Third party copyrights are property of their respective owners.
+</span><span>
+</span><span style=color:#6272a4>// Redistribution and use in source and binary forms, with or without modification,
+</span><span style=color:#6272a4>// are permitted provided that the following conditions are met:
+</span><span>
+</span><span style=color:#6272a4>//   * Redistributions of source code must retain the above copyright notice,
+</span><span style=color:#6272a4>//     this list of conditions and the following disclaimer.
+</span><span>
+</span><span style=color:#6272a4>//   * Redistributions in binary form must reproduce the above copyright notice,
+</span><span style=color:#6272a4>//     this list of conditions and the following disclaimer in the documentation
+</span><span style=color:#6272a4>//     and/or other materials provided with the distribution.
+</span><span>
+</span><span style=color:#6272a4>//   * Neither the names of the copyright holders nor the names of the contributors
+</span><span style=color:#6272a4>//     may be used to endorse or promote products derived from this software
+</span><span style=color:#6272a4>//     without specific prior written permission.
+</span><span>
+</span><span style=color:#6272a4>// This software is provided by the copyright holders and contributors "as is" and
+</span><span style=color:#6272a4>// any express or implied warranties, including, but not limited to, the implied
+</span><span style=color:#6272a4>// warranties of merchantability and fitness for a particular purpose are disclaimed.
+</span><span style=color:#6272a4>// In no event shall copyright holders or contributors be liable for any direct,
+</span><span style=color:#6272a4>// indirect, incidental, special, exemplary, or consequential damages
+</span><span style=color:#6272a4>// (including, but not limited to, procurement of substitute goods or services;
+</span><span style=color:#6272a4>// loss of use, data, or profits; or business interruption) however caused
+</span><span style=color:#6272a4>// and on any theory of liability, whether in contract, strict liability,
+</span><span style=color:#6272a4>// or tort (including negligence or otherwise) arising in any way out of
+</span><span style=color:#6272a4>// the use of this software, even if advised of the possibility of such damage.
+</span><span style=color:#6272a4>///////////////////////////////////////
+</span><span style=color:#6272a4>/// 640x480 version!
+</span><span style=color:#6272a4>/// test VGA with hardware video input copy to VGA
+</span><span style=color:#6272a4>///////////////////////////////////////
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTfcntl.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTmath.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTstdio.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTstdlib.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTstring.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/ipc.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/mman.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/shm.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/time.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/types.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTunistd.h>
+</span><span>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTalgorithm>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTiterator>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTvector>
+</span><span>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>"address_map_arm_brl4.h"
+</span><span>
+</span><span style=color:#ff79c6>#define </span><span>PI </span><span style=color:#bd93f9>3.14159
+</span><span style=color:#ff79c6>#define </span><span style=color:#50fa7b>assert</span><span>(</span><span style=font-style:italic;color:#ffb86c>b</span><span>)                      \
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(</span><span style=color:#ff79c6>!</span><span>b) </span><span style=color:#fff>{                            </span><span>\
+</span><span>    </span><span style=color:#8be9fd>printf</span><span>(</span><span style=color:#f1fa8c>"assertion does not hold"</span><span>); \
+</span><span>    </span><span style=color:#8be9fd>exit</span><span>(</span><span style=color:#bd93f9>3</span><span>);                           \
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>enum </span><span style=color:#fff>{</span><span> XY_SHIFT </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>16</span><span>,
+</span><span>       XY_ONE </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1 </span><span style=color:#ff79c6><<</span><span> XY_SHIFT,
+</span><span>       DRAWING_STORAGE_BLOCK </span><span style=color:#ff79c6>= </span><span>(</span><span style=color:#bd93f9>1 </span><span style=color:#ff79c6><< </span><span style=color:#bd93f9>12</span><span>) </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>256 </span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span style=color:#6272a4>/*
+</span><span style=color:#6272a4>Here image is an input raster;
+</span><span style=color:#6272a4>step is it's step; size characterizes it's ROI;
+</span><span style=color:#6272a4>rho and theta are discretization steps (in pixels and radians correspondingly).
+</span><span style=color:#6272a4>threshold is the minimum number of pixels in the feature for it
+</span><span style=color:#6272a4>to be a candidate for line. lines is the output
+</span><span style=color:#6272a4>array of (rho, theta) pairs. linesMax is the buffer size (number of pairs).
+</span><span style=color:#6272a4>Functions return the actual number of found lines.
+</span><span style=color:#6272a4>*/
+</span><span style=font-style:italic;color:#8be9fd>struct </span><span>LinePolar </span><span style=color:#fff>{
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>float</span><span> rho;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>float</span><span> angle;
+</span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>struct </span><span>Point </span><span style=color:#fff>{
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> x;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> y;
+</span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>struct </span><span>Rect </span><span style=color:#fff>{
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> x;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> y;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> width;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> height;
+</span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>struct </span><span>hough_cmp_gt </span><span style=color:#fff>{
+</span><span>  </span><span style=color:#50fa7b>hough_cmp_gt</span><span>(</span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>_aux</span><span>) : </span><span style=color:#fff>aux</span><span>(_aux) </span><span style=color:#fff>{}
+</span><span>  </span><span style=color:#ff79c6>inline </span><span style=font-style:italic;color:#8be9fd>bool </span><span style=color:#50fa7b>operator()</span><span>(</span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>l1</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>l2</span><span>) </span><span style=color:#ff79c6>const </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#ff79c6>return</span><span> aux[l1] </span><span style=color:#ff79c6>></span><span> aux[l2] </span><span style=color:#ff79c6>|| </span><span>(aux[l1] </span><span style=color:#ff79c6>==</span><span> aux[l2] </span><span style=color:#ff79c6>&&</span><span> l1 </span><span style=color:#ff79c6><</span><span> l2);
+</span><span>  </span><span style=color:#fff>}
+</span><span>  </span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>*</span><span> aux;
+</span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span style=color:#ff79c6>static inline </span><span style=font-style:italic;color:#8be9fd>int
+</span><span style=color:#50fa7b>computeNumangle</span><span>(</span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>min_theta</span><span>, </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>max_theta</span><span>, </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>theta_step</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> numangle </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>floor</span><span>((max_theta </span><span style=color:#ff79c6>-</span><span> min_theta) </span><span style=color:#ff79c6>/</span><span> theta_step) </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>;
+</span><span>  </span><span style=color:#6272a4>// If the distance between the first angle and the last angle is
+</span><span>  </span><span style=color:#6272a4>// approximately equal to pi, then the last angle will be removed
+</span><span>  </span><span style=color:#6272a4>// in order to prevent a line to be detected twice.
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(numangle </span><span style=color:#ff79c6>> </span><span style=color:#bd93f9>1 </span><span style=color:#ff79c6>&& </span><span style=color:#8be9fd>fabs</span><span>(PI </span><span style=color:#ff79c6>- </span><span>(numangle </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>*</span><span> theta_step) </span><span style=color:#ff79c6><</span><span> theta_step </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>2</span><span>)
+</span><span>    </span><span style=color:#ff79c6>--</span><span>numangle;
+</span><span>  </span><span style=color:#ff79c6>return</span><span> numangle;
+</span><span style=color:#fff>}
+</span><span>
+</span><span style=color:#ff79c6>static </span><span style=font-style:italic;color:#8be9fd>void
+</span><span style=color:#50fa7b>createTrigTable</span><span>(</span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>numangle</span><span>, </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>min_theta</span><span>, </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>theta_step</span><span>,
+</span><span>                </span><span style=font-style:italic;color:#8be9fd>float </span><span style=font-style:italic;color:#ffb86c>irho</span><span>, </span><span style=font-style:italic;color:#8be9fd>float</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>tabSin</span><span>, </span><span style=font-style:italic;color:#8be9fd>float</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>tabCos</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>float</span><span> ang </span><span style=color:#ff79c6>= static_cast</span><span><</span><span style=font-style:italic;color:#8be9fd>float</span><span>>(min_theta);
+</span><span>  </span><span style=color:#ff79c6>for </span><span>(</span><span style=font-style:italic;color:#8be9fd>int</span><span> n </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; n </span><span style=color:#ff79c6><</span><span> numangle; ang </span><span style=color:#ff79c6>+= </span><span>(</span><span style=font-style:italic;color:#8be9fd>float</span><span>)theta_step, n</span><span style=color:#ff79c6>++</span><span>) </span><span style=color:#fff>{
+</span><span>    tabSin[n] </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>float</span><span>)(</span><span style=color:#8be9fd>sin</span><span>((</span><span style=font-style:italic;color:#8be9fd>double</span><span>)ang) </span><span style=color:#ff79c6>*</span><span> irho);
+</span><span>    tabCos[n] </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>float</span><span>)(</span><span style=color:#8be9fd>cos</span><span>((</span><span style=font-style:italic;color:#8be9fd>double</span><span>)ang) </span><span style=color:#ff79c6>*</span><span> irho);
+</span><span>  </span><span style=color:#fff>}
+</span><span style=color:#fff>}
+</span><span>
+</span><span style=color:#ff79c6>static </span><span style=font-style:italic;color:#8be9fd>void
+</span><span style=color:#50fa7b>findLocalMaximums</span><span>(</span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>numrho</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>numangle</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>threshold</span><span>,
+</span><span>                  </span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>accum</span><span>, std</span><span style=color:#ff79c6>::</span><span>vector<</span><span style=font-style:italic;color:#8be9fd>int</span><span>></span><span style=color:#ff79c6>& </span><span style=font-style:italic;color:#ffb86c>sort_buf</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=color:#ff79c6>for </span><span>(</span><span style=font-style:italic;color:#8be9fd>int</span><span> r </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; r </span><span style=color:#ff79c6><</span><span> numrho; r</span><span style=color:#ff79c6>++</span><span>)
+</span><span>    </span><span style=color:#ff79c6>for </span><span>(</span><span style=font-style:italic;color:#8be9fd>int</span><span> n </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; n </span><span style=color:#ff79c6><</span><span> numangle; n</span><span style=color:#ff79c6>++</span><span>) </span><span style=color:#fff>{
+</span><span>      </span><span style=font-style:italic;color:#8be9fd>int</span><span> base </span><span style=color:#ff79c6>= </span><span>(n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>* </span><span>(numrho </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>) </span><span style=color:#ff79c6>+</span><span> r </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>;
+</span><span>      </span><span style=color:#ff79c6>if </span><span>(accum[base] </span><span style=color:#ff79c6>></span><span> threshold </span><span style=color:#ff79c6>&&
+</span><span>          accum[base] </span><span style=color:#ff79c6>></span><span> accum[base </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>1</span><span>] </span><span style=color:#ff79c6>&&</span><span> accum[base] </span><span style=color:#ff79c6>>=</span><span> accum[base </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>] </span><span style=color:#ff79c6>&&
+</span><span>          accum[base] </span><span style=color:#ff79c6>></span><span> accum[base </span><span style=color:#ff79c6>-</span><span> numrho </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>2</span><span>] </span><span style=color:#ff79c6>&&</span><span> accum[base] </span><span style=color:#ff79c6>>=</span><span> accum[base </span><span style=color:#ff79c6>+</span><span> numrho </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>])
+</span><span>        sort_buf</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>push_back</span><span>(base);
+</span><span>    </span><span style=color:#fff>}
+</span><span style=color:#fff>}
+</span><span>
+</span><span style=color:#6272a4>// lines should be of size linesMax
+</span><span style=color:#ff79c6>static </span><span style=font-style:italic;color:#8be9fd>void
+</span><span style=color:#50fa7b>HoughLinesStandard</span><span>(std</span><span style=color:#ff79c6>::</span><span>vector&LTLinePolar></span><span style=color:#ff79c6>& </span><span style=font-style:italic;color:#ffb86c>lines</span><span>,
+</span><span>                   </span><span style=font-style:italic;color:#8be9fd>float </span><span style=font-style:italic;color:#ffb86c>rho</span><span>, </span><span style=font-style:italic;color:#8be9fd>float </span><span style=font-style:italic;color:#ffb86c>theta</span><span>,
+</span><span>                   </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>threshold</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>linesMax</span><span>,
+</span><span>                   </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>min_theta</span><span>, </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>max_theta</span><span>, </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>accum</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=color:#6272a4>// unsigned char* img = (unsigned char*)src;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> i, j;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>float</span><span> irho </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1 </span><span style=color:#ff79c6>/</span><span> rho;
+</span><span>
+</span><span>  </span><span style=color:#8be9fd>assert</span><span>(linesMax </span><span style=color:#ff79c6>> </span><span style=color:#bd93f9>0</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// const unsigned char* image = img;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> step </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>320</span><span>; </span><span style=color:#6272a4>//Size in bytes of a row of image
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> width </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>320</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> height </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>240</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> max_rho </span><span style=color:#ff79c6>= </span><span>(width </span><span style=color:#ff79c6>+</span><span> height) </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>2</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> min_rho </span><span style=color:#ff79c6>= -</span><span>max_rho;
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(max_theta </span><span style=color:#ff79c6><</span><span> min_theta) </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#8be9fd>printf</span><span>(</span><span style=color:#f1fa8c>"max_theta must be greater than min_theta"</span><span>);
+</span><span>    </span><span style=color:#8be9fd>exit</span><span>(</span><span style=color:#bd93f9>2</span><span>);
+</span><span>  </span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> numangle </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>computeNumangle</span><span>(min_theta, max_theta, theta);
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> numrho </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>round</span><span>(((max_rho </span><span style=color:#ff79c6>-</span><span> min_rho) </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>/</span><span> rho);
+</span><span>
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// ALSO rho is x axis and y is theta, not other way around
+</span><span>  </span><span style=color:#6272a4>// for(int i = 0; i <(180 + 2) * (1121 + 2); ++i ){
+</span><span>  </span><span style=color:#6272a4>//   accum[i] = 0;
+</span><span>  </span><span style=color:#6272a4>// }
+</span><span>
+</span><span>  std</span><span style=color:#ff79c6>::</span><span>vector<</span><span style=font-style:italic;color:#8be9fd>int</span><span>> _sort_buf;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>struct</span><span> timeval t1, t2;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>double</span><span> elapsedTime;
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t1, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t2, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>  elapsedTime </span><span style=color:#ff79c6>= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec</span><span>) </span><span style=color:#ff79c6>* </span><span style=color:#bd93f9>1000.0</span><span>;      </span><span style=color:#6272a4>// sec to ms
+</span><span>  elapsedTime </span><span style=color:#ff79c6>+= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec</span><span>) </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>1000.0</span><span>;   </span><span style=color:#6272a4>// us to ms
+</span><span>  </span><span style=color:#6272a4>// printf("Fill Accumulator: %f\n", elapsedTime);
+</span><span>
+</span><span>
+</span><span>  
+</span><span>  </span><span style=color:#6272a4>// stage 2. find local maximums
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t1, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>findLocalMaximums</span><span>(numrho, numangle, threshold, accum, _sort_buf);
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t2, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>  elapsedTime </span><span style=color:#ff79c6>= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec</span><span>) </span><span style=color:#ff79c6>* </span><span style=color:#bd93f9>1000.0</span><span>;      </span><span style=color:#6272a4>// sec to ms
+</span><span>  elapsedTime </span><span style=color:#ff79c6>+= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec</span><span>) </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>1000.0</span><span>;   </span><span style=color:#6272a4>// us to ms
+</span><span>  </span><span style=color:#6272a4>// printf("Find Local Maximum: %f\n", elapsedTime);
+</span><span>
+</span><span>
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// stage 3. sort the detected lines by accumulator value
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t1, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>
+</span><span>  std</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>sort</span><span>(_sort_buf</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>begin</span><span>(), _sort_buf</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>end</span><span>(), </span><span style=color:#50fa7b>hough_cmp_gt</span><span>(accum));
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t2, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>  elapsedTime </span><span style=color:#ff79c6>= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec</span><span>) </span><span style=color:#ff79c6>* </span><span style=color:#bd93f9>1000.0</span><span>;      </span><span style=color:#6272a4>// sec to ms
+</span><span>  elapsedTime </span><span style=color:#ff79c6>+= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec</span><span>) </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>1000.0</span><span>;   </span><span style=color:#6272a4>// us to ms
+</span><span>  </span><span style=color:#6272a4>// printf("Sorting: %f\n", elapsedTime);
+</span><span>
+</span><span>
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// stage 4. store the first min(total,linesMax) lines to the output buffer
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t1, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>
+</span><span>  linesMax </span><span style=color:#ff79c6>= </span><span>std</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>min</span><span>(linesMax, (</span><span style=font-style:italic;color:#8be9fd>int</span><span>)_sort_buf</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>size</span><span>());
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>double</span><span> scale </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1. </span><span style=color:#ff79c6>/ </span><span>(numrho </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>);
+</span><span>
+</span><span>  lines</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>resize</span><span>(linesMax);
+</span><span>  </span><span style=color:#6272a4>// Mat _lines = lines.getMat();
+</span><span>  </span><span style=color:#ff79c6>for </span><span>(i </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; i </span><span style=color:#ff79c6><</span><span> linesMax; i</span><span style=color:#ff79c6>++</span><span>) </span><span style=color:#fff>{
+</span><span>    LinePolar line;
+</span><span>    </span><span style=font-style:italic;color:#8be9fd>int</span><span> idx </span><span style=color:#ff79c6>=</span><span> _sort_buf[i];
+</span><span>    </span><span style=font-style:italic;color:#8be9fd>int</span><span> n </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>floor</span><span>(idx </span><span style=color:#ff79c6>*</span><span> scale) </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>1</span><span>;
+</span><span>    </span><span style=font-style:italic;color:#8be9fd>int</span><span> r </span><span style=color:#ff79c6>=</span><span> idx </span><span style=color:#ff79c6>- </span><span>(n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>* </span><span>(numrho </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>) </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>1</span><span>;
+</span><span>    line</span><span style=color:#ff79c6>.</span><span style=color:#fff>rho </span><span style=color:#ff79c6>= </span><span>(r </span><span style=color:#ff79c6>- </span><span>(numrho </span><span style=color:#ff79c6>- </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>* </span><span style=color:#bd93f9>0.5</span><span style=font-style:italic;color:#8be9fd>f</span><span>) </span><span style=color:#ff79c6>*</span><span> rho;
+</span><span>    line</span><span style=color:#ff79c6>.</span><span style=color:#fff>angle </span><span style=color:#ff79c6>= static_cast</span><span><</span><span style=font-style:italic;color:#8be9fd>float</span><span>>(min_theta) </span><span style=color:#ff79c6>+</span><span> n </span><span style=color:#ff79c6>*</span><span> theta;
+</span><span>    lines[i] </span><span style=color:#ff79c6>=</span><span> line;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t2, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>  elapsedTime </span><span style=color:#ff79c6>= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec</span><span>) </span><span style=color:#ff79c6>* </span><span style=color:#bd93f9>1000.0</span><span>;      </span><span style=color:#6272a4>// sec to ms
+</span><span>  elapsedTime </span><span style=color:#ff79c6>+= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec</span><span>) </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>1000.0</span><span>;   </span><span style=color:#6272a4>// us to ms
+</span><span>  </span><span style=color:#6272a4>// printf("Lines Stuff: %f\n", elapsedTime);
+</span><span>
+</span><span style=color:#fff>}
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>class </span><span style=text-decoration:underline;color:#8be9fd>LineIterator </span><span style=color:#fff>{
+</span><span> </span><span style=color:#ff79c6>public</span><span>:
+</span><span>  </span><span style=color:#6272a4>/** @brief Initializes iterator object for the given line and image.
+</span><span style=color:#6272a4>
+</span><span style=color:#6272a4>  The returned iterator can be used to traverse all pixels on a line that
+</span><span style=color:#6272a4>  connects the given two points.
+</span><span style=color:#6272a4>  The line will be clipped on the image boundaries.
+</span><span style=color:#6272a4>
+</span><span style=color:#6272a4>  @param img Underlying image.p
+</span><span style=color:#6272a4>  @param pt1 First endpoint of the line.
+</span><span style=color:#6272a4>  @param pt2 The other endpoint of the line.
+</span><span style=color:#6272a4>  @param connectivity Pixel connectivity of the iterator. Valid values are 4 (iterator can move
+</span><span style=color:#6272a4>  up, down, left and right) and 8 (iterator can also move diagonally).
+</span><span style=color:#6272a4>  @param leftToRight If true, the line is traversed from the leftmost endpoint to the rightmost
+</span><span style=color:#6272a4>  endpoint. Otherwise, the line is traversed from \p pt1 to \p pt2.
+</span><span style=color:#6272a4>  */
+</span><span>  </span><span style=color:#50fa7b>LineIterator</span><span>(</span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>img</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt1</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt2</span><span>,
+</span><span>               </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>connectivity </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>8</span><span>, </span><span style=font-style:italic;color:#8be9fd>bool </span><span style=font-style:italic;color:#ffb86c>leftToRight </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>false</span><span>) </span><span style=color:#fff>{
+</span><span>    Rect rect;
+</span><span>    rect</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    rect</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    rect</span><span style=color:#ff79c6>.</span><span style=color:#fff>width </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>320</span><span>;
+</span><span>    rect</span><span style=color:#ff79c6>.</span><span style=color:#fff>height </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>240</span><span>;
+</span><span>    </span><span style=color:#50fa7b>init</span><span>(img, rect, pt1, pt2, connectivity, leftToRight);
+</span><span>    ptmode </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>false</span><span>;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>init</span><span>(</span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>img</span><span>, Rect </span><span style=font-style:italic;color:#ffb86c>boundingAreaRect</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt1</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt2</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>connectivity</span><span>, </span><span style=font-style:italic;color:#8be9fd>bool </span><span style=font-style:italic;color:#ffb86c>leftToRight</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#6272a4>/** @brief Returns pointer to the current pixel.
+</span><span style=color:#6272a4>   */
+</span><span>
+</span><span>  </span><span style=color:#6272a4>/** @brief Moves iterator to the next pixel on the line.
+</span><span style=color:#6272a4>
+</span><span style=color:#6272a4>  This is the prefix version (++it).
+</span><span style=color:#6272a4>  */
+</span><span>
+</span><span>  </span><span style=color:#6272a4>/** @brief Moves iterator to the next pixel on the line.
+</span><span style=color:#6272a4>
+</span><span style=color:#6272a4>  This is the postfix version (it++).
+</span><span style=color:#6272a4>  */
+</span><span>
+</span><span>  </span><span style=color:#6272a4>/** @brief Returns coordinates of the current pixel.
+</span><span style=color:#6272a4>   */
+</span><span>  Point </span><span style=color:#50fa7b>pos</span><span>() </span><span style=color:#ff79c6>const</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span> ptr;
+</span><span>  </span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span> ptr0;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> step, elemSize;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> err, count;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> minusDelta, plusDelta;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> minusStep, plusStep;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> minusShift, plusShift;
+</span><span>  Point p;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>bool</span><span> ptmode;
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>inline </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=color:#50fa7b>operator*</span><span>() </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#ff79c6>return</span><span> ptmode </span><span style=color:#ff79c6>? </span><span style=color:#bd93f9>0 </span><span style=color:#ff79c6>:</span><span> ptr;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>inline</span><span> LineIterator</span><span style=color:#ff79c6>& </span><span style=color:#50fa7b>operator++</span><span>() </span><span style=color:#fff>{
+</span><span>    </span><span style=font-style:italic;color:#8be9fd>int</span><span> mask </span><span style=color:#ff79c6>=</span><span> err </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>0 </span><span style=color:#ff79c6>? -</span><span style=color:#bd93f9>1 </span><span style=color:#ff79c6>: </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    err </span><span style=color:#ff79c6>+=</span><span> minusDelta </span><span style=color:#ff79c6>+ </span><span>(plusDelta </span><span style=color:#ff79c6>&</span><span> mask);
+</span><span>    </span><span style=color:#ff79c6>if </span><span>(</span><span style=color:#ff79c6>!</span><span>ptmode) </span><span style=color:#fff>{
+</span><span>      ptr </span><span style=color:#ff79c6>+=</span><span> minusStep </span><span style=color:#ff79c6>+ </span><span>(plusStep </span><span style=color:#ff79c6>&</span><span> mask);
+</span><span>    </span><span style=color:#fff>} </span><span style=color:#ff79c6>else </span><span style=color:#fff>{
+</span><span>      p</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>+=</span><span> minusShift </span><span style=color:#ff79c6>+ </span><span>(plusShift </span><span style=color:#ff79c6>&</span><span> mask);
+</span><span>      p</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>+=</span><span> minusStep </span><span style=color:#ff79c6>+ </span><span>(plusStep </span><span style=color:#ff79c6>&</span><span> mask);
+</span><span>    </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#ff79c6>return *</span><span style=color:#bd93f9>this</span><span>;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>inline</span><span> LineIterator </span><span style=color:#50fa7b>operator++</span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>) </span><span style=color:#fff>{
+</span><span>    LineIterator it </span><span style=color:#ff79c6>= *</span><span style=color:#bd93f9>this</span><span>;
+</span><span>    </span><span style=color:#ff79c6>++</span><span>(</span><span style=color:#ff79c6>*</span><span style=color:#bd93f9>this</span><span>);
+</span><span>    </span><span style=color:#ff79c6>return</span><span> it;
+</span><span>  </span><span style=color:#fff>}
+</span><span style=color:#fff>}</span><span>;
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>void </span><span>LineIterator</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>init</span><span>(</span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>img</span><span>, Rect </span><span style=font-style:italic;color:#ffb86c>rect</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt1_</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt2_</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>connectivity</span><span>, </span><span style=font-style:italic;color:#8be9fd>bool </span><span style=font-style:italic;color:#ffb86c>leftToRight</span><span>) </span><span style=color:#fff>{
+</span><span>  count </span><span style=color:#ff79c6>= -</span><span style=color:#bd93f9>1</span><span>;
+</span><span>  p </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>Point</span><span>{</span><span style=color:#bd93f9>0</span><span>, </span><span style=color:#bd93f9>0</span><span>};
+</span><span>  ptr0 </span><span style=color:#ff79c6>=</span><span> ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>  step </span><span style=color:#ff79c6>=</span><span> elemSize </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>
+</span><span>  Point pt1 </span><span style=color:#ff79c6>=</span><span> pt1_;
+</span><span>  Point pt2 </span><span style=color:#ff79c6>=</span><span> pt2_;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> delta_x </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>, delta_y </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> dx </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>-</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> dy </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>-</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(dx </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>0</span><span>) </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#ff79c6>if </span><span>(leftToRight) </span><span style=color:#fff>{
+</span><span>      dx </span><span style=color:#ff79c6>= -</span><span>dx;
+</span><span>      dy </span><span style=color:#ff79c6>= -</span><span>dy;
+</span><span>      pt1 </span><span style=color:#ff79c6>=</span><span> pt2;
+</span><span>    </span><span style=color:#fff>} </span><span style=color:#ff79c6>else </span><span style=color:#fff>{
+</span><span>      dx </span><span style=color:#ff79c6>= -</span><span>dx;
+</span><span>      delta_x </span><span style=color:#ff79c6>= -</span><span style=color:#bd93f9>1</span><span>;
+</span><span>    </span><span style=color:#fff>}
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(dy </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>0</span><span>) </span><span style=color:#fff>{
+</span><span>    dy </span><span style=color:#ff79c6>= -</span><span>dy;
+</span><span>    delta_y </span><span style=color:#ff79c6>= -</span><span style=color:#bd93f9>1</span><span>;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>bool</span><span> vert </span><span style=color:#ff79c6>=</span><span> dy </span><span style=color:#ff79c6>></span><span> dx;
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(vert) </span><span style=color:#fff>{
+</span><span>    std</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>swap</span><span>(dx, dy);
+</span><span>    std</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>swap</span><span>(delta_x, delta_y);
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(connectivity </span><span style=color:#ff79c6>== </span><span style=color:#bd93f9>8</span><span>) </span><span style=color:#fff>{
+</span><span>    err </span><span style=color:#ff79c6>=</span><span> dx </span><span style=color:#ff79c6>- </span><span>(dy </span><span style=color:#ff79c6>+</span><span> dy);
+</span><span>    plusDelta </span><span style=color:#ff79c6>=</span><span> dx </span><span style=color:#ff79c6>+</span><span> dx;
+</span><span>    minusDelta </span><span style=color:#ff79c6>= -</span><span>(dy </span><span style=color:#ff79c6>+</span><span> dy);
+</span><span>    minusShift </span><span style=color:#ff79c6>=</span><span> delta_x;
+</span><span>    plusShift </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    minusStep </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    plusStep </span><span style=color:#ff79c6>=</span><span> delta_y;
+</span><span>    count </span><span style=color:#ff79c6>=</span><span> dx </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>;
+</span><span>  </span><span style=color:#fff>} </span><span style=color:#ff79c6>else </span><span style=color:#6272a4>/* connectivity == 4 */
+</span><span>  </span><span style=color:#fff>{
+</span><span>    err </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    plusDelta </span><span style=color:#ff79c6>= </span><span>(dx </span><span style=color:#ff79c6>+</span><span> dx) </span><span style=color:#ff79c6>+ </span><span>(dy </span><span style=color:#ff79c6>+</span><span> dy);
+</span><span>    minusDelta </span><span style=color:#ff79c6>= -</span><span>(dy </span><span style=color:#ff79c6>+</span><span> dy);
+</span><span>    minusShift </span><span style=color:#ff79c6>=</span><span> delta_x;
+</span><span>    plusShift </span><span style=color:#ff79c6>= -</span><span>delta_x;
+</span><span>    minusStep </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    plusStep </span><span style=color:#ff79c6>=</span><span> delta_y;
+</span><span>    count </span><span style=color:#ff79c6>=</span><span> dx </span><span style=color:#ff79c6>+</span><span> dy </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(vert) </span><span style=color:#fff>{
+</span><span>    std</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>swap</span><span>(plusStep, plusShift);
+</span><span>    std</span><span style=color:#ff79c6>::</span><span style=color:#50fa7b>swap</span><span>(minusStep, minusShift);
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  p </span><span style=color:#ff79c6>=</span><span> pt1;
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(</span><span style=color:#ff79c6>!</span><span>ptmode) </span><span style=color:#fff>{
+</span><span>    ptr0 </span><span style=color:#ff79c6>=</span><span> img;
+</span><span>    step </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>int</span><span>)</span><span style=color:#bd93f9>320</span><span>;  </span><span style=color:#6272a4>//(size occurpied by row)
+</span><span>    elemSize </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>;
+</span><span>    ptr </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span>)ptr0 </span><span style=color:#ff79c6>+ </span><span>(</span><span style=font-style:italic;color:#66d9ef>size_t</span><span>)p</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>*</span><span> step </span><span style=color:#ff79c6>+ </span><span>(</span><span style=font-style:italic;color:#66d9ef>size_t</span><span>)p</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>*</span><span> elemSize;
+</span><span>    plusStep </span><span style=color:#ff79c6>=</span><span> plusStep </span><span style=color:#ff79c6>*</span><span> step </span><span style=color:#ff79c6>+</span><span> plusShift </span><span style=color:#ff79c6>*</span><span> elemSize;
+</span><span>    minusStep </span><span style=color:#ff79c6>=</span><span> minusStep </span><span style=color:#ff79c6>*</span><span> step </span><span style=color:#ff79c6>+</span><span> minusShift </span><span style=color:#ff79c6>*</span><span> elemSize;
+</span><span>  </span><span style=color:#fff>}
+</span><span style=color:#fff>}
+</span><span>
+</span><span style=color:#ff79c6>static </span><span style=font-style:italic;color:#8be9fd>void
+</span><span style=color:#50fa7b>Line</span><span>(</span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>img</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt1</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt2</span><span>, </span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char </span><span style=font-style:italic;color:#ffb86c>color</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>connectivity </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>8</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=color:#ff79c6>if </span><span>(connectivity </span><span style=color:#ff79c6>== </span><span style=color:#bd93f9>0</span><span>)
+</span><span>    connectivity </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>8</span><span>;
+</span><span>  </span><span style=color:#ff79c6>else if </span><span>(connectivity </span><span style=color:#ff79c6>== </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#fff>{
+</span><span>    connectivity </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>4</span><span>;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  LineIterator </span><span style=color:#50fa7b>iterator</span><span>(img, pt1, pt2, connectivity, </span><span style=color:#bd93f9>true</span><span>);
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> i, count </span><span style=color:#ff79c6>=</span><span> iterator</span><span style=color:#ff79c6>.</span><span style=color:#fff>count</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> pix_size </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>for </span><span>(i </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; i </span><span style=color:#ff79c6><</span><span> count; i</span><span style=color:#ff79c6>++</span><span>, </span><span style=color:#ff79c6>++</span><span>iterator) </span><span style=color:#fff>{
+</span><span>    </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span> ptr </span><span style=color:#ff79c6>= *</span><span>iterator;
+</span><span>    </span><span style=color:#ff79c6>*</span><span>ptr </span><span style=color:#ff79c6>=</span><span> color;
+</span><span>  </span><span style=color:#fff>}
+</span><span style=color:#fff>}
+</span><span>
+</span><span style=color:#ff79c6>static </span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>ThickLine</span><span>(</span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>img</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>p0</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>p1</span><span>, </span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char </span><span style=font-style:italic;color:#ffb86c>color</span><span>,
+</span><span>                      </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>thickness</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>line_type</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>flags</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>shift</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=color:#ff79c6>static const </span><span style=font-style:italic;color:#8be9fd>double</span><span> INV_XY_ONE </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1. </span><span style=color:#ff79c6>/</span><span> XY_ONE;
+</span><span>  
+</span><span>
+</span><span>  </span><span style=color:#6272a4>//TODO: Are we sure these are ints?
+</span><span>  p0</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6><<=</span><span> XY_SHIFT </span><span style=color:#ff79c6>-</span><span> shift;
+</span><span>  p0</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6><<=</span><span> XY_SHIFT </span><span style=color:#ff79c6>-</span><span> shift;
+</span><span>  p1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6><<=</span><span> XY_SHIFT </span><span style=color:#ff79c6>-</span><span> shift;
+</span><span>  p1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6><<=</span><span> XY_SHIFT </span><span style=color:#ff79c6>-</span><span> shift;
+</span><span>
+</span><span>  p0</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span>(p0</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>+ </span><span>(XY_ONE </span><span style=color:#ff79c6>>> </span><span style=color:#bd93f9>1</span><span>)) </span><span style=color:#ff79c6>>></span><span> XY_SHIFT;
+</span><span>  p0</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span>(p0</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>+ </span><span>(XY_ONE </span><span style=color:#ff79c6>>> </span><span style=color:#bd93f9>1</span><span>)) </span><span style=color:#ff79c6>>></span><span> XY_SHIFT;
+</span><span>  p1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span>(p1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>+ </span><span>(XY_ONE </span><span style=color:#ff79c6>>> </span><span style=color:#bd93f9>1</span><span>)) </span><span style=color:#ff79c6>>></span><span> XY_SHIFT;
+</span><span>  p1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span>(p1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>+ </span><span>(XY_ONE </span><span style=color:#ff79c6>>> </span><span style=color:#bd93f9>1</span><span>)) </span><span style=color:#ff79c6>>></span><span> XY_SHIFT;
+</span><span>  </span><span style=color:#50fa7b>Line</span><span>(img, p0, p1, color, line_type);
+</span><span style=color:#fff>}
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>line</span><span>(</span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>* </span><span style=font-style:italic;color:#ffb86c>_img</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt1</span><span>, Point </span><span style=font-style:italic;color:#ffb86c>pt2</span><span>, </span><span style=color:#ff79c6>const </span><span style=font-style:italic;color:#8be9fd>char </span><span style=font-style:italic;color:#ffb86c>color </span><span style=color:#ff79c6>= </span><span>(</span><span style=color:#bd93f9>7 </span><span style=color:#ff79c6><< </span><span style=color:#bd93f9>5</span><span>),
+</span><span>          </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>thickness </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>line_type </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>8</span><span>, </span><span style=font-style:italic;color:#8be9fd>int </span><span style=font-style:italic;color:#ffb86c>shift </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>) </span><span style=color:#fff>{
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span> img </span><span style=color:#ff79c6>=</span><span> _img;
+</span><span>
+</span><span>  line_type </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>8</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#8be9fd>assert</span><span>(</span><span style=color:#bd93f9>0 </span><span style=color:#ff79c6><</span><span> thickness </span><span style=color:#ff79c6>&&</span><span> thickness </span><span style=color:#ff79c6><= </span><span style=color:#bd93f9>8</span><span>);
+</span><span>  </span><span style=color:#8be9fd>assert</span><span>(</span><span style=color:#bd93f9>0 </span><span style=color:#ff79c6><=</span><span> shift </span><span style=color:#ff79c6>&&</span><span> shift </span><span style=color:#ff79c6><=</span><span> XY_SHIFT);
+</span><span>
+</span><span>  </span><span style=color:#50fa7b>ThickLine</span><span>(img, pt1, pt2, color, thickness, line_type, </span><span style=color:#bd93f9>3</span><span>, shift);
+</span><span style=color:#fff>}
+</span></code></pre><h2 id=main-program>Main Program</h2><pre class=language-cpp data-lang=cpp style=background:#282a36;color:#f8f8f2><code class=language-cpp data-lang=cpp><span style=color:#6272a4>///////////////////////////////////////
+</span><span style=color:#6272a4>/// 640x480 version!
+</span><span style=color:#6272a4>/// test VGA with hardware video input copy to VGA
+</span><span style=color:#6272a4>///////////////////////////////////////
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTstdio.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTstring.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTstdlib.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTunistd.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTfcntl.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/types.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/ipc.h> 
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/shm.h> 
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/mman.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTsys/time.h> 
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTvector>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>&LTmath.h>
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>"address_map_arm_brl4.h"
+</span><span style=color:#ff79c6>#include </span><span style=color:#f1fa8c>"hough.cpp"
+</span><span>
+</span><span style=color:#ff79c6>#define </span><span>PI </span><span style=color:#bd93f9>3.14159
+</span><span>
+</span><span style=color:#6272a4>// #define HW_REGS_BASE 0xff200000
+</span><span style=color:#6272a4>// #define HW_REGS_SPAN 0x00006000
+</span><span>
+</span><span>
+</span><span style=color:#6272a4>/* function prototypes */
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>VGA_text </span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#8be9fd>char </span><span style=color:#ff79c6>*</span><span>);
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>VGA_text_clear</span><span>();
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>VGA_box </span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>short</span><span>);
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>VGA_line</span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>short</span><span>) ;
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>VGA_disc </span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>short</span><span>);
+</span><span style=font-style:italic;color:#8be9fd>int  </span><span style=color:#50fa7b>VGA_read_pixel</span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>) ;
+</span><span style=font-style:italic;color:#8be9fd>int  </span><span style=color:#50fa7b>video_in_read_pixel</span><span>(</span><span style=font-style:italic;color:#ffb86c>int</span><span>, </span><span style=font-style:italic;color:#ffb86c>int</span><span>);
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>draw_delay</span><span>(</span><span style=font-style:italic;color:#8be9fd>void</span><span>) ;
+</span><span>
+</span><span>
+</span><span style=color:#6272a4>// the light weight buss base
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#ff79c6>*</span><span>h2p_lw_virtual_base;
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>h2p_lw_video_in_control_addr</span><span style=color:#ff79c6>=</span><span style=color:#bd93f9>NULL</span><span>;
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>h2p_lw_video_in_resolution_addr</span><span style=color:#ff79c6>=</span><span style=color:#bd93f9>NULL</span><span>;
+</span><span>
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>h2p_lw_video_edge_control_addr</span><span style=color:#ff79c6>=</span><span style=color:#bd93f9>NULL</span><span>;
+</span><span>
+</span><span style=color:#6272a4>// pixel buffer from
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span> vga_pixel_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>NULL </span><span>;
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#ff79c6>*</span><span>vga_pixel_virtual_base;
+</span><span>
+</span><span style=color:#6272a4>// video input buffer
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span> video_in_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>NULL </span><span>;
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#ff79c6>*</span><span>video_in_virtual_base;
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#ff79c6>*</span><span>sram_master_base;
+</span><span>
+</span><span style=color:#6272a4>//hps copy sram pointer from the first copy of camera in that hps reads from
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>char </span><span style=color:#ff79c6>*</span><span> hps_copy_sram2_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>NULL</span><span>;
+</span><span style=color:#6272a4>//hps copy sram pointer to 3rd sram that hps writes into
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>char </span><span style=color:#ff79c6>*</span><span> lines_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>NULL</span><span>;
+</span><span>
+</span><span style=color:#6272a4>// character buffer
+</span><span style=color:#6272a4>// volatile unsigned int * vga_char_ptr = NULL ;
+</span><span style=color:#6272a4>// void *vga_char_virtual_base;
+</span><span>
+</span><span style=color:#6272a4>// /dev/mem file id
+</span><span style=font-style:italic;color:#8be9fd>int</span><span> fd;
+</span><span>
+</span><span style=color:#6272a4>// shared memory 
+</span><span style=font-style:italic;color:#66d9ef>key_t</span><span> mem_key</span><span style=color:#ff79c6>=</span><span style=color:#bd93f9>0xf0</span><span>;
+</span><span style=font-style:italic;color:#8be9fd>int</span><span> shared_mem_id; 
+</span><span style=font-style:italic;color:#8be9fd>int </span><span style=color:#ff79c6>*</span><span>shared_ptr;
+</span><span style=font-style:italic;color:#8be9fd>int</span><span> shared_time;
+</span><span style=font-style:italic;color:#8be9fd>int</span><span> shared_note;
+</span><span style=font-style:italic;color:#8be9fd>char</span><span> shared_str[</span><span style=color:#bd93f9>64</span><span>];
+</span><span>
+</span><span>  
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>signed int </span><span style=color:#ff79c6>*</span><span>color_in_ptr; 
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>signed int </span><span style=color:#ff79c6>*</span><span>color_out_ptr; 
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>signed int </span><span style=color:#ff79c6>*</span><span>color_wr_addr_ptr; 
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>signed int </span><span style=color:#ff79c6>*</span><span>color_wr_en_ptr;
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>signed int </span><span style=color:#ff79c6>*</span><span>color_in_addr_ptr; 
+</span><span>
+</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>bool </span><span style=color:#ff79c6>*</span><span>wait_accum_ptr;
+</span><span>
+</span><span style=color:#6272a4>// measure time
+</span><span style=font-style:italic;color:#8be9fd>struct </span><span>timeval t1, t2;
+</span><span style=font-style:italic;color:#8be9fd>double</span><span> elapsedTime;
+</span><span style=font-style:italic;color:#8be9fd>struct</span><span> timespec delay_time;
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>bool </span><span style=color:#50fa7b>check</span><span>(Point </span><span style=font-style:italic;color:#ffb86c>pt</span><span>)</span><span style=color:#fff>{
+</span><span>  </span><span style=color:#ff79c6>return </span><span>(pt</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>>= </span><span style=color:#bd93f9>0</span><span>) </span><span style=color:#ff79c6>&& </span><span>(pt</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6><= </span><span style=color:#bd93f9>340</span><span>) </span><span style=color:#ff79c6>&& </span><span>(pt</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6><= </span><span style=color:#bd93f9>240</span><span>) </span><span style=color:#ff79c6>&& </span><span>(pt</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>>= </span><span style=color:#bd93f9>0</span><span>);
+</span><span style=color:#fff>}
+</span><span style=font-style:italic;color:#8be9fd>void </span><span style=color:#50fa7b>coords</span><span>(</span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>m</span><span>, </span><span style=font-style:italic;color:#8be9fd>double </span><span style=font-style:italic;color:#ffb86c>b</span><span>, </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>*</span><span style=font-style:italic;color:#ffb86c>x0</span><span>, </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>*</span><span style=font-style:italic;color:#ffb86c>x1</span><span>, </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>*</span><span style=font-style:italic;color:#ffb86c>y0</span><span>, </span><span style=font-style:italic;color:#8be9fd>int</span><span style=color:#ff79c6>*</span><span style=font-style:italic;color:#ffb86c>y1</span><span>)</span><span style=color:#fff>{
+</span><span>  
+</span><span>  Point pt1, pt2, pt3, pt4;
+</span><span>
+</span><span>  pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>round</span><span>((</span><span style=color:#bd93f9>240</span><span style=color:#ff79c6>-</span><span>b)</span><span style=color:#ff79c6>/</span><span>m);
+</span><span>  pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>240</span><span>;
+</span><span>
+</span><span>  pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>round</span><span>(</span><span style=color:#ff79c6>-</span><span>b</span><span style=color:#ff79c6>/</span><span>m);
+</span><span>  pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>
+</span><span>  pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>320</span><span>;
+</span><span>  pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>round</span><span>(m</span><span style=color:#ff79c6>*</span><span style=color:#bd93f9>320 </span><span style=color:#ff79c6>+</span><span> b);
+</span><span>
+</span><span>  pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>x </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>  pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>y </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>round</span><span>(b);
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>bool</span><span> v1, v2, v3, v4;
+</span><span>  v1 </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>check</span><span>(pt1);
+</span><span>  v2 </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>check</span><span>(pt2);
+</span><span>  v3 </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>check</span><span>(pt3);
+</span><span>  v4 </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>check</span><span>(pt4);
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// Forgive me lord.
+</span><span>  </span><span style=color:#ff79c6>if</span><span>(v1)</span><span style=color:#fff>{
+</span><span>    </span><span style=color:#ff79c6>if</span><span>(v2)</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>=</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>      </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>=</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>      </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>      </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>    </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>if</span><span>(v3)</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>=</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>      </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>=</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>      </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>=</span><span> pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>      </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>=</span><span> pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>      </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>        </span><span style=color:#ff79c6>if</span><span>(v4)</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>=</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>=</span><span> pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>=</span><span> pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>=</span><span> pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>        </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#6272a4>// printf("WARNING: Invalid Line \n");	
+</span><span>        </span><span style=color:#fff>}
+</span><span>      </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#fff>}
+</span><span>  </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>    </span><span style=color:#ff79c6>if</span><span>(v2)</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>if</span><span>(v3)</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>=</span><span> pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>=</span><span> pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>      </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>        </span><span style=color:#ff79c6>if</span><span>(v4)</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>=</span><span> pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>=</span><span> pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>=</span><span> pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>        </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#6272a4>// printf("WARNING: Invalid Line \n");						
+</span><span>        </span><span style=color:#fff>}
+</span><span>      </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>if</span><span>(v3)</span><span style=color:#fff>{
+</span><span>        </span><span style=color:#ff79c6>if</span><span>(v4)</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>=</span><span> pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>=</span><span> pt3</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>=</span><span> pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>=</span><span> pt4</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>;
+</span><span>        </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>          </span><span style=color:#6272a4>// printf("WARNING: Invalid Line \n");
+</span><span>        </span><span style=color:#fff>}
+</span><span>      </span><span style=color:#fff>}</span><span style=color:#ff79c6>else</span><span style=color:#fff>{
+</span><span>        </span><span style=color:#ff79c6>*</span><span>x0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>        </span><span style=color:#ff79c6>*</span><span>y0 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>        </span><span style=color:#ff79c6>*</span><span>x1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>        </span><span style=color:#ff79c6>*</span><span>y1 </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>        </span><span style=color:#6272a4>// printf("WARNING: Invalid Line \n");
+</span><span>      </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#fff>}
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span style=color:#fff>}
+</span><span>
+</span><span>
+</span><span>
+</span><span style=font-style:italic;color:#8be9fd>int </span><span style=color:#50fa7b>main</span><span>(</span><span style=font-style:italic;color:#8be9fd>void</span><span>)
+</span><span style=color:#fff>{
+</span><span>  delay_time</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_nsec </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>10 </span><span>;
+</span><span>  delay_time</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0 </span><span>;
+</span><span>
+</span><span>  
+</span><span>  </span><span style=color:#6272a4>// === get FPGA addresses ==================
+</span><span>    </span><span style=color:#6272a4>// Open /dev/mem
+</span><span>  </span><span style=color:#ff79c6>if</span><span>( ( fd </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>open</span><span>( </span><span style=color:#f1fa8c>"/dev/mem"</span><span>, ( O_RDWR </span><span style=color:#ff79c6>|</span><span> O_SYNC ) ) ) </span><span style=color:#ff79c6>== -</span><span style=color:#bd93f9>1 </span><span>) 	</span><span style=color:#fff>{
+</span><span>    </span><span style=color:#8be9fd>printf</span><span>( </span><span style=color:#f1fa8c>"ERROR: could not open </span><span style=color:#ff79c6>\"</span><span style=color:#f1fa8c>/dev/mem</span><span style=color:#ff79c6>\"</span><span style=color:#f1fa8c>...</span><span style=color:#ff79c6>\n</span><span style=color:#f1fa8c>" </span><span>);
+</span><span>    </span><span style=color:#ff79c6>return</span><span>( </span><span style=color:#bd93f9>1 </span><span>);
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>  h2p_lw_virtual_base </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>mmap</span><span>( </span><span style=color:#bd93f9>NULL</span><span>, HW_REGS_SPAN, ( PROT_READ </span><span style=color:#ff79c6>|</span><span> PROT_WRITE ), MAP_SHARED, fd, HW_REGS_BASE );	
+</span><span>  </span><span style=color:#ff79c6>if</span><span>( h2p_lw_virtual_base </span><span style=color:#ff79c6>==</span><span> MAP_FAILED ) </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#8be9fd>printf</span><span>( </span><span style=color:#f1fa8c>"ERROR: mmap1() failed...</span><span style=color:#ff79c6>\n</span><span style=color:#f1fa8c>" </span><span>);
+</span><span>    </span><span style=color:#50fa7b>close</span><span>( fd );
+</span><span>    </span><span style=color:#ff79c6>return</span><span>(</span><span style=color:#bd93f9>1</span><span>);
+</span><span>  </span><span style=color:#fff>}
+</span><span>    h2p_lw_video_in_control_addr</span><span style=color:#ff79c6>=</span><span>(</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>)(h2p_lw_virtual_base</span><span style=color:#ff79c6>+</span><span>VIDEO_IN_BASE</span><span style=color:#ff79c6>+</span><span style=color:#bd93f9>0x0c</span><span>);
+</span><span>  h2p_lw_video_in_resolution_addr</span><span style=color:#ff79c6>=</span><span>(</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>)(h2p_lw_virtual_base</span><span style=color:#ff79c6>+</span><span>VIDEO_IN_BASE</span><span style=color:#ff79c6>+</span><span style=color:#bd93f9>0x08</span><span>);
+</span><span>  </span><span style=color:#ff79c6>*</span><span>(h2p_lw_video_in_control_addr) </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0x04 </span><span>; </span><span style=color:#6272a4>// turn on video capture
+</span><span>  </span><span style=color:#ff79c6>*</span><span>(h2p_lw_video_in_resolution_addr) </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0x00f00140 </span><span>;  </span><span style=color:#6272a4>// high 240 low 320
+</span><span>  h2p_lw_video_edge_control_addr</span><span style=color:#ff79c6>=</span><span>(</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>)(h2p_lw_virtual_base</span><span style=color:#ff79c6>+</span><span>VIDEO_IN_BASE</span><span style=color:#ff79c6>+</span><span style=color:#bd93f9>0x10</span><span>);
+</span><span>  </span><span style=color:#ff79c6>*</span><span>h2p_lw_video_edge_control_addr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0x01 </span><span>; </span><span style=color:#6272a4>// 1 means edges
+</span><span>  </span><span style=color:#6272a4>// *h2p_lw_video_edge_control_addr = 0x00 ; // 1 means edges
+</span><span>
+</span><span>  
+</span><span>  </span><span style=color:#6272a4>// === get video input =======================
+</span><span>  </span><span style=color:#6272a4>// on-chip sRAM
+</span><span>  video_in_virtual_base </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>mmap</span><span>( </span><span style=color:#bd93f9>NULL</span><span>, FPGA_ONCHIP_SPAN, ( PROT_READ </span><span style=color:#ff79c6>|</span><span> PROT_WRITE ), MAP_SHARED, fd, FPGA_ONCHIP_BASE); 
+</span><span>  </span><span style=color:#ff79c6>if</span><span>( video_in_virtual_base </span><span style=color:#ff79c6>==</span><span> MAP_FAILED ) </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#8be9fd>printf</span><span>( </span><span style=color:#f1fa8c>"ERROR: mmap3() failed...</span><span style=color:#ff79c6>\n</span><span style=color:#f1fa8c>" </span><span>);
+</span><span>    </span><span style=color:#50fa7b>close</span><span>( fd );
+</span><span>    </span><span style=color:#ff79c6>return</span><span>(</span><span style=color:#bd93f9>1</span><span>);
+</span><span>  </span><span style=color:#fff>}
+</span><span>  </span><span style=color:#6272a4>// format the pointer
+</span><span>  video_in_ptr </span><span style=color:#ff79c6>=</span><span>(</span><span style=font-style:italic;color:#8be9fd>unsigned int </span><span style=color:#ff79c6>*</span><span>)(video_in_virtual_base);
+</span><span style=color:#6272a4>// 0x00040000
+</span><span>  </span><span style=color:#6272a4>// for srams using not lw
+</span><span>  sram_master_base </span><span style=color:#ff79c6>= </span><span style=color:#50fa7b>mmap</span><span>( </span><span style=color:#bd93f9>NULL</span><span>, </span><span style=color:#bd93f9>0x00040000</span><span>, ( PROT_READ </span><span style=color:#ff79c6>|</span><span> PROT_WRITE ), MAP_SHARED, fd, </span><span style=color:#bd93f9>0xc0000000</span><span>); 
+</span><span>  </span><span style=color:#ff79c6>if</span><span>( sram_master_base </span><span style=color:#ff79c6>==</span><span> MAP_FAILED ) </span><span style=color:#fff>{
+</span><span>    </span><span style=color:#8be9fd>printf</span><span>( </span><span style=color:#f1fa8c>"ERROR: mmap3() failed...</span><span style=color:#ff79c6>\n</span><span style=color:#f1fa8c>" </span><span>);
+</span><span>    </span><span style=color:#50fa7b>close</span><span>( fd );
+</span><span>    </span><span style=color:#ff79c6>return</span><span>(</span><span style=color:#bd93f9>1</span><span>);
+</span><span>  </span><span style=color:#fff>}
+</span><span>  </span><span style=color:#6272a4>// format the pointer
+</span><span>  </span><span style=color:#6272a4>// sram_master_ptr =(unsigned int *)(sram_master_base);
+</span><span>  lines_ptr </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>char </span><span style=color:#ff79c6>*</span><span>)(sram_master_base </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>0x20000</span><span>); </span><span style=color:#6272a4>// Lines 
+</span><span>  hps_copy_sram2_ptr </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>char </span><span style=color:#ff79c6>*</span><span>)(sram_master_base); </span><span style=color:#6272a4>// Hough Space
+</span><span>
+</span><span>  wait_accum_ptr </span><span style=color:#ff79c6>= </span><span>(</span><span style=color:#ff79c6>volatile </span><span style=font-style:italic;color:#8be9fd>bool </span><span style=color:#ff79c6>*</span><span>)(sram_master_base</span><span style=color:#ff79c6>+</span><span style=color:#bd93f9>0x40000</span><span>);
+</span><span>
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// ===========================================
+</span><span>
+</span><span>  </span><span style=color:#6272a4>/* create a message to be displayed on the VGA 
+</span><span style=color:#6272a4>          and LCD displays */
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span> text_top_row[</span><span style=color:#bd93f9>40</span><span>] </span><span style=color:#ff79c6>= </span><span style=color:#f1fa8c>"DE1-SoC ARM/FPGA</span><span style=color:#ff79c6>\0</span><span style=color:#f1fa8c>"</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span> text_bottom_row[</span><span style=color:#bd93f9>40</span><span>] </span><span style=color:#ff79c6>= </span><span style=color:#f1fa8c>"Cornell ece5760</span><span style=color:#ff79c6>\0</span><span style=color:#f1fa8c>"</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span> num_string[</span><span style=color:#bd93f9>20</span><span>], time_string[</span><span style=color:#bd93f9>50</span><span>] ;
+</span><span>  
+</span><span>  </span><span style=color:#6272a4>// a pixel from the video
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> pixel_color;
+</span><span>  </span><span style=color:#6272a4>// video input index
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> i,j;
+</span><span>
+</span><span>  </span><span style=color:#6272a4>// HoughLinesStandard parameters
+</span><span>
+</span><span>  std</span><span style=color:#ff79c6>::</span><span>vector&LTLinePolar> </span><span style=color:#50fa7b>lines</span><span>(</span><span style=color:#bd93f9>5</span><span>);
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>float</span><span> rho;
+</span><span>  rho </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1.0</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>float</span><span> theta;
+</span><span>  theta </span><span style=color:#ff79c6>=</span><span> PI</span><span style=color:#ff79c6>/</span><span style=color:#bd93f9>180.0</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> threshold;
+</span><span>  threshold </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> linesMax;
+</span><span>  linesMax </span><span style=color:#ff79c6>=</span><span> lines</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>size</span><span>();
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>double</span><span> min_theta;
+</span><span>  min_theta </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0.0</span><span>;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>double</span><span> max_theta;
+</span><span>  max_theta </span><span style=color:#ff79c6>=</span><span> PI;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char </span><span style=color:#ff79c6>*</span><span>color;
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span> sw_m10k[</span><span style=color:#bd93f9>76800</span><span>];
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span> black[</span><span style=color:#bd93f9>76800</span><span>];
+</span><span>  </span><span style=color:#6272a4>// Init Black
+</span><span>  </span><span style=color:#ff79c6>for</span><span>(</span><span style=font-style:italic;color:#8be9fd>int</span><span> i </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; i </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>76800</span><span>; i</span><span style=color:#ff79c6>++</span><span>)</span><span style=color:#fff>{
+</span><span>    black[i] </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>  </span><span style=color:#fff>}
+</span><span>
+</span><span>
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> accum[(</span><span style=color:#bd93f9>179 </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>) </span><span style=color:#ff79c6>* </span><span>(</span><span style=color:#bd93f9>561 </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>)];
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> rho_count </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>561</span><span>;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> rho_n;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>int</span><span> theta_n;
+</span><span>  </span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span> accum_val;
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>*</span><span>wait_accum_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;	
+</span><span>
+</span><span>  </span><span style=color:#ff79c6>while</span><span>(</span><span style=color:#bd93f9>1</span><span>) 
+</span><span>  </span><span style=color:#fff>{
+</span><span>
+</span><span>    </span><span style=color:#6272a4>// Init Black
+</span><span>    </span><span style=color:#ff79c6>for</span><span>(</span><span style=font-style:italic;color:#8be9fd>int</span><span> i </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; i </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>76800</span><span>; i</span><span style=color:#ff79c6>++</span><span>)</span><span style=color:#fff>{
+</span><span>      black[i] </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    </span><span style=color:#fff>}
+</span><span>
+</span><span>    </span><span style=color:#6272a4>// Time full Computation
+</span><span>    </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t1, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#6272a4>// Get edge-detected video copy from FPGA sram
+</span><span>    </span><span style=color:#6272a4>//ALSO rho is x axis and y is theta, not other way around
+</span><span>  
+</span><span>    </span><span style=color:#ff79c6>for</span><span>(theta_n </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; theta_n </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>180</span><span>; </span><span style=color:#ff79c6>++</span><span>theta_n)</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>for</span><span>(rho_n </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; rho_n </span><span style=color:#ff79c6><</span><span> rho_count; </span><span style=color:#ff79c6>++</span><span> rho_n )</span><span style=color:#fff>{
+</span><span>        accum_val </span><span style=color:#ff79c6>= </span><span>(</span><span style=font-style:italic;color:#8be9fd>char</span><span style=color:#ff79c6>*</span><span>)(hps_copy_sram2_ptr </span><span style=color:#ff79c6>+ </span><span>((theta_n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>* </span><span>(rho_count </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>)) </span><span style=color:#ff79c6>+ </span><span>(rho_n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>));
+</span><span>        accum[((theta_n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>* </span><span>(rho_count </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>)) </span><span style=color:#ff79c6>+ </span><span>(	rho_n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>)] </span><span style=color:#ff79c6>= *</span><span>accum_val;
+</span><span>      </span><span style=color:#fff>}
+</span><span>      </span><span style=color:#6272a4>// printf("\n");
+</span><span>    </span><span style=color:#fff>}
+</span><span>
+</span><span>    </span><span style=color:#50fa7b>HoughLinesStandard</span><span>(lines, rho, theta, threshold, linesMax, min_theta, max_theta, accum );
+</span><span>    
+</span><span>    </span><span style=color:#6272a4>//zero after houghlinesstandard call
+</span><span>    </span><span style=color:#ff79c6>*</span><span>wait_accum_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>1</span><span>;
+</span><span>    </span><span style=color:#ff79c6>for</span><span>(theta_n </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; theta_n </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>180</span><span>; </span><span style=color:#ff79c6>++</span><span>theta_n)</span><span style=color:#fff>{
+</span><span>      </span><span style=color:#ff79c6>for</span><span>(rho_n </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; rho_n </span><span style=color:#ff79c6><</span><span> rho_count; </span><span style=color:#ff79c6>++</span><span> rho_n )</span><span style=color:#fff>{
+</span><span>        </span><span style=color:#ff79c6>*</span><span>(hps_copy_sram2_ptr </span><span style=color:#ff79c6>+ </span><span>((theta_n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>) </span><span style=color:#ff79c6>* </span><span>(rho_count </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>2</span><span>)) </span><span style=color:#ff79c6>+ </span><span>(rho_n </span><span style=color:#ff79c6>+ </span><span style=color:#bd93f9>1</span><span>)) </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>      </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#ff79c6>*</span><span>wait_accum_ptr </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>
+</span><span>
+</span><span>    
+</span><span>    </span><span style=color:#6272a4>// Draw the lines calculated in lines vector from above
+</span><span>    </span><span style=color:#ff79c6>for</span><span>( </span><span style=font-style:italic;color:#66d9ef>size_t</span><span> i </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; i </span><span style=color:#ff79c6><</span><span> lines</span><span style=color:#ff79c6>.</span><span style=color:#50fa7b>size</span><span>(); i</span><span style=color:#ff79c6>++ </span><span>) </span><span style=color:#fff>{
+</span><span>      </span><span style=font-style:italic;color:#8be9fd>float</span><span> rho_out </span><span style=color:#ff79c6>=</span><span> lines[i]</span><span style=color:#ff79c6>.</span><span style=color:#fff>rho</span><span>, theta </span><span style=color:#ff79c6>=</span><span> lines[i]</span><span style=color:#ff79c6>.</span><span style=color:#fff>angle</span><span>;
+</span><span>      Point pt1, pt2;
+</span><span>      </span><span style=font-style:italic;color:#8be9fd>double</span><span> a </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>cos</span><span>(theta), b </span><span style=color:#ff79c6>= </span><span style=color:#8be9fd>sin</span><span>(theta);
+</span><span>
+</span><span>
+</span><span>      </span><span style=font-style:italic;color:#8be9fd>double</span><span> m </span><span style=color:#ff79c6>= -</span><span>(a</span><span style=color:#ff79c6>/</span><span>b);
+</span><span>      </span><span style=font-style:italic;color:#8be9fd>double</span><span> y_int </span><span style=color:#ff79c6>=</span><span> rho_out</span><span style=color:#ff79c6>/</span><span>b; 
+</span><span>      
+</span><span>      </span><span style=color:#50fa7b>coords</span><span>(m, y_int, </span><span style=color:#ff79c6>&</span><span>pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>, </span><span style=color:#ff79c6>&</span><span>pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>x</span><span>, </span><span style=color:#ff79c6>&</span><span>pt1</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>, </span><span style=color:#ff79c6>&</span><span>pt2</span><span style=color:#ff79c6>.</span><span style=color:#fff>y</span><span>);
+</span><span>      </span><span style=color:#50fa7b>line</span><span>(black, pt1, pt2);
+</span><span>      </span><span style=color:#fff>}
+</span><span>
+</span><span>    </span><span style=font-style:italic;color:#8be9fd>int</span><span> count </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>;
+</span><span>    </span><span style=color:#ff79c6>for</span><span>(j </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; j </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>240</span><span>; </span><span style=color:#ff79c6>++</span><span>j)</span><span style=color:#fff>{ </span><span style=color:#6272a4>//theta
+</span><span>      </span><span style=color:#ff79c6>for</span><span>(i </span><span style=color:#ff79c6>= </span><span style=color:#bd93f9>0</span><span>; i </span><span style=color:#ff79c6>< </span><span style=color:#bd93f9>320</span><span>; </span><span style=color:#ff79c6>++</span><span>i)</span><span style=color:#fff>{ </span><span style=color:#6272a4>//rho
+</span><span>        </span><span style=color:#ff79c6>*</span><span>(lines_ptr </span><span style=color:#ff79c6>+ </span><span>(i) </span><span style=color:#ff79c6>+ </span><span>(j</span><span style=color:#ff79c6>*</span><span style=color:#bd93f9>320</span><span>)) </span><span style=color:#ff79c6>=</span><span> black[i</span><span style=color:#ff79c6>+</span><span>(j</span><span style=color:#ff79c6>*</span><span style=color:#bd93f9>320</span><span>)];
+</span><span>      </span><span style=color:#fff>}
+</span><span>    </span><span style=color:#fff>}
+</span><span>    
+</span><span>    </span><span style=color:#6272a4>// stop timer
+</span><span>     </span><span style=color:#50fa7b>gettimeofday</span><span>(</span><span style=color:#ff79c6>&</span><span>t2, </span><span style=color:#bd93f9>NULL</span><span>);
+</span><span>     elapsedTime </span><span style=color:#ff79c6>= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_sec</span><span>) </span><span style=color:#ff79c6>* </span><span style=color:#bd93f9>1000.0</span><span>;      </span><span style=color:#6272a4>// sec to ms
+</span><span>     elapsedTime </span><span style=color:#ff79c6>+= </span><span>(t2</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec </span><span style=color:#ff79c6>-</span><span> t1</span><span style=color:#ff79c6>.</span><span style=color:#fff>tv_usec</span><span>) </span><span style=color:#ff79c6>/ </span><span style=color:#bd93f9>1000.0</span><span>;   </span><span style=color:#6272a4>// us to ms
+</span><span>    
+</span><span>  </span><span style=color:#fff>} </span><span style=color:#6272a4>// end while(1)
+</span><span style=color:#fff>} </span><span style=color:#6272a4>// end main
+</span><span>
+</span></code></pre><h1 id=verilog>Verilog</h1><h2 id=accumulator-module>Accumulator Module</h2><pre class=language-v data-lang=v style=background:#282a36;color:#f8f8f2><code class=language-v data-lang=v><span>//Takes in an x and y, rho and theta information (tbd what exactly)
+</span><span>// and outputs (or puts into a memory directly)
+</span><span>module accumulator #(
+</span><span>    parameter WIDTH = 10
+</span><span>  )
+</span><span>  (
+</span><span>    input reset, 
+</span><span>    input clk, 
+</span><span>
+</span><span>    input [7:0]  THETA_COUNT,
+</span><span>    input [10:0] RHO_COUNT,
+</span><span>    input [8:0]  x_in,
+</span><span>    input [8:0]  y_in,
+</span><span>
+</span><span>    input  [9:0]  prev_rho_theta_read_in, //for our pipeline, we expect this to be the data of the previous rho_out_read and theta_out_read
+</span><span>
+</span><span>    //these correspond to memory locations in our accumulator grid.
+</span><span>    //log2(1121 * 180) = 18 bits to address
+</span><span>    output reg [17:0]  curr_addr_out, //up to 180, maybe more, so 8 bits gives us 256 max
+</span><span>    output reg [9:0]   accumulator_write_out_data, //assumed we don't go above 400 ever, so 
+</span><span>    output reg         mem_write_en,
+</span><span>    
+</span><span>    output wire   done
+</span><span>  );
+</span><span>
+</span><span>
+</span><span>  ///////////////////////////////////////
+</span><span>  /// STATUS SIGNALS & STATE VARIABLES
+</span><span>  ///////////////////////////////////////
+</span><span>  reg [17:0] curr_rho; // Current rho we're on. Set as state machine output.
+</span><span>  reg  [7:0]  curr_theta; //in degrees/radians, need to check which
+</span><span>  reg  [7:0]  curr_theta_n; // i.e 0-180
+</span><span>  wire [17:0]  theta_incr;
+</span><span>
+</span><span>
+</span><span>  //TODO: Figure out representation of theta to assign this based on THETA_COUNT
+</span><span>  assign theta_incr = 18'd0;
+</span><span>
+</span><span>  reg [1:0] accumulator_state;
+</span><span>
+</span><span>
+</span><span>
+</span><span>  ///////////////////////////////////////
+</span><span>  /// DATAPATH
+</span><span>  ///////////////////////////////////////
+</span><span>
+</span><span>//TODO: figure out representation of all sin tables
+</span><span>wire [17:0] sin_out;
+</span><span>wire [17:0] cos_out;
+</span><span>
+</span><span>reg  [7:0] trig_table_in;
+</span><span>
+</span><span>sine_table sin(clk, trig_table_in, sin_out);
+</span><span>//TODO: make a cos_table
+</span><span>cosine_table cos(clk, trig_table_in, cos_out);
+</span><span>
+</span><span>reg [17:0] x_in_18;
+</span><span>reg [17:0] y_in_18;
+</span><span>wire [17:0] horz_rho_comp;
+</span><span>wire [17:0] vert_rho_comp;
+</span><span>
+</span><span>signed_mult sin_mult(
+</span><span>  .a(y_in_18),
+</span><span>  .b(sin_out),
+</span><span>  .out(horz_rho_comp)
+</span><span>);
+</span><span>
+</span><span>signed_mult cos_mult(
+</span><span>  .a(x_in_18),
+</span><span>  .b(cos_out),
+</span><span>  .out(vert_rho_comp)
+</span><span>);
+</span><span>
+</span><span>///////////////////////////////////////
+</span><span>  /// STATE MACHINE
+</span><span>  //////////////////////////////////////
+</span><span>
+</span><span>
+</span><span>  //Idea is that we go through THETA_COUNT cycles then we are done
+</span><span>
+</span><span>  localparam STATE_INIT = 2'd0,
+</span><span>             STATE_TRAVERSE_READ = 2'd1,
+</span><span>             STATE_TRAVERSE_WRITE = 2'd2,
+</span><span>             STATE_DONE= 2'd3;
+</span><span>
+</span><span>  assign done = accumulator_state == STATE_DONE;
+</span><span>
+</span><span>  // STATE UPDATES
+</span><span>  always@(posedge clk) begin 
+</span><span>      if(reset) begin
+</span><span>          accumulator_state <= STATE_INIT;
+</span><span>      end else begin
+</span><span>          case (accumulator_state)
+</span><span>              STATE_INIT: begin // TODO: Update to accomodate updating the MK10 data
+</span><span>                  accumulator_state <= STATE_TRAVERSE_READ;
+</span><span>              end
+</span><span>              STATE_TRAVERSE_READ: begin 
+</span><span>                //TODO: Is this ok? May need to doa  signed check
+</span><span>                accumulator_state <= STATE_TRAVERSE_WRITE;
+</span><span>              end
+</span><span>              STATE_TRAVERSE_WRITE: begin
+</span><span>                if(curr_theta_n >= THETA_COUNT) begin
+</span><span>                  accumulator_state <= STATE_DONE;
+</span><span>                end else begin
+</span><span>                  accumulator_state <= STATE_TRAVERSE_READ;
+</span><span>                end
+</span><span>              end
+</span><span>              STATE_DONE: begin
+</span><span>                accumulator_state <= STATE_DONE;
+</span><span>              end
+</span><span>              default:
+</span><span>                accumulator_state <= accumulator_state;
+</span><span>          endcase
+</span><span>      end
+</span><span>  end
+</span><span>
+</span><span>
+</span><span> // CONTROL SIGNALS REGS
+</span><span>  always@(posedge clk) begin
+</span><span>      case (accumulator_state) 
+</span><span>        STATE_INIT: begin
+</span><span>          curr_theta_n <= 8'b0;
+</span><span>          curr_theta <= 8'b0;
+</span><span>          trig_table_in <= 8'b0;
+</span><span>
+</span><span>          x_in_18 <= x_in << 7;
+</span><span>          y_in_18 <= y_in << 7;
+</span><span>
+</span><span>        end
+</span><span>        STATE_TRAVERSE_READ: begin
+</span><span>          // curr_theta <= theta_incr; //should be equal to curr_theta_n * theta_incr
+</span><span>          trig_table_in <= trig_table_in + 8'd1;
+</span><span>          curr_theta_n <= curr_theta_n;
+</span><span>          x_in_18 <= x_in_18;
+</span><span>          y_in_18 <= y_in_18;
+</span><span>
+</span><span>        end
+</span><span>        STATE_TRAVERSE_WRITE: begin
+</span><span>          trig_table_in <= trig_table_in;
+</span><span>          curr_theta_n <= curr_theta_n + 8'b1;
+</span><span>          x_in_18 <= x_in_18;
+</span><span>          y_in_18 <= y_in_18;
+</span><span>
+</span><span>        end
+</span><span>        STATE_DONE: begin
+</span><span>        end
+</span><span>      endcase
+</span><span>  end
+</span><span>
+</span><span>  // CONTROL SIGNALS CONTINUOUS
+</span><span>  always@(*) begin
+</span><span>    //increments accumulator, always set, Rely on mem_write_en to write or not
+</span><span>
+</span><span>    //these 2 lines are the address translator. See line 171 hough.cpp
+</span><span>    //Depending on format of sin need to round to a whole number Lines 159 and 168 in hough.cpp
+</span><span>    //curr_rho should be though of as an int
+</span><span>
+</span><span>    // 3 is functionally incorrect. 2 works better than 3
+</span><span>    // 1 is just 2 but with no truncation warnings
+</span><span>
+</span><span>    // THIS IS 1
+</span><span>    curr_rho = ((horz_rho_comp + vert_rho_comp) >> 7) + (({7'd0, RHO_COUNT} - 18'd1) >> 1);
+</span><span>    curr_addr_out = ((({10'd0, curr_theta_n} + 18'd1) * ({7'd0, RHO_COUNT} + 18'd2)) + (curr_rho) + 18'd1);
+</span><span>
+</span><span>    // THIS IS 2
+</span><span>    // curr_rho = ((horz_rho_comp + vert_rho_comp) >> 7) + ((RHO_COUNT - 11'd1) >> 1);
+</span><span>    // curr_addr_out = (((curr_theta_n + 8'd1) * (RHO_COUNT + 11'd2)) + (curr_rho) + 1);
+</span><span>
+</span><span>    // THIS IS 3
+</span><span>    // curr_rho = ((horz_rho_comp + vert_rho_comp) >> 7) + ((RHO_COUNT - 11'd1));
+</span><span>    // curr_addr_out = (((curr_theta_n + 8'd1) * (RHO_COUNT + 11'd2)) + (curr_rho >> 1) + 1);
+</span><span>      case (accumulator_state) 
+</span><span>        STATE_INIT: begin
+</span><span>          mem_write_en = 1'b0;
+</span><span>          accumulator_write_out_data = 10'dx; 
+</span><span>        end
+</span><span>        STATE_TRAVERSE_READ: begin
+</span><span>          mem_write_en = 1'b0;
+</span><span>          accumulator_write_out_data = 10'dx; 
+</span><span>        end
+</span><span>        STATE_TRAVERSE_WRITE: begin
+</span><span>          //just got last read
+</span><span>          accumulator_write_out_data = prev_rho_theta_read_in + 10'b1; 
+</span><span>          mem_write_en = 1'b1;
+</span><span>        end
+</span><span>        STATE_DONE: begin
+</span><span>          mem_write_en = 1'b0;
+</span><span>          accumulator_write_out_data = 10'dx; 
+</span><span>        end
+</span><span>      endcase
+</span><span>  end
+</span><span>
+</span><span>
+</span><span>endmodule
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span>//////////////////////////////////////////////////
+</span><span>////////////	Sin Wave ROM Table	//////////////
+</span><span>//////////////////////////////////////////////////
+</span><span>// produces a 2's comp, 16-bit, approximation
+</span><span>// of a sine wave, given an input phase (address)
+</span><span>
+</span><span>//This takes in a degree between 0-180 and outputs
+</span><span>//a sin value in 1.8 fixed point (unsigned)
+</span><span>module sine_table (clock, address, sine);
+</span><span>input clock;
+</span><span>input [7:0] address;
+</span><span>output [17:0] sine;
+</span><span>reg signed [17:0] sine;
+</span><span>always@(posedge clock)
+</span><span>begin
+</span><span>    case(address)
+</span><span>8'd0: sine = 18'h0;
+</span><span>8'd1: sine = 18'h2;
+</span><span>8'd2: sine = 18'h4;
+</span><span>8'd3: sine = 18'h7;
+</span><span>8'd4: sine = 18'h9;
+</span><span>8'd5: sine = 18'hb;
+</span><span>8'd6: sine = 18'hd;
+</span><span>8'd7: sine = 18'h10;
+</span><span>8'd8: sine = 18'h12;
+</span><span>8'd9: sine = 18'h14;
+</span><span>8'd10: sine = 18'h16;
+</span><span>8'd11: sine = 18'h18;
+</span><span>8'd12: sine = 18'h1b;
+</span><span>8'd13: sine = 18'h1d;
+</span><span>8'd14: sine = 18'h1f;
+</span><span>8'd15: sine = 18'h21;
+</span><span>8'd16: sine = 18'h23;
+</span><span>8'd17: sine = 18'h25;
+</span><span>8'd18: sine = 18'h28;
+</span><span>8'd19: sine = 18'h2a;
+</span><span>8'd20: sine = 18'h2c;
+</span><span>8'd21: sine = 18'h2e;
+</span><span>8'd22: sine = 18'h30;
+</span><span>8'd23: sine = 18'h32;
+</span><span>8'd24: sine = 18'h34;
+</span><span>8'd25: sine = 18'h36;
+</span><span>8'd26: sine = 18'h38;
+</span><span>8'd27: sine = 18'h3a;
+</span><span>8'd28: sine = 18'h3c;
+</span><span>8'd29: sine = 18'h3e;
+</span><span>8'd30: sine = 18'h40;
+</span><span>8'd31: sine = 18'h42;
+</span><span>8'd32: sine = 18'h44;
+</span><span>8'd33: sine = 18'h46;
+</span><span>8'd34: sine = 18'h48;
+</span><span>8'd35: sine = 18'h49;
+</span><span>8'd36: sine = 18'h4b;
+</span><span>8'd37: sine = 18'h4d;
+</span><span>8'd38: sine = 18'h4f;
+</span><span>8'd39: sine = 18'h51;
+</span><span>8'd40: sine = 18'h52;
+</span><span>8'd41: sine = 18'h54;
+</span><span>8'd42: sine = 18'h56;
+</span><span>8'd43: sine = 18'h57;
+</span><span>8'd44: sine = 18'h59;
+</span><span>8'd45: sine = 18'h5b;
+</span><span>8'd46: sine = 18'h5c;
+</span><span>8'd47: sine = 18'h5e;
+</span><span>8'd48: sine = 18'h5f;
+</span><span>8'd49: sine = 18'h61;
+</span><span>8'd50: sine = 18'h62;
+</span><span>8'd51: sine = 18'h63;
+</span><span>8'd52: sine = 18'h65;
+</span><span>8'd53: sine = 18'h66;
+</span><span>8'd54: sine = 18'h68;
+</span><span>8'd55: sine = 18'h69;
+</span><span>8'd56: sine = 18'h6a;
+</span><span>8'd57: sine = 18'h6b;
+</span><span>8'd58: sine = 18'h6d;
+</span><span>8'd59: sine = 18'h6e;
+</span><span>8'd60: sine = 18'h6f;
+</span><span>8'd61: sine = 18'h70;
+</span><span>8'd62: sine = 18'h71;
+</span><span>8'd63: sine = 18'h72;
+</span><span>8'd64: sine = 18'h73;
+</span><span>8'd65: sine = 18'h74;
+</span><span>8'd66: sine = 18'h75;
+</span><span>8'd67: sine = 18'h76;
+</span><span>8'd68: sine = 18'h77;
+</span><span>8'd69: sine = 18'h77;
+</span><span>8'd70: sine = 18'h78;
+</span><span>8'd71: sine = 18'h79;
+</span><span>8'd72: sine = 18'h7a;
+</span><span>8'd73: sine = 18'h7a;
+</span><span>8'd74: sine = 18'h7b;
+</span><span>8'd75: sine = 18'h7c;
+</span><span>8'd76: sine = 18'h7c;
+</span><span>8'd77: sine = 18'h7d;
+</span><span>8'd78: sine = 18'h7d;
+</span><span>8'd79: sine = 18'h7e;
+</span><span>8'd80: sine = 18'h7e;
+</span><span>8'd81: sine = 18'h7e;
+</span><span>8'd82: sine = 18'h7f;
+</span><span>8'd83: sine = 18'h7f;
+</span><span>8'd84: sine = 18'h7f;
+</span><span>8'd85: sine = 18'h80;
+</span><span>8'd86: sine = 18'h80;
+</span><span>8'd87: sine = 18'h80;
+</span><span>8'd88: sine = 18'h80;
+</span><span>8'd89: sine = 18'h80;
+</span><span>8'd90: sine = 18'h80;
+</span><span>8'd91: sine = 18'h80;
+</span><span>8'd92: sine = 18'h80;
+</span><span>8'd93: sine = 18'h80;
+</span><span>8'd94: sine = 18'h80;
+</span><span>8'd95: sine = 18'h80;
+</span><span>8'd96: sine = 18'h7f;
+</span><span>8'd97: sine = 18'h7f;
+</span><span>8'd98: sine = 18'h7f;
+</span><span>8'd99: sine = 18'h7e;
+</span><span>8'd100: sine = 18'h7e;
+</span><span>8'd101: sine = 18'h7e;
+</span><span>8'd102: sine = 18'h7d;
+</span><span>8'd103: sine = 18'h7d;
+</span><span>8'd104: sine = 18'h7c;
+</span><span>8'd105: sine = 18'h7c;
+</span><span>8'd106: sine = 18'h7b;
+</span><span>8'd107: sine = 18'h7a;
+</span><span>8'd108: sine = 18'h7a;
+</span><span>8'd109: sine = 18'h79;
+</span><span>8'd110: sine = 18'h78;
+</span><span>8'd111: sine = 18'h77;
+</span><span>8'd112: sine = 18'h77;
+</span><span>8'd113: sine = 18'h76;
+</span><span>8'd114: sine = 18'h75;
+</span><span>8'd115: sine = 18'h74;
+</span><span>8'd116: sine = 18'h73;
+</span><span>8'd117: sine = 18'h72;
+</span><span>8'd118: sine = 18'h71;
+</span><span>8'd119: sine = 18'h70;
+</span><span>8'd120: sine = 18'h6f;
+</span><span>8'd121: sine = 18'h6e;
+</span><span>8'd122: sine = 18'h6d;
+</span><span>8'd123: sine = 18'h6b;
+</span><span>8'd124: sine = 18'h6a;
+</span><span>8'd125: sine = 18'h69;
+</span><span>8'd126: sine = 18'h68;
+</span><span>8'd127: sine = 18'h66;
+</span><span>8'd128: sine = 18'h65;
+</span><span>8'd129: sine = 18'h63;
+</span><span>8'd130: sine = 18'h62;
+</span><span>8'd131: sine = 18'h61;
+</span><span>8'd132: sine = 18'h5f;
+</span><span>8'd133: sine = 18'h5e;
+</span><span>8'd134: sine = 18'h5c;
+</span><span>8'd135: sine = 18'h5b;
+</span><span>8'd136: sine = 18'h59;
+</span><span>8'd137: sine = 18'h57;
+</span><span>8'd138: sine = 18'h56;
+</span><span>8'd139: sine = 18'h54;
+</span><span>8'd140: sine = 18'h52;
+</span><span>8'd141: sine = 18'h51;
+</span><span>8'd142: sine = 18'h4f;
+</span><span>8'd143: sine = 18'h4d;
+</span><span>8'd144: sine = 18'h4b;
+</span><span>8'd145: sine = 18'h49;
+</span><span>8'd146: sine = 18'h48;
+</span><span>8'd147: sine = 18'h46;
+</span><span>8'd148: sine = 18'h44;
+</span><span>8'd149: sine = 18'h42;
+</span><span>8'd150: sine = 18'h40;
+</span><span>8'd151: sine = 18'h3e;
+</span><span>8'd152: sine = 18'h3c;
+</span><span>8'd153: sine = 18'h3a;
+</span><span>8'd154: sine = 18'h38;
+</span><span>8'd155: sine = 18'h36;
+</span><span>8'd156: sine = 18'h34;
+</span><span>8'd157: sine = 18'h32;
+</span><span>8'd158: sine = 18'h30;
+</span><span>8'd159: sine = 18'h2e;
+</span><span>8'd160: sine = 18'h2c;
+</span><span>8'd161: sine = 18'h2a;
+</span><span>8'd162: sine = 18'h28;
+</span><span>8'd163: sine = 18'h25;
+</span><span>8'd164: sine = 18'h23;
+</span><span>8'd165: sine = 18'h21;
+</span><span>8'd166: sine = 18'h1f;
+</span><span>8'd167: sine = 18'h1d;
+</span><span>8'd168: sine = 18'h1b;
+</span><span>8'd169: sine = 18'h18;
+</span><span>8'd170: sine = 18'h16;
+</span><span>8'd171: sine = 18'h14;
+</span><span>8'd172: sine = 18'h12;
+</span><span>8'd173: sine = 18'h10;
+</span><span>8'd174: sine = 18'hd;
+</span><span>8'd175: sine = 18'hb;
+</span><span>8'd176: sine = 18'h9;
+</span><span>8'd177: sine = 18'h7;
+</span><span>8'd178: sine = 18'h4;
+</span><span>8'd179: sine = 18'h2;
+</span><span>  endcase
+</span><span>end
+</span><span>endmodule
+</span><span>
+</span><span>
+</span><span>
+</span><span>module cosine_table (clock, address, cosine);
+</span><span>input clock;
+</span><span>input [7:0] address;
+</span><span>output [17:0] cosine;
+</span><span>reg signed [17:0] cosine;
+</span><span>always@(posedge clock)
+</span><span>begin
+</span><span>    case(address)
+</span><span> 8'd0: cosine = 18'h80;
+</span><span>8'd1: cosine = 18'h80;
+</span><span>8'd2: cosine = 18'h80;
+</span><span>8'd3: cosine = 18'h80;
+</span><span>8'd4: cosine = 18'h80;
+</span><span>8'd5: cosine = 18'h80;
+</span><span>8'd6: cosine = 18'h7f;
+</span><span>8'd7: cosine = 18'h7f;
+</span><span>8'd8: cosine = 18'h7f;
+</span><span>8'd9: cosine = 18'h7e;
+</span><span>8'd10: cosine = 18'h7e;
+</span><span>8'd11: cosine = 18'h7e;
+</span><span>8'd12: cosine = 18'h7d;
+</span><span>8'd13: cosine = 18'h7d;
+</span><span>8'd14: cosine = 18'h7c;
+</span><span>8'd15: cosine = 18'h7c;
+</span><span>8'd16: cosine = 18'h7b;
+</span><span>8'd17: cosine = 18'h7a;
+</span><span>8'd18: cosine = 18'h7a;
+</span><span>8'd19: cosine = 18'h79;
+</span><span>8'd20: cosine = 18'h78;
+</span><span>8'd21: cosine = 18'h77;
+</span><span>8'd22: cosine = 18'h77;
+</span><span>8'd23: cosine = 18'h76;
+</span><span>8'd24: cosine = 18'h75;
+</span><span>8'd25: cosine = 18'h74;
+</span><span>8'd26: cosine = 18'h73;
+</span><span>8'd27: cosine = 18'h72;
+</span><span>8'd28: cosine = 18'h71;
+</span><span>8'd29: cosine = 18'h70;
+</span><span>8'd30: cosine = 18'h6f;
+</span><span>8'd31: cosine = 18'h6e;
+</span><span>8'd32: cosine = 18'h6d;
+</span><span>8'd33: cosine = 18'h6b;
+</span><span>8'd34: cosine = 18'h6a;
+</span><span>8'd35: cosine = 18'h69;
+</span><span>8'd36: cosine = 18'h68;
+</span><span>8'd37: cosine = 18'h66;
+</span><span>8'd38: cosine = 18'h65;
+</span><span>8'd39: cosine = 18'h63;
+</span><span>8'd40: cosine = 18'h62;
+</span><span>8'd41: cosine = 18'h61;
+</span><span>8'd42: cosine = 18'h5f;
+</span><span>8'd43: cosine = 18'h5e;
+</span><span>8'd44: cosine = 18'h5c;
+</span><span>8'd45: cosine = 18'h5b;
+</span><span>8'd46: cosine = 18'h59;
+</span><span>8'd47: cosine = 18'h57;
+</span><span>8'd48: cosine = 18'h56;
+</span><span>8'd49: cosine = 18'h54;
+</span><span>8'd50: cosine = 18'h52;
+</span><span>8'd51: cosine = 18'h51;
+</span><span>8'd52: cosine = 18'h4f;
+</span><span>8'd53: cosine = 18'h4d;
+</span><span>8'd54: cosine = 18'h4b;
+</span><span>8'd55: cosine = 18'h49;
+</span><span>8'd56: cosine = 18'h48;
+</span><span>8'd57: cosine = 18'h46;
+</span><span>8'd58: cosine = 18'h44;
+</span><span>8'd59: cosine = 18'h42;
+</span><span>8'd60: cosine = 18'h40;
+</span><span>8'd61: cosine = 18'h3e;
+</span><span>8'd62: cosine = 18'h3c;
+</span><span>8'd63: cosine = 18'h3a;
+</span><span>8'd64: cosine = 18'h38;
+</span><span>8'd65: cosine = 18'h36;
+</span><span>8'd66: cosine = 18'h34;
+</span><span>8'd67: cosine = 18'h32;
+</span><span>8'd68: cosine = 18'h30;
+</span><span>8'd69: cosine = 18'h2e;
+</span><span>8'd70: cosine = 18'h2c;
+</span><span>8'd71: cosine = 18'h2a;
+</span><span>8'd72: cosine = 18'h28;
+</span><span>8'd73: cosine = 18'h25;
+</span><span>8'd74: cosine = 18'h23;
+</span><span>8'd75: cosine = 18'h21;
+</span><span>8'd76: cosine = 18'h1f;
+</span><span>8'd77: cosine = 18'h1d;
+</span><span>8'd78: cosine = 18'h1b;
+</span><span>8'd79: cosine = 18'h18;
+</span><span>8'd80: cosine = 18'h16;
+</span><span>8'd81: cosine = 18'h14;
+</span><span>8'd82: cosine = 18'h12;
+</span><span>8'd83: cosine = 18'h10;
+</span><span>8'd84: cosine = 18'hd;
+</span><span>8'd85: cosine = 18'hb;
+</span><span>8'd86: cosine = 18'h9;
+</span><span>8'd87: cosine = 18'h7;
+</span><span>8'd88: cosine = 18'h4;
+</span><span>8'd89: cosine = 18'h2;
+</span><span>8'd90: cosine = 18'h0;
+</span><span>8'd91: cosine = 18'h3fffe;
+</span><span>8'd92: cosine = 18'h3fffc;
+</span><span>8'd93: cosine = 18'h3fff9;
+</span><span>8'd94: cosine = 18'h3fff7;
+</span><span>8'd95: cosine = 18'h3fff5;
+</span><span>8'd96: cosine = 18'h3fff3;
+</span><span>8'd97: cosine = 18'h3fff0;
+</span><span>8'd98: cosine = 18'h3ffee;
+</span><span>8'd99: cosine = 18'h3ffec;
+</span><span>8'd100: cosine = 18'h3ffea;
+</span><span>8'd101: cosine = 18'h3ffe8;
+</span><span>8'd102: cosine = 18'h3ffe5;
+</span><span>8'd103: cosine = 18'h3ffe3;
+</span><span>8'd104: cosine = 18'h3ffe1;
+</span><span>8'd105: cosine = 18'h3ffdf;
+</span><span>8'd106: cosine = 18'h3ffdd;
+</span><span>8'd107: cosine = 18'h3ffdb;
+</span><span>8'd108: cosine = 18'h3ffd8;
+</span><span>8'd109: cosine = 18'h3ffd6;
+</span><span>8'd110: cosine = 18'h3ffd4;
+</span><span>8'd111: cosine = 18'h3ffd2;
+</span><span>8'd112: cosine = 18'h3ffd0;
+</span><span>8'd113: cosine = 18'h3ffce;
+</span><span>8'd114: cosine = 18'h3ffcc;
+</span><span>8'd115: cosine = 18'h3ffca;
+</span><span>8'd116: cosine = 18'h3ffc8;
+</span><span>8'd117: cosine = 18'h3ffc6;
+</span><span>8'd118: cosine = 18'h3ffc4;
+</span><span>8'd119: cosine = 18'h3ffc2;
+</span><span>8'd120: cosine = 18'h3ffc0;
+</span><span>8'd121: cosine = 18'h3ffbe;
+</span><span>8'd122: cosine = 18'h3ffbc;
+</span><span>8'd123: cosine = 18'h3ffba;
+</span><span>8'd124: cosine = 18'h3ffb8;
+</span><span>8'd125: cosine = 18'h3ffb7;
+</span><span>8'd126: cosine = 18'h3ffb5;
+</span><span>8'd127: cosine = 18'h3ffb3;
+</span><span>8'd128: cosine = 18'h3ffb1;
+</span><span>8'd129: cosine = 18'h3ffaf;
+</span><span>8'd130: cosine = 18'h3ffae;
+</span><span>8'd131: cosine = 18'h3ffac;
+</span><span>8'd132: cosine = 18'h3ffaa;
+</span><span>8'd133: cosine = 18'h3ffa9;
+</span><span>8'd134: cosine = 18'h3ffa7;
+</span><span>8'd135: cosine = 18'h3ffa5;
+</span><span>8'd136: cosine = 18'h3ffa4;
+</span><span>8'd137: cosine = 18'h3ffa2;
+</span><span>8'd138: cosine = 18'h3ffa1;
+</span><span>8'd139: cosine = 18'h3ff9f;
+</span><span>8'd140: cosine = 18'h3ff9e;
+</span><span>8'd141: cosine = 18'h3ff9d;
+</span><span>8'd142: cosine = 18'h3ff9b;
+</span><span>8'd143: cosine = 18'h3ff9a;
+</span><span>8'd144: cosine = 18'h3ff98;
+</span><span>8'd145: cosine = 18'h3ff97;
+</span><span>8'd146: cosine = 18'h3ff96;
+</span><span>8'd147: cosine = 18'h3ff95;
+</span><span>8'd148: cosine = 18'h3ff93;
+</span><span>8'd149: cosine = 18'h3ff92;
+</span><span>8'd150: cosine = 18'h3ff91;
+</span><span>8'd151: cosine = 18'h3ff90;
+</span><span>8'd152: cosine = 18'h3ff8f;
+</span><span>8'd153: cosine = 18'h3ff8e;
+</span><span>8'd154: cosine = 18'h3ff8d;
+</span><span>8'd155: cosine = 18'h3ff8c;
+</span><span>8'd156: cosine = 18'h3ff8b;
+</span><span>8'd157: cosine = 18'h3ff8a;
+</span><span>8'd158: cosine = 18'h3ff89;
+</span><span>8'd159: cosine = 18'h3ff89;
+</span><span>8'd160: cosine = 18'h3ff88;
+</span><span>8'd161: cosine = 18'h3ff87;
+</span><span>8'd162: cosine = 18'h3ff86;
+</span><span>8'd163: cosine = 18'h3ff86;
+</span><span>8'd164: cosine = 18'h3ff85;
+</span><span>8'd165: cosine = 18'h3ff84;
+</span><span>8'd166: cosine = 18'h3ff84;
+</span><span>8'd167: cosine = 18'h3ff83;
+</span><span>8'd168: cosine = 18'h3ff83;
+</span><span>8'd169: cosine = 18'h3ff82;
+</span><span>8'd170: cosine = 18'h3ff82;
+</span><span>8'd171: cosine = 18'h3ff82;
+</span><span>8'd172: cosine = 18'h3ff81;
+</span><span>8'd173: cosine = 18'h3ff81;
+</span><span>8'd174: cosine = 18'h3ff81;
+</span><span>8'd175: cosine = 18'h3ff80;
+</span><span>8'd176: cosine = 18'h3ff80;
+</span><span>8'd177: cosine = 18'h3ff80;
+</span><span>8'd178: cosine = 18'h3ff80;
+</span><span>8'd179: cosine = 18'h3ff80;
+</span><span>  endcase
+</span><span>end
+</span><span>endmodule
+</span><span>
+</span><span>
+</span><span>module signed_mult (out, a, b);
+</span><span>  output 	signed  [17:0]	out;
+</span><span>  input 	signed	[17:0] 	a;
+</span><span>  input 	signed	[17:0] 	b;
+</span><span>  // intermediate full bit length
+</span><span>  wire 	signed	[35:0]	mult_out;
+</span><span>  assign mult_out = a * b;
+</span><span>  // select bits for 11.7 fixed point
+</span><span>  //in our mult we have 14 fractional bits and 22 integer bits
+</span><span>  // the decimal lands between 13 and 14 (0-indexed).
+</span><span>  assign out = {mult_out[35], mult_out[23:7]};
+</span><span>endmodule
+</span></code></pre><h2 id=dispatcher-module>Dispatcher Module</h2><pre class=language-v data-lang=v style=background:#282a36;color:#f8f8f2><code class=language-v data-lang=v><span>module not_zero 
+</span><span>  (
+</span><span>    
+</span><span>    input clk,
+</span><span>    input reset,
+</span><span>    input [7:0] color,
+</span><span>    input acc_done,
+</span><span>
+</span><span>    output [8:0] sram_x_out,
+</span><span>    output [8:0] sram_y_out,
+</span><span>    output go,
+</span><span>    output [8:0] acc_x_out,
+</span><span>    output [8:0] acc_y_out,
+</span><span>
+</span><span>    input wait_sig
+</span><span>    
+</span><span>  );
+</span><span>
+</span><span>  wire valid_pixel;
+</span><span>  assign valid_pixel = |color;
+</span><span>
+</span><span>  //=======================================================
+</span><span>  //  FSM
+</span><span>  //=======================================================
+</span><span>
+</span><span>  reg [8:0] prev_x_cood;
+</span><span>  reg [8:0] prev_y_cood;
+</span><span>  reg [8:0] curr_x_cood;
+</span><span>  reg [8:0] curr_y_cood;
+</span><span>  reg [16:0] prev_address;
+</span><span>  reg [16:0] curr_address;
+</span><span>  reg go_reg;
+</span><span>
+</span><span>  localparam INIT = 2'd0,
+</span><span>             READY = 2'd1,
+</span><span>             WAITING = 2'd2;
+</span><span>          
+</span><span>
+</span><span>  reg [1:0] zero_state;
+</span><span>
+</span><span>  assign go = go_reg;
+</span><span>
+</span><span>  always@(posedge clk) begin 
+</span><span>      if(reset) begin
+</span><span>        zero_state <= INIT;
+</span><span>      end 
+</span><span>      else begin
+</span><span>        case (zero_state)
+</span><span>
+</span><span>          INIT: begin
+</span><span>            
+</span><span>            go_reg <= 0;
+</span><span>            zero_state <= READY;
+</span><span>
+</span><span>          end 
+</span><span>          READY: begin 
+</span><span>
+</span><span>            if (valid_pixel && !wait_sig) begin
+</span><span>              zero_state <= WAITING;
+</span><span>              go_reg <= 1;
+</span><span>            end
+</span><span>            else begin
+</span><span>              zero_state <= READY;
+</span><span>              go_reg <= 0;
+</span><span>            end
+</span><span>
+</span><span>          end
+</span><span>          WAITING: begin
+</span><span>
+</span><span>            go_reg <= 0;
+</span><span>
+</span><span>            if (acc_done) begin 
+</span><span>              zero_state <= READY;
+</span><span>            end
+</span><span>
+</span><span>          end
+</span><span>          
+</span><span>          default:
+</span><span>            zero_state <= zero_state;
+</span><span>        endcase
+</span><span>      end
+</span><span>  end
+</span><span>
+</span><span>  // assign sram_address =  {8'b0,curr_x_cood} + ({8'b0,curr_y_cood} * 320) ;
+</span><span>
+</span><span>  assign acc_x_out = prev_x_cood;
+</span><span>  assign acc_y_out = prev_y_cood;
+</span><span>  assign sram_x_out = curr_x_cood;
+</span><span>  assign sram_y_out = curr_y_cood;
+</span><span>
+</span><span>  always @(posedge clk) begin 
+</span><span>
+</span><span>    
+</span><span>
+</span><span>    case (zero_state) 
+</span><span>
+</span><span>      INIT: begin
+</span><span>
+</span><span>        curr_x_cood <= 9'd0;
+</span><span>        curr_y_cood <= 9'd0;
+</span><span>
+</span><span>        prev_x_cood <= 0 ;
+</span><span>        prev_y_cood <= 0 ;
+</span><span>      end
+</span><span>
+</span><span>      READY: begin
+</span><span>
+</span><span>        prev_x_cood <= curr_x_cood;
+</span><span>        prev_y_cood <= curr_y_cood;
+</span><span>        if (wait_sig) begin
+</span><span>          curr_x_cood <= curr_x_cood;
+</span><span>          curr_y_cood <= curr_y_cood;
+</span><span>        end else begin
+</span><span>          if (curr_x_cood >= 9'd319) begin
+</span><span>            curr_x_cood <= 9'd0 ;
+</span><span>            if (curr_y_cood >= 9'd239) 
+</span><span>              curr_y_cood <= 9'd0 ;
+</span><span>            else 
+</span><span>              curr_y_cood <= curr_y_cood + 9'd1 ;
+</span><span>          end
+</span><span>          else 
+</span><span>            curr_x_cood <= curr_x_cood + 9'd1 ;
+</span><span>
+</span><span>        end
+</span><span>      end
+</span><span>      WAITING: begin
+</span><span>
+</span><span>        curr_x_cood <= curr_x_cood;
+</span><span>        curr_y_cood <= curr_y_cood;
+</span><span>
+</span><span>        prev_x_cood <= prev_x_cood ;
+</span><span>        prev_y_cood <= prev_y_cood ;
+</span><span>        
+</span><span>      end
+</span><span>
+</span><span>    endcase
+</span><span>
+</span><span>  end
+</span><span>
+</span><span>endmodule
+</span></code></pre><h2 id=toplevel-module>Toplevel Module</h2><pre class=language-v data-lang=v style=background:#282a36;color:#f8f8f2><code class=language-v data-lang=v><span>// Generated code omitted...
+</span><span>
+</span><span>
+</span><span>//=======================================================
+</span><span>// Bus controller for AVALON bus-master
+</span><span>//=======================================================
+</span><span>reg [31:0] timer ;
+</span><span>reg [3:0] state ;
+</span><span>
+</span><span>// PLLs
+</span><span>wire vga_pll_lock;
+</span><span>wire vga_pll;
+</span><span>wire M10k_pll_locked;
+</span><span>wire M10k_pll;
+</span><span>
+</span><span>// Video In M10k
+</span><span>reg [7:0] video_in_read_data;
+</span><span>
+</span><span>// VGA M10k that holds pixels directly from camera in
+</span><span>wire [16:0] sram1_read_addr;
+</span><span>wire [16:0] sram1_write_addr;
+</span><span>wire [9:0] vga_next_x;
+</span><span>wire [9:0] vga_next_y;
+</span><span>
+</span><span>// pixel address is
+</span><span>reg [9:0] vga_x_cood, vga_y_cood, video_in_x_cood, video_in_y_cood ;
+</span><span>reg [7:0] current_pixel_color1, current_pixel_color2 ;
+</span><span>// compute address
+</span><span>
+</span><span>assign sram1_read_addr  =  ({7'b0, vga_next_x}) + (({7'b0,vga_next_y})*17'd320) ;
+</span><span>
+</span><span>
+</span><span>//traverse over x and y coordinates
+</span><span>always @(posedge CLOCK_50) begin //M10k_pll
+</span><span>
+</span><span>  // reset state machine and read/write controls
+</span><span>  if (~KEY[0]) begin
+</span><span>    state <= 0 ;
+</span><span>    video_in_x_cood <= 0 ;
+</span><span>    video_in_y_cood <= 0 ;
+</span><span>
+</span><span>    timer <= 0;
+</span><span>  end
+</span><span>  else begin
+</span><span>    timer <= timer + 1;
+</span><span>  end
+</span><span>  
+</span><span>  // and put in a small delay to aviod bus hogging
+</span><span>  // timer delay can be set to 2**n-1, so 3, 7, 15, 31
+</span><span>  // bigger numbers mean slower frame update to VGA
+</span><span>  if (state==0 && SW[0] && (timer & 30)==0 ) begin //
+</span><span>
+</span><span>    if (video_in_x_cood >= 10'd319) begin
+</span><span>      video_in_x_cood <= 10'd0 ;
+</span><span>      if (video_in_y_cood >= 10'd239) 
+</span><span>        video_in_y_cood <= 10'd0 ;
+</span><span>      else 
+</span><span>        video_in_y_cood <= video_in_y_cood + 10'd1 ;
+</span><span>    end
+</span><span>    else 
+</span><span>      video_in_x_cood <= video_in_x_cood + 10'd1 ;
+</span><span>  end
+</span><span>  
+</span><span>end // always @(posedge state_clock)
+</span><span>
+</span><span>
+</span><span>
+</span><span>//=======================================================
+</span><span>//  HPS Data M10k (M10k_3) Stuff
+</span><span>//=======================================================
+</span><span>
+</span><span>reg [16:0] hps_copy_sram_read_address;
+</span><span>
+</span><span>
+</span><span>
+</span><span>  localparam STATE_ACC_INIT = 2'd0,
+</span><span>             STATE_ACC_TRAVERSE = 2'd1,
+</span><span>             STATE_ACC_DISPLAY= 2'd2; //loop through reading only
+</span><span>reg [1:0] acc_state;
+</span><span>
+</span><span>reg [8:0] acc_sram_x_cood;
+</span><span>reg [8:0] acc_sram_y_cood;
+</span><span>
+</span><span>
+</span><span>//Acc test state transitions
+</span><span>always @(posedge CLOCK_50) begin
+</span><span>  if (~KEY[0]) begin
+</span><span>    acc_state <= STATE_ACC_INIT;
+</span><span>  end else begin
+</span><span>    case (acc_state)
+</span><span>      STATE_ACC_INIT: begin
+</span><span>        acc_state <= STATE_ACC_TRAVERSE;
+</span><span>      end
+</span><span>      STATE_ACC_TRAVERSE: begin
+</span><span>        // acc_state <= (acc_done && acc_x_coord >= 9'd319) ? STATE_ACC_DISPLAY : STATE_ACC_TRAVERSE;
+</span><span>        acc_state <= (acc_done) ? STATE_ACC_DISPLAY : STATE_ACC_TRAVERSE;
+</span><span>
+</span><span>      end
+</span><span>      STATE_ACC_DISPLAY: begin
+</span><span>        acc_state <= STATE_ACC_DISPLAY;
+</span><span>      end
+</span><span>    endcase
+</span><span>  end
+</span><span>end
+</span><span>
+</span><span>assign acc_sram_read_addr = {8'b0, acc_sram_x_cood}  + ({8'b0,acc_sram_y_cood} * 17'd320) ;
+</span><span>
+</span><span> //acc test state reg updates
+</span><span>always @(posedge CLOCK_50) begin
+</span><span>  case (acc_state)
+</span><span>    STATE_ACC_INIT: begin
+</span><span>      acc_sram_x_cood <= 0;
+</span><span>      acc_sram_y_cood <= 0;
+</span><span>      // acc_x_coord <= 9'd0;
+</span><span>      // acc_y_coord <= 9'd50;
+</span><span>      // acc_reset <= 1'b0;
+</span><span>    end
+</span><span>    STATE_ACC_TRAVERSE: begin
+</span><span>      acc_sram_x_cood <= acc_sram_x_cood;
+</span><span>      acc_sram_y_cood <= acc_sram_y_cood;
+</span><span>      // acc_reset <= acc_done; //TODO: Make sure this isnt staying high for 2 cycles
+</span><span>      // acc_x_coord <= acc_done ? acc_x_coord + 9'd1 : acc_x_coord;
+</span><span>      // acc_y_coord <= 9'd50;
+</span><span>    end
+</span><span>    STATE_ACC_DISPLAY: begin
+</span><span>      if (acc_sram_x_cood >= 9'd319) begin
+</span><span>        acc_sram_x_cood <= 9'd0 ;
+</span><span>        if (acc_sram_y_cood >= 9'd239) 
+</span><span>          acc_sram_y_cood <= 9'd0 ;
+</span><span>        else 
+</span><span>          acc_sram_y_cood <= acc_sram_y_cood + 9'd1 ;
+</span><span>      end
+</span><span>      else 
+</span><span>        acc_sram_x_cood <= acc_sram_x_cood + 9'd1 ;
+</span><span>      // acc_reset <= 1'b0;
+</span><span>      // acc_x_coord <= acc_x_coord;
+</span><span>      // acc_y_coord <= acc_y_coord;
+</span><span>    end
+</span><span>  endcase
+</span><span>end
+</span><span>
+</span><span>reg [7:0] force_color;
+</span><span>
+</span><span>
+</span><span>
+</span><span>//=======================================================
+</span><span>//  VIDEO M10K Stuff
+</span><span>//=======================================================
+</span><span>M10K_76800_8 video_m10k( //8 bit colors with 240 rows * 320 pixels/row
+</span><span>  .clk(CLOCK_50),
+</span><span>  .read_address(src_copy_read_addr),
+</span><span>    .out(not_zero_color),
+</span><span>  .we(1'b1),
+</span><span>  .write_address(sram1_read_addr), //this sounds backwards but fine, connects Qsys camera-in sram to verilog module
+</span><span>    .in(no_top_line)
+</span><span>);
+</span><span>
+</span><span>wire [7:0] no_top_line;
+</span><span>assign no_top_line = (vga_next_y == 8 || vga_next_y == 9 || vga_next_y == 10) ? 8'b000_000_00 : video_in_read_data;
+</span><span>
+</span><span>//=======================================================
+</span><span>//  NOT ZERO Stuff
+</span><span>//=======================================================
+</span><span>wire [17:0] acc_address;
+</span><span>
+</span><span>wire [8:0] sram_x_in;
+</span><span>wire [8:0] sram_y_in;
+</span><span>
+</span><span>wire [16:0] src_copy_read_addr;
+</span><span>
+</span><span>assign src_copy_read_addr = {8'b0,sram_x_in} + ({8'b0,sram_y_in} * 17'd320) ;
+</span><span>
+</span><span>wire [7:0] not_zero_color;
+</span><span>
+</span><span>wire wait_dispatch;
+</span><span>
+</span><span>assign LEDR[3] = wait_dispatch;
+</span><span>
+</span><span>not_zero dispatch
+</span><span>  (
+</span><span>    .clk(CLOCK_50),
+</span><span>    .reset(~KEY[0]),
+</span><span>    .color(not_zero_color),
+</span><span>    .acc_done(acc_done),
+</span><span>    .go(acc_reset),
+</span><span>  .acc_x_out(acc_x_in),
+</span><span>  .acc_y_out(acc_y_in),
+</span><span>  .sram_x_out(sram_x_in),
+</span><span>  .sram_y_out(sram_y_in),
+</span><span>  .wait_sig(wait_dispatch)
+</span><span>  );
+</span><span>
+</span><span>//=======================================================
+</span><span>//  VGA Driver Stuff
+</span><span>//=======================================================
+</span><span>
+</span><span>// Val/rdy protocol
+</span><span>
+</span><span>wire acc_reset;
+</span><span>wire [7:0] theta_count;
+</span><span>assign theta_count = 8'd179;
+</span><span>wire [10:0] rho_count;
+</span><span>assign rho_count = 11'd561;
+</span><span>wire [8:0] acc_x_in;
+</span><span>wire [8:0] acc_y_in;
+</span><span>wire [9:0]  acc_write_out_data;
+</span><span>wire acc_mem_write_en;
+</span><span>wire acc_done;
+</span><span>
+</span><span>wire [16:0] acc_sram_read_addr;
+</span><span>
+</span><span>accumulator acc(
+</span><span>  .reset(acc_reset),
+</span><span>  .clk(CLOCK_50),
+</span><span>
+</span><span>  .THETA_COUNT(theta_count),
+</span><span>  .RHO_COUNT(rho_count),
+</span><span>
+</span><span>  .x_in(acc_x_in),
+</span><span>  .y_in(acc_y_in),
+</span><span>  .prev_rho_theta_read_in(acc_read_data),
+</span><span>  .curr_addr_out(acc_address),
+</span><span>  .accumulator_write_out_data(acc_write_out_data),
+</span><span>  .mem_write_en(acc_mem_write_en),
+</span><span>  .done(acc_done)
+</span><span>);
+</span><span>
+</span><span>
+</span><span>wire [9:0] acc_read_data;
+</span><span>wire [7:0] lines_read_data;
+</span><span>// reg [7:0] second_sram_out;
+</span><span>
+</span><span>wire my_clk;
+</span><span>assign my_clk = SW[5] ? CLOCK_50 : vga_pll;
+</span><span>
+</span><span>reg [7:0] vga_data;
+</span><span>// assign vga_data = (vga_next_x <= 320 && vga_next_y <= 240) ? m10k_out : 8'b000_000_00;
+</span><span>always @(*) begin
+</span><span>
+</span><span>  if (vga_next_x <= 320 && vga_next_y <= 240) begin // top left
+</span><span>    vga_data = SW[6] ? 8'b111111_11 : (SW[8] ? (video_in_read_data) : (video_in_read_data + lines_read_data));
+</span><span>  end
+</span><span>
+</span><span>  else if (vga_next_x >= 320 && vga_next_y <= 240) begin // top right
+</span><span>      vga_data = SW[7] ?  lines_read_data : (video_in_read_data + lines_read_data);
+</span><span>  end
+</span><span>
+</span><span>
+</span><span>  else begin
+</span><span>    vga_data = 8'b000_000_00;
+</span><span>  end
+</span><span>  
+</span><span>end
+</span><span>
+</span><span>reg vga_reset;
+</span><span>
+</span><span>always @(posedge my_clk)begin
+</span><span>  if (~KEY[0]) begin
+</span><span>    vga_reset <= 1;
+</span><span>  end else begin
+</span><span>    vga_reset <= 0;
+</span><span>  end
+</span><span>end
+</span><span>          
+</span><span>vga_driver DUT   (	.clock(my_clk), 
+</span><span>          .reset(vga_reset),
+</span><span>          .color_in(SW[4] ? 8'b000_111_00 : vga_data),	// Pixel color (8-bit) from memory
+</span><span>          // .color_in(8'b000_111_00),	// Pixel color (8-bit) from memory
+</span><span>          .next_x(vga_next_x),		// This (and next_y) used to specify memory read address
+</span><span>          .next_y(vga_next_y),		// This (and next_x) used to specify memory read address
+</span><span>          .hsync(VGA_HS),
+</span><span>          .vsync(VGA_VS),
+</span><span>          .red(VGA_R),
+</span><span>          .green(VGA_G),
+</span><span>          .blue(VGA_B),
+</span><span>          .sync(VGA_SYNC_N),
+</span><span>          .clk(VGA_CLK),
+</span><span>          .blank(VGA_BLANK_N)
+</span><span>);
+</span><span>
+</span><span>//=======================================================
+</span><span>//  Structural coding
+</span><span>//=======================================================
+</span><span>
+</span><span>Computer_System The_System (
+</span><span>
+</span><span>  // Video In M10k SRAM 1
+</span><span>  .onchip_sram_s2_address          (sram1_read_addr),
+</span><span>  .onchip_sram_s2_chipselect       (1'b1),
+</span><span>  .onchip_sram_s2_clken            (1'b1),
+</span><span>  .onchip_sram_s2_write            (1'b0),
+</span><span>  .onchip_sram_s2_readdata         (video_in_read_data),
+</span><span>  .onchip_sram_s2_writedata        (),
+</span><span>
+</span><span>    //HOUGH SPACE SRAM
+</span><span>  //2nd sram is what we want to output in the upper right corner of the vga
+</span><span>  .hps_to_onchip_sram_s2_address    (acc_address), 
+</span><span>  .hps_to_onchip_sram_s2_write      (acc_mem_write_en),
+</span><span>  .hps_to_onchip_sram_s2_readdata   (acc_read_data),  
+</span><span>  .hps_to_onchip_sram_s2_writedata  (acc_write_out_data),   
+</span><span>  .hps_to_onchip_sram_s2_chipselect (1'b1),    
+</span><span>  .hps_to_onchip_sram_s2_clken      (1'b1),
+</span><span>
+</span><span>
+</span><span>     // Just lines (ie black[])
+</span><span>  .onchip_camera_in_to_onchip_copy_0_s2_address     (sram1_read_addr),
+</span><span>  .onchip_camera_in_to_onchip_copy_0_s2_chipselect  (1'b1),    
+</span><span>  .onchip_camera_in_to_onchip_copy_0_s2_clken       (1'b1),
+</span><span>  .onchip_camera_in_to_onchip_copy_0_s2_write       (1'b0),
+</span><span>  .onchip_camera_in_to_onchip_copy_0_s2_readdata    (lines_read_data),  
+</span><span>  .onchip_camera_in_to_onchip_copy_0_s2_writedata   (),   
+</span><span>
+</span><span>  .wait_signal_dispatcher_export(wait_dispatch),
+</span><span>
+</span><span>  // PLLs
+</span><span>  .vga_pll_locked_export			(vga_pll_lock),           //       vga_pio_locked.export
+</span><span>  .vga_pll_outclk0_clk				(vga_pll),              //      vga_pio_outclk0.clk
+</span><span>  // .m10k_pll_locked_export			(M10k_pll_locked),          //      m10k_pll_locked.export
+</span><span>  // .m10k_pll_outclk0_clk			(M10k_pll),            //     m10k_pll_outclk0.clk
+</span><span>
+</span><span>  // HPS data pio ports
+</span><span>
+</span><span>// More generated code omitted.
+</span><span>
+</span><span>endmodule
+</span><span>
+</span><span>module vga_driver (
+</span><span>    input wire clock,     // 25 MHz
+</span><span>    input wire reset,     // Active high
+</span><span>    input [7:0] color_in, // Pixel color data (RRRGGGBB)
+</span><span>    output [9:0] next_x,  // x-coordinate of NEXT pixel that will be drawn
+</span><span>    output [9:0] next_y,  // y-coordinate of NEXT pixel that will be drawn
+</span><span>    output wire hsync,    // HSYNC (to VGA connector)
+</span><span>    output wire vsync,    // VSYNC (to VGA connctor)
+</span><span>    output [7:0] red,     // RED (to resistor DAC VGA connector)
+</span><span>    output [7:0] green,   // GREEN (to resistor DAC to VGA connector)
+</span><span>    output [7:0] blue,    // BLUE (to resistor DAC to VGA connector)
+</span><span>    output sync,          // SYNC to VGA connector
+</span><span>    output clk,           // CLK to VGA connector
+</span><span>    output blank          // BLANK to VGA connector
+</span><span>);
+</span><span>
+</span><span>    // Horizontal parameters (measured in clock cycles)
+</span><span>    parameter [9:0] H_ACTIVE  =  10'd_639 ;
+</span><span>    parameter [9:0] H_FRONT   =  10'd_15 ;
+</span><span>    parameter [9:0] H_PULSE   =  10'd_95 ;
+</span><span>    parameter [9:0] H_BACK    =  10'd_47 ;
+</span><span>
+</span><span>    // Vertical parameters (measured in lines)
+</span><span>    parameter [9:0] V_ACTIVE   =  10'd_479 ;
+</span><span>    parameter [9:0] V_FRONT    =  10'd_9 ;
+</span><span>    parameter [9:0] V_PULSE =  10'd_1 ;
+</span><span>    parameter [9:0] V_BACK  =  10'd_32 ;
+</span><span>
+</span><span>    // Parameters for readability
+</span><span>    parameter   LOW     = 1'b_0 ;
+</span><span>    parameter   HIGH    = 1'b_1 ;
+</span><span>
+</span><span>    // States (more readable)
+</span><span>    parameter   [7:0]    H_ACTIVE_STATE    = 8'd_0 ;
+</span><span>    parameter   [7:0]   H_FRONT_STATE     = 8'd_1 ;
+</span><span>    parameter   [7:0]   H_PULSE_STATE   = 8'd_2 ;
+</span><span>    parameter   [7:0]   H_BACK_STATE     = 8'd_3 ;
+</span><span>
+</span><span>    parameter   [7:0]    V_ACTIVE_STATE    = 8'd_0 ;
+</span><span>    parameter   [7:0]   V_FRONT_STATE    = 8'd_1 ;
+</span><span>    parameter   [7:0]   V_PULSE_STATE   = 8'd_2 ;
+</span><span>    parameter   [7:0]   V_BACK_STATE     = 8'd_3 ;
+</span><span>
+</span><span>    // Clocked registers
+</span><span>    reg              hysnc_reg ;
+</span><span>    reg              vsync_reg ;
+</span><span>    reg     [7:0]   red_reg ;
+</span><span>    reg     [7:0]   green_reg ;
+</span><span>    reg     [7:0]   blue_reg ;
+</span><span>    reg              line_done ;
+</span><span>
+</span><span>    // Control registers
+</span><span>    reg     [9:0]   h_counter ;
+</span><span>    reg     [9:0]   v_counter ;
+</span><span>
+</span><span>    reg     [7:0]    h_state ;
+</span><span>    reg     [7:0]    v_state ;
+</span><span>
+</span><span>    // State machine
+</span><span>    always@(posedge clock) begin
+</span><span>        // At reset . . .
+</span><span>        if (reset) begin
+</span><span>            // Zero the counters
+</span><span>            h_counter   <= 10'd_0 ;
+</span><span>            v_counter   <= 10'd_0 ;
+</span><span>            // States to ACTIVE
+</span><span>            h_state     <= H_ACTIVE_STATE  ;
+</span><span>            v_state     <= V_ACTIVE_STATE  ;
+</span><span>            // Deassert line done
+</span><span>            line_done   <= LOW ;
+</span><span>        end
+</span><span>        else begin
+</span><span>            //////////////////////////////////////////////////////////////////////////
+</span><span>            ///////////////////////// HORIZONTAL /////////////////////////////////////
+</span><span>            //////////////////////////////////////////////////////////////////////////
+</span><span>            if (h_state == H_ACTIVE_STATE) begin
+</span><span>                // Iterate horizontal counter, zero at end of ACTIVE mode
+</span><span>                h_counter <= (h_counter==H_ACTIVE)?10'd_0:(h_counter + 10'd_1) ;
+</span><span>                // Set hsync
+</span><span>                hysnc_reg <= HIGH ;
+</span><span>                // Deassert line done
+</span><span>                line_done <= LOW ;
+</span><span>                // State transition
+</span><span>                h_state <= (h_counter == H_ACTIVE)?H_FRONT_STATE:H_ACTIVE_STATE ;
+</span><span>            end
+</span><span>            if (h_state == H_FRONT_STATE) begin
+</span><span>                // Iterate horizontal counter, zero at end of H_FRONT mode
+</span><span>                h_counter <= (h_counter==H_FRONT)?10'd_0:(h_counter + 10'd_1) ;
+</span><span>                // Set hsync
+</span><span>                hysnc_reg <= HIGH ;
+</span><span>                // State transition
+</span><span>                h_state <= (h_counter == H_FRONT)?H_PULSE_STATE:H_FRONT_STATE ;
+</span><span>            end
+</span><span>            if (h_state == H_PULSE_STATE) begin
+</span><span>                // Iterate horizontal counter, zero at end of H_PULSE mode
+</span><span>                h_counter <= (h_counter==H_PULSE)?10'd_0:(h_counter + 10'd_1) ;
+</span><span>                // Clear hsync
+</span><span>                hysnc_reg <= LOW ;
+</span><span>                // State transition
+</span><span>                h_state <= (h_counter == H_PULSE)?H_BACK_STATE:H_PULSE_STATE ;
+</span><span>            end
+</span><span>            if (h_state == H_BACK_STATE) begin
+</span><span>                // Iterate horizontal counter, zero at end of H_BACK mode
+</span><span>                h_counter <= (h_counter==H_BACK)?10'd_0:(h_counter + 10'd_1) ;
+</span><span>                // Set hsync
+</span><span>                hysnc_reg <= HIGH ;
+</span><span>                // State transition
+</span><span>                h_state <= (h_counter == H_BACK)?H_ACTIVE_STATE:H_BACK_STATE ;
+</span><span>                // Signal line complete at state transition (offset by 1 for synchronous state transition)
+</span><span>                line_done <= (h_counter == (H_BACK-1))?HIGH:LOW ;
+</span><span>            end
+</span><span>            //////////////////////////////////////////////////////////////////////////
+</span><span>            ///////////////////////// VERTICAL ///////////////////////////////////////
+</span><span>            //////////////////////////////////////////////////////////////////////////
+</span><span>            if (v_state == V_ACTIVE_STATE) begin
+</span><span>                // increment vertical counter at end of line, zero on state transition
+</span><span>                v_counter<=(line_done==HIGH)?((v_counter==V_ACTIVE)?10'd_0:(v_counter+10'd_1)):v_counter ;
+</span><span>                // set vsync in active mode
+</span><span>                vsync_reg <= HIGH ;
+</span><span>                // state transition - only on end of lines
+</span><span>                v_state<=(line_done==HIGH)?((v_counter==V_ACTIVE)?V_FRONT_STATE:V_ACTIVE_STATE):V_ACTIVE_STATE ;
+</span><span>            end
+</span><span>            if (v_state == V_FRONT_STATE) begin
+</span><span>                // increment vertical counter at end of line, zero on state transition
+</span><span>                v_counter<=(line_done==HIGH)?((v_counter==V_FRONT)?10'd_0:(v_counter + 10'd_1)):v_counter ;
+</span><span>                // set vsync in front porch
+</span><span>                vsync_reg <= HIGH ;
+</span><span>                // state transition
+</span><span>                v_state<=(line_done==HIGH)?((v_counter==V_FRONT)?V_PULSE_STATE:V_FRONT_STATE):V_FRONT_STATE;
+</span><span>            end
+</span><span>            if (v_state == V_PULSE_STATE) begin
+</span><span>                // increment vertical counter at end of line, zero on state transition
+</span><span>                v_counter<=(line_done==HIGH)?((v_counter==V_PULSE)?10'd_0:(v_counter + 10'd_1)):v_counter ;
+</span><span>                // clear vsync in pulse
+</span><span>                vsync_reg <= LOW ;
+</span><span>                // state transition
+</span><span>                v_state<=(line_done==HIGH)?((v_counter==V_PULSE)?V_BACK_STATE:V_PULSE_STATE):V_PULSE_STATE;
+</span><span>            end
+</span><span>            if (v_state == V_BACK_STATE) begin
+</span><span>                // increment vertical counter at end of line, zero on state transition
+</span><span>                v_counter<=(line_done==HIGH)?((v_counter==V_BACK)?10'd_0:(v_counter + 10'd_1)):v_counter ;
+</span><span>                // set vsync in back porch
+</span><span>                vsync_reg <= HIGH ;
+</span><span>                // state transition
+</span><span>                v_state<=(line_done==HIGH)?((v_counter==V_BACK)?V_ACTIVE_STATE:V_BACK_STATE):V_BACK_STATE ;
+</span><span>            end
+</span><span>
+</span><span>            //////////////////////////////////////////////////////////////////////////
+</span><span>            //////////////////////////////// COLOR OUT ///////////////////////////////
+</span><span>            //////////////////////////////////////////////////////////////////////////
+</span><span>            // Assign colors if in active mode
+</span><span>            red_reg<=(h_state==H_ACTIVE_STATE)?((v_state==V_ACTIVE_STATE)?{color_in[7:5],5'd_0}:8'd_0):8'd_0 ;
+</span><span>            green_reg<=(h_state==H_ACTIVE_STATE)?((v_state==V_ACTIVE_STATE)?{color_in[4:2],5'd_0}:8'd_0):8'd_0 ;
+</span><span>            blue_reg<=(h_state==H_ACTIVE_STATE)?((v_state==V_ACTIVE_STATE)?{color_in[1:0],6'd_0}:8'd_0):8'd_0 ;
+</span><span>
+</span><span>        end
+</span><span>    end
+</span><span>    // Assign output values - to VGA connector
+</span><span>    assign hsync = hysnc_reg ;
+</span><span>    assign vsync = vsync_reg ;
+</span><span>    assign red = red_reg ;
+</span><span>    assign green = green_reg ;
+</span><span>    assign blue = blue_reg ;
+</span><span>    assign clk = clock ;
+</span><span>    assign sync = 1'b_0 ;
+</span><span>    assign blank = hysnc_reg & vsync_reg ;
+</span><span>    // The x/y coordinates that should be available on the NEXT cycle
+</span><span>    assign next_x = (h_state==H_ACTIVE_STATE)?h_counter:10'd_0 ;
+</span><span>    assign next_y = (v_state==V_ACTIVE_STATE)?v_counter:10'd_0 ;
+</span><span>
+</span><span>endmodule
+</span><span>
+</span><span>
+</span><span>module M10K_76800_8( //8 bit colors with 240 rows * 320 pixels/row
+</span><span>    output reg [7:0] out,
+</span><span>    input [7:0] in,
+</span><span>    input [16:0] write_address, read_address,
+</span><span>    input we, clk
+</span><span>);
+</span><span>   // force M10K ram style
+</span><span>    reg [7:0] mem [76800:0]  /* synthesis ramstyle = "no_rw_check, M10K" */;
+</span><span>
+</span><span>    always @ (posedge clk) begin
+</span><span>        if (we) begin
+</span><span>            mem[write_address] <= in;
+</span><span>        end
+</span><span>        out <= mem[read_address]; // q doesn't get d in this clock cycle
+</span><span>    end
+</span><span>endmodule
+</span><span>
+</span></code></pre></article></div><footer><div class=copyright><p>© 2024 Brandon, Nathaniel, Tomas</div><div class=credits>powered by <a rel="noreferrer noopener" href=https://www.getzola.org target=_blank>zola</a> and <a rel="noreferrer noopener" href=https://github.com/isunjn/serene target=_blank>serene</a></div></footer></main></div><script src=https://nathanielnrn.github.io/hough-transform-documentation/js/lightense.min.js></script><script src=https://nathanielnrn.github.io/hough-transform-documentation/js/main.js></script>

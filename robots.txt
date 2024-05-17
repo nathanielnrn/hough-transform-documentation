@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+Allow: /
+Sitemap: https://nathanielnrn.github.io/hough-transform-documentation/sitemap.xml
